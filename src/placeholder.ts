@@ -1,0 +1,1 @@
+const placeHolder:string = 'hi';
