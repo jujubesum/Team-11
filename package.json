@@ -4,7 +4,7 @@
   "description": "CSE 110 Team 11 Group Project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"no tests yet!\""
   },
   "repository": {
     "type": "git",
