@@ -1,0 +1,30 @@
+{
+  "name": "team-11",
+  "version": "1.0.0",
+  "description": "CSE 110 Team 11 Group Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"no tests yet!\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jujubesum/Team-11.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jujubesum/Team-11/issues"
+  },
+  "homepage": "https://github.com/jujubesum/Team-11#readme",
+  "dependencies": {
+    "konva": "^10.9.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
