@@ -1,7 +1,7 @@
 export interface Recipe {
     id: string;
     name: string;
-    mathOperations: string[]; 
+    mathOperations: string[];
 }
 
 export interface GameState {
@@ -19,11 +19,12 @@ export class OrderManager {
             return JSON.parse(stateData);
         }
         return {
+            // This is just a place holder for the initial recipe that gets unlocked upon starting a game.
             unlockedRecipes: [
-                { 
-                    id: 'recipe_01', 
-                    name: 'Cookies', 
-                    mathOperations: ['addition', 'subtraction'] 
+                {
+                    id: 'recipe_01',
+                    name: 'Cookies',
+                    mathOperations: ['addition', 'subtraction']
                 }
             ],
             currentOrder: null,
@@ -45,8 +46,8 @@ export class OrderManager {
         }
 
         const randomIndex = Math.floor(Math.random() * availableRecipes.length);
-        
-        const nextOrder = availableRecipes[randomIndex]!; 
+
+        const nextOrder = availableRecipes[randomIndex]!;
 
         state.currentOrder = nextOrder;
         this.saveGameState(state);
@@ -56,7 +57,7 @@ export class OrderManager {
 
     public completeRecipeAndFetchNextOrder(): Recipe | null {
         const state = this.getGameState();
-        
+
         if (state.currentOrder) {
             state.completedOrders += 1;
             state.currentOrder = null;
