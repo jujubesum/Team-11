@@ -4,7 +4,7 @@
   "description": "CSE 110 Team 11 Group Project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"no tests yet!\""
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,11 @@
     "konva": "^10.9.0"
   },
   "devDependencies": {
-    "typescript": "^7.0.2"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.6.5",
+    "jest": "^30.5.2",
+    "ts-jest": "^29.4.15",
+    "typescript": "^6.0.3"
   },
   "engines": {
     "node": ">=22"
