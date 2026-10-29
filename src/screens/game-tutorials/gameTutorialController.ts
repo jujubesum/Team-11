@@ -13,4 +13,25 @@ export class GameTutorialController {
     this.model = new GameTutorialModel;
     this.view = new GameTutorialModel;
   }
+
+  /**
+   * Shift tutorial 1 to the right/left
+   */
+  moveTutorial(): void {
+
+  }
+
+  /**
+   * Shift to specific tutorial
+   */
+  moveToSpecificTutorial(index : Number){
+
+  }
+
+  /**
+   * Return to main menu
+   */
+  returnToMenu() :void {
+
+  }
 }
