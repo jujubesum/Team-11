@@ -1,5 +1,5 @@
-import { GameTutorialModel } from "./gameTutorialModel";
-import { GameTutorialView } from "./gameTutorialView";
+import { GameTutorial, GameTutorialModel } from "./gameTutorialModel";
+import type { GameTutorialView } from "./gameTutorialView";
 import Konva from "konva";
 
 /**
@@ -9,10 +9,10 @@ export class GameTutorialController {
   private model: GameTutorialModel;
   private view: GameTutorialView;
   
-  constructor() { // add screenSwitcher as parameter when ready
+  constructor(model: GameTutorialModel, view: GameTutorialView) { // add screenSwitcher as parameter when ready
     // this.screenSwitcher = screenSwitcher; //uncomment when ready
-    this.model = new GameTutorialModel;
-    this.view = new GameTutorialView;
+    this.model = model;
+    this.view = view;
   }
 
   /**
@@ -45,6 +45,9 @@ export class GameTutorialController {
     this.updateTutorial();
   }
 
+  /**
+   * To be called whenever a user input changes the current tutorial
+   */
   updateTutorial(): void {
     const currentTutorial = this.model.getCurrentTutorial();
     this.view.setTutorial(currentTutorial.getTitle(), currentTutorial.getBody());
@@ -57,7 +60,25 @@ export class GameTutorialController {
 
   }
 
+  /** 
+   * Handles when the user either of the directional buttons
+   */
+  handleArrowButtonPress(rightArrowPressed: boolean){
+    this.shiftTutorialRight(rightArrowPressed);
+  }  
+
+  /**
+   * Used for testing purposes atm, remove if unnecessary later
+   */
   getGroup() : Konva.Group{
     return this.view.getGroup();
+  }
+
+  getModel(): GameTutorialModel {
+    return this.model;
+  }
+
+  getView(): GameTutorialView {
+    return this.view;
   }
 }
