@@ -11,7 +11,21 @@ export class GameTutorialController {
   constructor() { // add screenSwitcher as parameter when ready
     // this.screenSwitcher = screenSwitcher; //uncomment when ready
     this.model = new GameTutorialModel;
-    this.view = new GameTutorialModel;
+    this.view = new GameTutorialView;
+  }
+
+  /**
+   * Make tutorials visible
+   */
+  showTutorials(){
+    this.view.show();
+  }
+
+  /**
+   * Hide tutorials
+   */
+  hideTutorials(){
+    this.view.hide();
   }
 
   /**
