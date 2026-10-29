@@ -1,3 +1,4 @@
+import { error } from "node:console";
 import { TUTORIAL_DATA } from "./data/tutorialData";
 
 
@@ -8,17 +9,11 @@ import { TUTORIAL_DATA } from "./data/tutorialData";
 export class GameTutorial {
   private title: string;
   private body: string;
-  private static tutorialCount = 0;
 
   constructor(title: string, body: string){
     this.title = title;
     this.body = body;
   }
-
-  /**
-   * Reset tutorial count
-   */
-  static resetCount() { GameTutorial.tutorialCount = 0; }
 
   /** Ahead will be a number of getters for testing purposes */
 
@@ -51,9 +46,36 @@ export class GameTutorialModel {
   }
 
   /**
-   * Update to new tutorial idx
+   * Update to specific tutorial idx
+   * @param idx update to index if valid
    */
   updateTutorialIdx(idx: number){
+    if (idx < 0 || idx >= this.tutorials.length) {
+      throw new Error('Invalid index!')
+    }
     this.currentTutorialIdx = idx;
+  }
+
+  /**
+   * shift right or left based on input
+   * @param rightShift if true shift right, otherwise shift left
+   */
+  shiftTutorialIdxRight(rightShift: boolean): void{
+    if (rightShift) this.currentTutorialIdx = (this.currentTutorialIdx + 1) % this.getNumberOfTutorials();
+    else {
+      if (this.currentTutorialIdx == 0) this.currentTutorialIdx = this.getNumberOfTutorials() - 1;
+      else this.currentTutorialIdx = this.currentTutorialIdx - 1
+    }
+  }
+
+  /**
+   * Getters
+   */
+  getCurrentTutorialIdx(): number {
+    return this.currentTutorialIdx;
+  }
+
+  getNumberOfTutorials(): number {
+    return this.tutorials.length;
   }
 }

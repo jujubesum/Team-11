@@ -17,15 +17,15 @@ export class GameTutorialController {
   /**
    * Shift tutorial 1 to the right/left
    */
-  moveTutorial(): void {
-
+  shiftTutorial(rightShift: boolean): void {
+    this.model.shiftTutorialIdxRight(rightShift);
   }
 
   /**
    * Shift to specific tutorial
    */
-  moveToSpecificTutorial(index : Number){
-
+  moveToSpecificTutorial(index : number){
+    this.model.updateTutorialIdx(index);
   }
 
   /**
