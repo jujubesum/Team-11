@@ -1,5 +1,6 @@
 import { GameTutorialModel } from "./gameTutorialModel";
 import { GameTutorialView } from "./gameTutorialView";
+import Konva from "konva";
 
 /**
  * TutorialController - Handles game tutorial screen interactions
@@ -31,8 +32,9 @@ export class GameTutorialController {
   /**
    * Shift tutorial 1 to the right/left
    */
-  shiftTutorial(rightShift: boolean): void {
+  shiftTutorialRight(rightShift: boolean): void {
     this.model.shiftTutorialIdxRight(rightShift);
+    this.updateTutorial();
   }
 
   /**
@@ -40,12 +42,22 @@ export class GameTutorialController {
    */
   moveToSpecificTutorial(index : number){
     this.model.updateTutorialIdx(index);
+    this.updateTutorial();
   }
 
+  updateTutorial(): void {
+    const currentTutorial = this.model.getCurrentTutorial();
+    this.view.setTutorial(currentTutorial.getTitle(), currentTutorial.getBody());
+  }
+  
   /**
    * Return to main menu
    */
   returnToMenu() :void {
 
+  }
+
+  getGroup() : Konva.Group{
+    return this.view.getGroup();
   }
 }

@@ -67,12 +67,23 @@ export class GameTutorialView {
       width: BOX_WIDTH - 2 * PADDING,
       text: "TEST BODY",
       fontSize: 32,
-      lineHeight: 1.3,
+      lineHeight: 1.5,
       fill: "black",
+      align: "center",
+    });
+
+    const placeholder = new Konva.Text({
+      text: "IMAGE PLACEHOLDER",
+      fontSize: 64,
+      width: BOX_WIDTH - 2 * PADDING,
+      height: BOX_HEIGHT - 2 * PADDING,
+      fill: "black",
+      align: "center",
+      verticalAlign: "middle"
     });
 
     leftPanel.add(this.makeBox(), this.titleDisplay, this.bodyDisplay);
-    rightPanel.add(this.makeBox());
+    rightPanel.add(this.makeBox(), placeholder);
 
     this.group.add(
       bg, 

@@ -78,4 +78,12 @@ export class GameTutorialModel {
   getNumberOfTutorials(): number {
     return this.tutorials.length;
   }
+
+  getCurrentTutorial(): GameTutorial {
+    const tutorial = this.tutorials[this.currentTutorialIdx];
+    if (tutorial === undefined) {
+      throw new Error("No tutorial at the current index!");
+    }
+    return tutorial;
+  }
 }
