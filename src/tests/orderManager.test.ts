@@ -25,9 +25,24 @@ describe('OrderManager', () => {
 
         const mockState: GameState = {
             unlockedRecipes: [
-                { id: 'r1', name: 'Cake', mathOperations: ['addition', 'multiplication'] },
-                { id: 'r2', name: 'Pie', mathOperations: ['fractions'] },
-                { id: 'r3', name: 'Cookies', mathOperations: ['subtraction'] }
+                { id: 'recipe_01', name: 'Cookies', mathOperations: ['addition'], steps: [
+                    'Add flour, sugar, eggs, and butter',
+                    'Stir until smooth',
+                    'Bake in oven',
+                    'Decorate with sprinkles'] 
+                },
+                { id: 'recipe_02', name: 'Jello', mathOperations: ['subtraction'], steps: [
+                    'Subtract the water',
+                    'Stir until until the powder dissolves',
+                    'Let it refrigerate',
+                    'Remove the Jello from the mold']
+                },
+                { id: 'recipe_03', name: 'Cupcakes', mathOperations: ['multiplication'], steps: [
+                    'Multiply how much flour, sugar, eggs, and butter is needed for 6 cupcakes',
+                    'Stir until smooth',
+                    'Pour the batter and bake',
+                    'Decorate with the right amount of frosting for 6 cupcakes']
+                },
             ],
             currentOrder: null,
             completedOrders: 0
@@ -40,7 +55,7 @@ describe('OrderManager', () => {
         const nextOrder = orderManager.generateRandomOrder();
 
         expect(nextOrder).not.toBeNull();
-        expect(['r1', 'r2', 'r3']).toContain(nextOrder!.id);
+        expect(['recipe_01', 'recipe_02', 'recipe_03']).toContain(nextOrder!.id);
 
         const savedState: GameState = JSON.parse(localStorage.getItem('bakeryGameState')!);
         expect(savedState.currentOrder?.id).toBe(nextOrder!.id);
