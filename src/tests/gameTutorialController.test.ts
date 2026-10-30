@@ -14,20 +14,79 @@ describe("gameTutorialController.handleArrowButtonPress", () => {
 
   beforeEach(() => {
     model = new GameTutorialModel();
-    view = { setTutorial: jest.fn()} as unknown as GameTutorialView // create a mock to detect if visual change occurred
+    view = { setTutorial: jest.fn(), onArrowPress: jest.fn()} as unknown as GameTutorialView // create a mock to detect if visual change occurred
     controller = new GameTutorialController(model, view);
+    (view.setTutorial as jest.Mock).mockClear(); //override default setTutorial call
   });
 
-  it("updates view when user presses right arrow", () => {
+  it("shows the next tutorial when right arrow is pressed", () => {
     controller.handleArrowButtonPress(true);
     const tutorial = model.getCurrentTutorial();
+    expect(model.getCurrentTutorialIdx()).toBe(1);
+    expect(view.setTutorial).toHaveBeenCalledTimes(1);
     expect(view.setTutorial).toHaveBeenCalledWith(tutorial.getTitle(), tutorial.getBody());
   });
 
-  it("updates view when uesr presses left arrow", () => {
+  it("shows previous tutorial when left arrow is pressed from non-starting position", () => {
+    controller.handleArrowButtonPress(true); //move 1 position from start
+    (view.setTutorial as jest.Mock).mockClear();
+    
+    controller.handleArrowButtonPress(false);
+
+    const firstTutorial = model.getCurrentTutorial();
+    expect(model.getCurrentTutorialIdx()).toBe(0);
+    expect(view.setTutorial).toHaveBeenCalledWith(firstTutorial.getTitle(), firstTutorial.getBody());
+  });
+
+  it("shows the final tutorial when left arrow is pressed on first tutorial", () => {
     controller.handleArrowButtonPress(false);
     const tutorial = model.getCurrentTutorial();
+    expect(model.getCurrentTutorialIdx()).toBe(model.getNumberOfTutorials() - 1);
     expect(view.setTutorial).toHaveBeenCalledWith(tutorial.getTitle(), tutorial.getBody());
   });
+
+  it("shows the first tutorial when right arrow is pressed on final tutorial", () => {
+    const firstTutorial = model.getCurrentTutorial();
+    model.updateTutorialIdx(model.getNumberOfTutorials() - 1);
+
+    controller.handleArrowButtonPress(true);
+
+    expect(model.getCurrentTutorialIdx()).toBe(0)
+    expect(view.setTutorial).toHaveBeenCalledWith(firstTutorial.getTitle(), firstTutorial.getBody());
+  });
+
+  it("routes the view's arrow callback to handleArrowButtonPress", () => {
+    const handler = (view.onArrowPress as jest.Mock).mock.calls[0][0]; // this line is a little confusing but essentially mocks .onArrowPress, [0][0] being the argument passed to the callback (eg (rightShift))
+
+    handler(true); // functionally, handler = (rightShift) => this.handleArrowButtonPress(rightShift)
+
+    expect(model.getCurrentTutorialIdx()).toBe(1);
+    expect(view.setTutorial).toHaveBeenCalledTimes(1);
+  });
 });
+
+/** Test expected behaviors upon constructor call */
+describe("GameTutorialController.constructor", () => {
+  let controller: GameTutorialController;
+  let view: GameTutorialView;
+  let model: GameTutorialModel;
+
+  beforeEach(() => {
+    model = new GameTutorialModel();
+    view = { setTutorial: jest.fn(), onArrowPress: jest.fn()} as unknown as GameTutorialView
+  });
+
+  it("displays the first tutorial on construction", () => {
+    controller = new GameTutorialController(model, view);
+    const firstTutorial = model.getCurrentTutorial();
+    expect(view.setTutorial).toHaveBeenCalledTimes(1);
+    expect(view.setTutorial).toHaveBeenCalledWith(firstTutorial.getTitle(), firstTutorial.getBody());
+  });
+
+  it("registers an arrow press handler with the view", () => {
+    controller = new GameTutorialController(model,view);
+    expect(view.onArrowPress).toHaveBeenCalledTimes(1);
+  });
+});
+
 

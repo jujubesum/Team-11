@@ -18,7 +18,7 @@ export class GameTutorialController {
   }
 
   /**
-   * Make tutorials visible
+   * Make tutorials visible (FOR USE IN SCREENSWITCHER, UNUSED AS OF NOW)
    */
   showTutorials(){
     this.view.show();
@@ -54,7 +54,7 @@ export class GameTutorialController {
   }
   
   /**
-   * Return to main menu
+   * Return to main menu (TO-DO IN FUTURE PR)
    */
   returnToMenu() :void {
 
