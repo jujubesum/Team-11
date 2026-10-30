@@ -1,16 +1,14 @@
-
 import { describe, expect, it } from "vitest";
-
 import {
   MATH_OPERATIONS,
   getMathTutorial,
-  isMathOperation
+  isMathOperation,
+  type MathOperation
 } from "../mathTutorials";
-
 import { TutorialManager } from "../tutorialManager";
 
 describe("math tutorial content", () => {
-  it.each(MATH_OPERATIONS)("has complete content for %s", (operation) => {
+  it.each(MATH_OPERATIONS)("has complete content for %s", (operation: MathOperation) => {
     const tutorial = getMathTutorial(operation);
 
     expect(tutorial.steps.length).toBeGreaterThan(1);

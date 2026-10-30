@@ -13,8 +13,14 @@ export class TutorialManager {
   }
 
   getCurrentStep(): string {
-    return mathTutorials[this.operation].steps[this.stepIndex];
+  const step = mathTutorials[this.operation].steps[this.stepIndex];
+
+  if (step === undefined) {
+    throw new Error("Tutorial step not found");
   }
+
+  return step;
+}
 
   nextStep(): boolean {
     const steps = mathTutorials[this.operation].steps;
