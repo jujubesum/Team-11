@@ -19,10 +19,9 @@ describe("GameTutorialModel.loadTutorals", () => {
 
   it("doesn't modify title or body from the data file", () =>{
     const tutorials = model.loadTutorials();
-    tutorials.forEach((tutorial, idx) => {
-      expect(tutorial.getTitle()).toBe(TUTORIAL_DATA[idx].title);
-      expect(tutorial.getBody()).toBe(TUTORIAL_DATA[idx].body);
-    });
+    expect(tutorials.map(tutorial => ({
+      title: tutorial.getTitle(), body: tutorial.getBody()
+    }))).toEqual(TUTORIAL_DATA);
   });
 });
 
