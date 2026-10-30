@@ -13,6 +13,8 @@ export class GameTutorialController {
     // this.screenSwitcher = screenSwitcher; //uncomment when ready
     this.model = model;
     this.view = view;
+    this.view.onArrowPress((rightShift) => this.handleArrowButtonPress(rightShift));
+    this.updateView();
   }
 
   /**
@@ -34,21 +36,19 @@ export class GameTutorialController {
    */
   shiftTutorialRight(rightShift: boolean): void {
     this.model.shiftTutorialIdxRight(rightShift);
-    this.updateTutorial();
   }
 
   /**
    * Shift to specific tutorial
    */
-  moveToSpecificTutorial(index : number){
+  moveToSpecificTutorial(index : number): void {
     this.model.updateTutorialIdx(index);
-    this.updateTutorial();
   }
 
   /**
    * To be called whenever a user input changes the current tutorial
    */
-  updateTutorial(): void {
+  updateView(): void {
     const currentTutorial = this.model.getCurrentTutorial();
     this.view.setTutorial(currentTutorial.getTitle(), currentTutorial.getBody());
   }
@@ -63,8 +63,9 @@ export class GameTutorialController {
   /** 
    * Handles when the user either of the directional buttons
    */
-  handleArrowButtonPress(rightArrowPressed: boolean){
-    this.shiftTutorialRight(rightArrowPressed);
+  handleArrowButtonPress(rightShift: boolean){
+    this.shiftTutorialRight(rightShift);
+    this.updateView();
   }  
 
   /**
