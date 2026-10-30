@@ -61,12 +61,12 @@ export class GameTutorialView {
     this.titleDisplay = new Konva.Text({
       x: PADDING,
       y: PADDING,
-      width: BOX_WIDTH - 2 * PADDING,
       text: "TEST TITLE",
       fontSize: 48,
       fontStyle: "bold",
       fill: "black",
-      align: "center"
+      align: "center",
+      wrap: "none"
     });
 
     this.bodyDisplay = new Konva.Text({
@@ -74,7 +74,7 @@ export class GameTutorialView {
       y: PADDING + 60, // room for title
       width: BOX_WIDTH - 2 * PADDING,
       text: "TEST BODY",
-      fontSize: 32,
+      fontSize: 36,
       lineHeight: 1.5,
       fill: "black",
       align: "center",
@@ -131,9 +131,10 @@ export class GameTutorialView {
   setTutorial(title: string, body: string): void {
     this.titleDisplay.text(title);
     this.bodyDisplay.text(body);
+    this.calculateAndSetMaximumTitleFontSize();
     this.group.getLayer()?.batchDraw();
   }
-
+  
   /**
    * 
    * @param handler 
@@ -192,5 +193,23 @@ export class GameTutorialView {
     button.on("mouseenter", () => { document.body.style.cursor = "pointer"; });
     button.on("mouseleave", () => { document.body.style.cursor = "default"; });
     return button;
+  }
+
+  /** 
+   * To prevent wrapping to next line or going off into void, find largest font
+   * size that fits on a single and set it
+   */
+  private calculateAndSetMaximumTitleFontSize(): void {
+    const TITLE_MAX_FONT = 48;
+    const TITLE_MIN_FONT = 16;
+    const maxWidth = BOX_WIDTH - 2 * PADDING;
+    let size = TITLE_MAX_FONT;
+    this.titleDisplay.fontSize(size);
+    while (this.titleDisplay.getTextWidth() > maxWidth && size > TITLE_MIN_FONT){
+      size--;
+      this.titleDisplay.fontSize(size)
+    }
+    this.titleDisplay.x(PADDING + (maxWidth - this.titleDisplay.width()) / 2); //Re-centers title
+    this.bodyDisplay.y(this.titleDisplay.y() + this.titleDisplay.height() + 20); // Adds padding between title and body
   }
 }
