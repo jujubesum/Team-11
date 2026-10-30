@@ -4,6 +4,7 @@ import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "./../../constants"
 const HEADERCOLOR = "#989898";
 const BGCOLOR = "#D9D9D9";
 const WHITE = "#FFFFFF"
+const HOVERFILL = "#eeeeee"
 const MARGIN = 50;
 const GAP = 100;
 const BOX_WIDTH = (STAGE_WIDTH - 2 * MARGIN - GAP) / 2;
@@ -13,9 +14,9 @@ const LEFT_BOX_X = MARGIN;
 const RIGHT_BOX_X = MARGIN + BOX_WIDTH + GAP;
 const PADDING = 20;
 const LEFT_ARROW_X = MARGIN + PADDING;
-const LEFT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 10;
+const LEFT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 20;
 const RIGHT_ARROW_X = STAGE_WIDTH - MARGIN - PADDING - 10 + PADDING;
-const RIGHT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 10;
+const RIGHT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 20;
 
 /**
  * GameTutorialView renders the game tutorials using Konva
@@ -131,6 +132,7 @@ export class GameTutorialView {
   setTutorial(title: string, body: string): void {
     this.titleDisplay.text(title);
     this.bodyDisplay.text(body);
+    this.calculateAndSetMaximumBodyFontSize();
     this.calculateAndSetMaximumTitleFontSize();
     this.group.getLayer()?.batchDraw();
   }
@@ -166,7 +168,7 @@ export class GameTutorialView {
    * @returns button
    */
   private makeArrowButton(direction: "left" | "right", x: number, y: number): Konva.Group{
-    const RADIUS = 40;
+    const RADIUS = 30;
     const sign = direction === "left" ? 1 : -1 // will flip the arrow depending on direction
     const button = new Konva.Group({ x, y }); // (x,y) is the circle's center
 
@@ -190,8 +192,16 @@ export class GameTutorialView {
     });
 
     button.add(circle, arrow);
-    button.on("mouseenter", () => { document.body.style.cursor = "pointer"; });
-    button.on("mouseleave", () => { document.body.style.cursor = "default"; });
+    button.on("mouseenter", () => {
+      const container = button.getStage()?.container();
+      if (container) container.style.cursor = "pointer";
+      circle.fill(HOVERFILL);
+    });
+    button.on("mouseleave", () => {
+      const container = button.getStage()?.container();
+      if (container) container.style.cursor = "default";
+      circle.fill(BGCOLOR);
+    });
     return button;
   }
 
@@ -211,5 +221,18 @@ export class GameTutorialView {
     }
     this.titleDisplay.x(PADDING + (maxWidth - this.titleDisplay.width()) / 2); //Re-centers title
     this.bodyDisplay.y(this.titleDisplay.y() + this.titleDisplay.height() + 20); // Adds padding between title and body
+  }
+
+  /** Same as above but for body text */
+  private calculateAndSetMaximumBodyFontSize(): void {
+    const BODY_MAX_FONT = 36;
+    const BODY_MIN_FONT = 16;
+    const maxHeight = BOX_HEIGHT - this.bodyDisplay.y() - PADDING;
+    let size = BODY_MAX_FONT;
+    this.bodyDisplay.fontSize(size);
+    while (this.bodyDisplay.height() > maxHeight && size > BODY_MIN_FONT){
+      size--;
+      this.bodyDisplay.fontSize(size);
+    }
   }
 }
