@@ -1,24 +1,28 @@
 import { GameTutorial, GameTutorialModel } from "./gameTutorialModel";
-import type { GameTutorialView } from "./gameTutorialView";
+import { GameTutorialView } from "./gameTutorialView";
+import { ScreenController } from "../../types";
+import type { ScreenSwitcher } from "../../types";
 import Konva from "konva";
 
 /**
  * TutorialController - Handles game tutorial screen interactions
  */
-export class GameTutorialController {
+export class GameTutorialController extends ScreenController{
   private model: GameTutorialModel;
   private view: GameTutorialView;
+  private screenSwitcher: ScreenSwitcher;
   
-  constructor(model: GameTutorialModel, view: GameTutorialView) { // add screenSwitcher as parameter when ready
-    // this.screenSwitcher = screenSwitcher; //uncomment when ready
+  constructor(screenSwitcher: ScreenSwitcher, model: GameTutorialModel = new GameTutorialModel(), view: GameTutorialView = new GameTutorialView()) { 
+    super();
     this.model = model;
     this.view = view;
+    this.screenSwitcher = screenSwitcher;
     this.view.onArrowPress((rightShift) => this.handleArrowButtonPress(rightShift));
     this.updateView();
   }
 
   /**
-   * Make tutorials visible (FOR USE IN SCREENSWITCHER, UNUSED AS OF NOW)
+   * Make tutorials visible
    */
   showTutorials(){
     this.view.show();
@@ -54,7 +58,7 @@ export class GameTutorialController {
   }
   
   /**
-   * Return to main menu (TO-DO IN FUTURE PR)
+   * Return to main menu (TO-DO)
    */
   returnToMenu() :void {
 

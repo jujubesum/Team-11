@@ -7,6 +7,7 @@ import { Button } from "../../components/Button.ts";
 export interface TitleScreenHandlers {
 	onContinue: () => void;
 	onNewGame: () => void;
+  onTutorial: () => void;
 }
  
 
@@ -35,7 +36,7 @@ export class TitleScreenView implements View {
 		this.newGameCard = makeCard(0.315);
 		this.newGameCard.add(
 			makeButton("New Game", 0.42, BUTTON_HEIGHT, handlers.onNewGame).getGroup(),
-			makeButton("How to Play", 0.55, BUTTON_HEIGHT).getGroup(),
+			makeButton("How to Play", 0.55, BUTTON_HEIGHT, handlers.onTutorial).getGroup(),
 		);
  
 		// Card 2: save exists
@@ -44,7 +45,7 @@ export class TitleScreenView implements View {
 		this.continueCard.add(
 			this.continueButton.getGroup(),
 			makeButton("New Game", 0.51, BUTTON_HEIGHT, handlers.onNewGame).getGroup(),
-			makeButton("How to Play", 0.64, BUTTON_HEIGHT).getGroup(),
+			makeButton("How to Play", 0.64, BUTTON_HEIGHT, handlers.onTutorial).getGroup(),
 		);
  
 		this.group.add(this.newGameCard, this.continueCard);

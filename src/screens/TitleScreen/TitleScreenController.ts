@@ -14,6 +14,7 @@ export class TitleScreenController extends ScreenController {
 		this.view = new TitleScreenView({
 			onContinue: () => this.handleContinue(),
 			onNewGame: () => this.handleNewGame(),
+      onTutorial: () => this.handleTutorial(),
 		});
 	}
  
@@ -35,6 +36,11 @@ export class TitleScreenController extends ScreenController {
 		// TODO add save system logic
 		this.screenSwitcher.switchToScreen({ type: "home" });
 	}
+
+  // Go to tutorials page
+  private handleTutorial(): void {
+    this.screenSwitcher.switchToScreen({ type: "gameTutorial" })
+  }
  
 	getView(): TitleScreenView {
 		return this.view;
