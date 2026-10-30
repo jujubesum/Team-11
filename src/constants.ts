@@ -1,3 +1,3 @@
-export const STAGE_WIDTH = 1600;
-export const STAGE_HEIGHT = 800;
 export const TOPBAR_HEIGHT = 100; 
+export const STAGE_WIDTH = window.innerWidth;
+export const STAGE_HEIGHT = window.innerHeight;

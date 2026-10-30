@@ -30,6 +30,8 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.6",
     "jest": "^30.5.2",
+    "jest-canvas-mock": "^2.5.8",
+    "jest-environment-jsdom": "^30.5.2",
     "ts-jest": "^29.4.15",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
