@@ -18,6 +18,7 @@ export class GameTutorialController extends ScreenController{
     this.view = view;
     this.screenSwitcher = screenSwitcher;
     this.view.onArrowPress((rightShift) => this.handleArrowButtonPress(rightShift));
+    this.view.onBackPress(() => this.handleBackButtonPress());
     this.updateView();
   }
 
@@ -58,10 +59,10 @@ export class GameTutorialController extends ScreenController{
   }
   
   /**
-   * Return to main menu (TO-DO)
+   * Return to main menu 
    */
-  returnToMenu() :void {
-
+  handleBackButtonPress() :void {
+    this.screenSwitcher.switchToScreen({ type: "title" })
   }
 
   /** 

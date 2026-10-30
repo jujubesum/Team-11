@@ -14,9 +14,10 @@ const LEFT_BOX_X = MARGIN;
 const RIGHT_BOX_X = MARGIN + BOX_WIDTH + GAP;
 const PADDING = 20;
 const LEFT_ARROW_X = MARGIN + PADDING;
-const LEFT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 20;
+const LEFT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 10;
 const RIGHT_ARROW_X = STAGE_WIDTH - MARGIN - PADDING - 10 + PADDING;
-const RIGHT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 20;
+const RIGHT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 10;
+const BUTTON_RADIUS = BOX_HEIGHT / 16;
 
 /**
  * GameTutorialView renders the game tutorials using Konva
@@ -27,6 +28,7 @@ export class GameTutorialView {
   private bodyDisplay: Konva.Text;
   private leftArrow: Konva.Group;
   private rightArrow: Konva.Group;
+  private backButton: Konva.Group;
 
 
 
@@ -93,6 +95,8 @@ export class GameTutorialView {
 
     this.leftArrow = this.makeArrowButton("left", LEFT_ARROW_X, LEFT_ARROW_Y);
     this.rightArrow = this.makeArrowButton("right", RIGHT_ARROW_X, RIGHT_ARROW_Y);
+    this.backButton = this.makeArrowButton("left", MARGIN, MARGIN);
+
 
     leftPanel.add(this.makeBox(), this.titleDisplay, this.bodyDisplay);
     rightPanel.add(this.makeBox(), placeholder);
@@ -105,6 +109,7 @@ export class GameTutorialView {
       rightPanel,
       this.leftArrow,
       this.rightArrow,
+      this.backButton,
     );
   }
 
@@ -138,12 +143,19 @@ export class GameTutorialView {
   }
   
   /**
-   * 
+   * Calls handler to switch tutorials
    * @param handler 
    */
   onArrowPress(handler: (rightShift:boolean) => void): void {
     this.leftArrow.on("click tap", () => handler(false));
     this.rightArrow.on("click tap", () => handler(true));
+  }
+
+  /**
+   * Calls handler to return to main menu
+   */
+  onBackPress(handler: () => void): void {
+    this.backButton.on('click tap', () => handler());
   }
 
   /**
@@ -173,7 +185,7 @@ export class GameTutorialView {
     const button = new Konva.Group({ x, y }); // (x,y) is the circle's center
 
     const circle = new Konva.Circle({
-      radius: RADIUS,
+      radius: BUTTON_RADIUS,
       stroke: "black",
       strokeWidth: 6,
       fill: BGCOLOR,
@@ -210,7 +222,7 @@ export class GameTutorialView {
    * size that fits on a single and set it
    */
   private calculateAndSetMaximumTitleFontSize(): void {
-    const TITLE_MAX_FONT = 48;
+    const TITLE_MAX_FONT = 64;
     const TITLE_MIN_FONT = 16;
     const maxWidth = BOX_WIDTH - 2 * PADDING;
     let size = TITLE_MAX_FONT;
@@ -225,7 +237,7 @@ export class GameTutorialView {
 
   /** Same as above but for body text */
   private calculateAndSetMaximumBodyFontSize(): void {
-    const BODY_MAX_FONT = 36;
+    const BODY_MAX_FONT = 48;
     const BODY_MIN_FONT = 16;
     const maxHeight = BOX_HEIGHT - this.bodyDisplay.y() - PADDING;
     let size = BODY_MAX_FONT;
