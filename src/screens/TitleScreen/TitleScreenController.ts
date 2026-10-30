@@ -1,5 +1,6 @@
 import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
+import type { SaveManager } from "../../saveManager.ts";
 import { TitleScreenView } from "./TitleScreenView.ts";
  
 // TitleScreenController - decides which title screen state to show (new game vs continue)
@@ -7,10 +8,12 @@ import { TitleScreenView } from "./TitleScreenView.ts";
 export class TitleScreenController extends ScreenController {
 	private view: TitleScreenView;
 	private screenSwitcher: ScreenSwitcher;
+	private saveManager: SaveManager;
  
-	constructor(screenSwitcher: ScreenSwitcher) {
+	constructor(screenSwitcher: ScreenSwitcher, saveManager: SaveManager) {
 		super();
 		this.screenSwitcher = screenSwitcher;
+		this.saveManager = saveManager;
 		this.view = new TitleScreenView({
 			onContinue: () => this.handleContinue(),
 			onNewGame: () => this.handleNewGame(),
@@ -19,20 +22,26 @@ export class TitleScreenController extends ScreenController {
  
 	// Runs every time the screen opens, so the Continue button stays up to date after the player saves.
 	override show(): void {
-		// TODO (save system): pass the saved level, or null if there is no save.
-		this.view.setSaveInfo(null);
+		const save = this.saveManager.load();
+		this.view.setSaveInfo(save ? save.level : null);
 		super.show();
 	}
  
 	// Continue the existing game.
 	private handleContinue(): void {
-		// TODO (save system): load the existing save here
+		if (!this.saveManager.getCurrent()) {
+			this.saveManager.load();
+		}
 		this.screenSwitcher.switchToScreen({ type: "home" });
 	}
  
-	// Start a new game, replacing any existing save. 
+	// Start a new game. If a save already exists, ask for confirmation first.
 	private handleNewGame(): void {
-		// TODO add save system logic
+		if (this.saveManager.hasSave()) {
+			this.screenSwitcher.switchToScreen({ type: "newGameCheck" });
+			return;
+		}
+		this.saveManager.startNewGame();
 		this.screenSwitcher.switchToScreen({ type: "home" });
 	}
  
@@ -40,4 +49,3 @@ export class TitleScreenController extends ScreenController {
 		return this.view;
 	}
 }
- 
