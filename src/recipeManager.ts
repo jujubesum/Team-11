@@ -24,7 +24,7 @@ export const RECIPES: Recipe[] = [
     mathOperations: ['subtraction'],
     steps: [
       'Subtract the water',
-      'Stir until until the powder dissolves',
+      'Stir until the powder dissolves',
       'Let it refrigerate',
       'Remove the Jello from the mold'
     ],
@@ -45,7 +45,7 @@ export const RECIPES: Recipe[] = [
     name: 'Pie',
     mathOperations: ['division'],
     steps: [
-      'Cut the the apples',
+      'Cut the apples',
       'Mix the apples with the dough',
       'Bake in oven',
       'Cut the pie into slices'

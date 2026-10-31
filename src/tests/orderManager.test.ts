@@ -33,7 +33,7 @@ describe('OrderManager', () => {
                 },
                 { id: 'recipe_02', name: 'Jello', mathOperations: ['subtraction'], steps: [
                     'Subtract the water',
-                    'Stir until until the powder dissolves',
+                    'Stir until the powder dissolves',
                     'Let it refrigerate',
                     'Remove the Jello from the mold']
                 },

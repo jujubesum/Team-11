@@ -44,7 +44,7 @@ describe('recipeManager', () => {
         ]);
         expect(RECIPES[1]!.steps).toEqual([
             'Subtract the water',
-            'Stir until until the powder dissolves',
+            'Stir until the powder dissolves',
             'Let it refrigerate',
             'Remove the Jello from the mold'
         ]);
@@ -55,7 +55,7 @@ describe('recipeManager', () => {
             'Decorate with the right amount of frosting for 6 cupcakes'
         ]);
         expect(RECIPES[3]!.steps).toEqual([
-            'Cut the the apples',
+            'Cut the apples',
             'Mix the apples with the dough',
             'Bake in oven',
             'Cut the pie into slices']);
