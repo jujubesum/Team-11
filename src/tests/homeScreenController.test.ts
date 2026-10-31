@@ -2,6 +2,7 @@ import "jest-canvas-mock";
 import type { ScreenSwitcher } from "../types.ts";
 import { clickButton, hasVisibleText } from "./konvaHelpers.ts";
 import { HomeScreenController } from "../screens/HomeScreen/HomeScreenController.ts";
+import { SaveManager } from "../saveManager.ts";
  
 // Tests screen switching and that the homescreen has the correct display
 const HOME_BUTTON_LABELS = [
@@ -19,10 +20,13 @@ const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Sav
 describe("HomeScreenController", () => {
 	let screenSwitcher: ScreenSwitcher;
 	let controller: HomeScreenController;
+	let saveManager: SaveManager;
  
 	beforeEach(() => {
+		localStorage.clear();
 		screenSwitcher = { switchToScreen: jest.fn() };
-		controller = new HomeScreenController(screenSwitcher);
+		saveManager = new SaveManager();
+		controller = new HomeScreenController(screenSwitcher, saveManager);
 		controller.show();
 	});
  
@@ -40,6 +44,15 @@ describe("HomeScreenController", () => {
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "title" });
 	});
+
+	it("saves progress when Save & Exit is clicked", () => {
+		saveManager.startNewGame();
+		saveManager.update({ level: 4 });
+
+		clickButton(controller.getView().getGroup(), "Save & Exit");
+
+		expect(new SaveManager().load()!.level).toBe(4);
+	});
  
 	it.each(NOT_YET_WIRED_LABELS)("does not navigate when '%s' is clicked (not built yet)", (label) => {
 		clickButton(controller.getView().getGroup(), label);
@@ -48,7 +61,7 @@ describe("HomeScreenController", () => {
 	});
  
 	it("is hidden until shown and hidden again by hide()", () => {
-		const freshController = new HomeScreenController(screenSwitcher);
+		const freshController = new HomeScreenController(screenSwitcher, saveManager);
 		const group = freshController.getView().getGroup();
 		expect(group.visible()).toBe(false);
  
