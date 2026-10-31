@@ -1,7 +1,7 @@
 import { GameTutorialController } from "../screens/game-tutorials/gameTutorialController";
 import { GameTutorialModel } from "../screens/game-tutorials/gameTutorialModel";
 import type { GameTutorialView } from "../screens/game-tutorials/gameTutorialView";
-import { error } from "node:console";
+import type { ScreenSwitcher } from "../types";
 
 /**
  * Tests arrow button press handler
@@ -11,11 +11,16 @@ describe("gameTutorialController.handleArrowButtonPress", () => {
   let controller: GameTutorialController;
   let view: GameTutorialView;
   let model: GameTutorialModel;
+  let screenSwitcher: ScreenSwitcher;
 
   beforeEach(() => {
     model = new GameTutorialModel();
-    view = { setTutorial: jest.fn(), onArrowPress: jest.fn()} as unknown as GameTutorialView // create a mock to detect if visual change occurred
-    controller = new GameTutorialController(model, view);
+    screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
+    view = {
+       setTutorial: jest.fn(), 
+       onArrowPress: jest.fn(),
+       onBackPress: jest.fn()} as unknown as GameTutorialView // create a mock to detect if visual change occurred
+    controller = new GameTutorialController(screenSwitcher, model, view);
     (view.setTutorial as jest.Mock).mockClear(); //override default setTutorial call
   });
 
@@ -70,21 +75,26 @@ describe("GameTutorialController.constructor", () => {
   let controller: GameTutorialController;
   let view: GameTutorialView;
   let model: GameTutorialModel;
+  let screenSwitcher: ScreenSwitcher;
 
   beforeEach(() => {
     model = new GameTutorialModel();
-    view = { setTutorial: jest.fn(), onArrowPress: jest.fn()} as unknown as GameTutorialView
+    view = {
+       setTutorial: jest.fn(), 
+       onArrowPress: jest.fn(),
+       onBackPress: jest.fn()} as unknown as GameTutorialView
+    screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
   });
 
   it("displays the first tutorial on construction", () => {
-    controller = new GameTutorialController(model, view);
+    controller = new GameTutorialController(screenSwitcher, model, view);
     const firstTutorial = model.getCurrentTutorial();
     expect(view.setTutorial).toHaveBeenCalledTimes(1);
     expect(view.setTutorial).toHaveBeenCalledWith(firstTutorial.getTitle(), firstTutorial.getBody());
   });
 
   it("registers an arrow press handler with the view", () => {
-    controller = new GameTutorialController(model,view);
+    controller = new GameTutorialController(screenSwitcher, model,view);
     expect(view.onArrowPress).toHaveBeenCalledTimes(1);
   });
 });
