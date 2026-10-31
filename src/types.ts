@@ -12,7 +12,8 @@ export type Screen =
 	| { type: "title" }
 	| { type: "home" }
 	| { type: "game" }
-  | {type: "gameTutorial"};
+  | { type: "gameTutorial"}
+	| { type: "newGameCheck" };
 
 export abstract class ScreenController {
 abstract getView(): View;
