@@ -45,10 +45,11 @@ describe("TitleScreenController", () => {
 			expect(saveManager.hasSave()).toBe(true);
 		});
  
-		it("does not navigate when How to Play is clicked (not built yet)", () => {
+		it("goes to the tutorials screen when How to Play is clicked", () => {
 			clickButton(root(), "How to Play");
  
-			expect(screenSwitcher.switchToScreen).not.toHaveBeenCalled();
+			expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+      expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "gameTutorial"});
 		});
 	});
  

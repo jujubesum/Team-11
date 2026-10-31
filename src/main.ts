@@ -2,6 +2,7 @@ import Konva from "konva";
 import type { ScreenSwitcher, Screen } from "./types.ts";
 import { TitleScreenController } from "./screens/TitleScreen/TitleScreenController.ts";
 import { HomeScreenController } from "./screens/HomeScreen/HomeScreenController.ts";
+import { GameTutorialController } from "./screens/game-tutorials/gameTutorialController.ts";
 import { NewGameCheckScreenController } from "./screens/NewGameCheckScreen/NewGameCheckScreenController.ts";
 import { SaveManager } from "./saveManager.ts";
 import {STAGE_WIDTH, STAGE_HEIGHT} from "./constants.ts";
@@ -27,6 +28,7 @@ class App implements ScreenSwitcher {
 	private homeController: HomeScreenController;
 	private titleController: TitleScreenController;
 	private newGameCheckController: NewGameCheckScreenController;
+  private gameTutorialController: GameTutorialController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -45,11 +47,13 @@ class App implements ScreenSwitcher {
 		this.homeController = new HomeScreenController(this, this.saveManager);
 		this.titleController = new TitleScreenController(this, this.saveManager);
 		this.newGameCheckController = new NewGameCheckScreenController(this, this.saveManager);
+    this.gameTutorialController = new GameTutorialController(this);
 
 		// Add all screen groups to the layer
 		// All screens exist simultaneously but only one is visible at a time
 		this.layer.add(this.homeController.getView().getGroup());
 		this.layer.add(this.titleController.getView().getGroup());
+    this.layer.add(this.gameTutorialController.getView().getGroup());
 		this.layer.add(this.newGameCheckController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
@@ -75,7 +79,8 @@ class App implements ScreenSwitcher {
 		// Hide all screens first by setting their Groups to invisible
         this.homeController.hide();
         this.titleController.hide();
-		this.newGameCheckController.hide();
+        this.gameTutorialController.hide();
+        this.newGameCheckController.hide();
 		// this.resultsController.hide();
 
 		// Show the requested screen based on the screen type
@@ -88,6 +93,10 @@ class App implements ScreenSwitcher {
 				this.homeController.show();
 				break;
 
+      case "gameTutorial":
+        this.gameTutorialController.show();
+        break;
+      
 			case "newGameCheck":
 				this.newGameCheckController.show();
 				break;
