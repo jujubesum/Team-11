@@ -54,7 +54,7 @@ export class SaveManager {
 	}
 
 	// Gets current save data
-	getCurrent(): SaveData | null {
+	getCurrent(): Readonly<SaveData> | null {
 		return this.current;
 	}
 
@@ -95,6 +95,8 @@ function isValidSave(data: unknown): data is SaveData {
 		typeof d["level"] === "number" &&
 		typeof d["money"] === "number" &&
 		Array.isArray(d["unlockedRecipeIds"]) &&
-		Array.isArray(d["customizations"])
+		Array.isArray(d["customizations"]) &&
+		typeof d["createdAt"] === "number" &&
+		typeof d["lastSavedAt"] === "number"
 	);
 }
