@@ -3,6 +3,7 @@ import type { ScreenSwitcher, Screen } from "./types.ts";
 import { TitleScreenController } from "./screens/TitleScreen/TitleScreenController.ts";
 import { HomeScreenController } from "./screens/HomeScreen/HomeScreenController.ts";
 import { NewGameCheckScreenController } from "./screens/NewGameCheckScreen/NewGameCheckScreenController.ts";
+import { ShopScreenController } from "./screens/ShopScreen/ShopScreenController.ts";
 import { SaveManager } from "./saveManager.ts";
 import {STAGE_WIDTH, STAGE_HEIGHT} from "./constants.ts";
 
@@ -27,6 +28,7 @@ class App implements ScreenSwitcher {
 	private homeController: HomeScreenController;
 	private titleController: TitleScreenController;
 	private newGameCheckController: NewGameCheckScreenController;
+	private shopController: ShopScreenController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -45,12 +47,14 @@ class App implements ScreenSwitcher {
 		this.homeController = new HomeScreenController(this, this.saveManager);
 		this.titleController = new TitleScreenController(this, this.saveManager);
 		this.newGameCheckController = new NewGameCheckScreenController(this, this.saveManager);
+		this.shopController = new ShopScreenController(this, this.saveManager);
 
 		// Add all screen groups to the layer
 		// All screens exist simultaneously but only one is visible at a time
 		this.layer.add(this.homeController.getView().getGroup());
 		this.layer.add(this.titleController.getView().getGroup());
 		this.layer.add(this.newGameCheckController.getView().getGroup());
+		this.layer.add(this.shopController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
@@ -76,6 +80,7 @@ class App implements ScreenSwitcher {
         this.homeController.hide();
         this.titleController.hide();
 		this.newGameCheckController.hide();
+		this.shopController.hide();
 		// this.resultsController.hide();
 
 		// Show the requested screen based on the screen type
@@ -90,6 +95,10 @@ class App implements ScreenSwitcher {
 
 			case "newGameCheck":
 				this.newGameCheckController.show();
+				break;
+
+			case "shop":
+				this.shopController.show();
 				break;
 
 		// 	more cases to add in the future: games, tutorials, etc.

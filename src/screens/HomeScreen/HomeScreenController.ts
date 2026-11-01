@@ -16,6 +16,7 @@ export class HomeScreenController extends ScreenController {
 		this.saveManager = saveManager;
 		this.view = new HomeScreenView({
             onSaveExit: () => this.handleSaveExit(),
+			onShop: () => this.handleShop(),
         });
 	}
 
@@ -23,6 +24,11 @@ export class HomeScreenController extends ScreenController {
 	private handleSaveExit(): void {
 		this.saveManager.save();
 		this.screenSwitcher.switchToScreen({type:"title"});
+	}
+
+	// Go to the shop screen
+	private handleShop(): void {
+		this.screenSwitcher.switchToScreen({ type: "shop" });
 	}
 
 	// Return the view

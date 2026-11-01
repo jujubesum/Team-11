@@ -12,7 +12,16 @@ export interface ButtonConfig {
 	fontSize?: number | undefined;
 	fill?: string | undefined;
 	hoverFill?: string | undefined;
+	// Start the button greyed out and unclickable
+	disabled?: boolean | undefined;
+	// Fill used while disabled
+	disabledFill?: string | undefined;
 }
+
+const TEXT_COLOR = "black";
+const STROKE_COLOR = "black";
+const DISABLED_TEXT_COLOR = "#aaaaaa";
+const DISABLED_STROKE_COLOR = "#bbbbbb";
  
 // Reusable rounded button: a Group holding a Rect, a main label, and an optional subtitle line.
 export class Button {
@@ -23,6 +32,9 @@ export class Button {
 	private height: number;
 	private fill: string;
 	private hoverFill: string;
+	private disabledFill: string;
+	private enabled = true;
+	private hovered = false;
  
 	constructor({
 		x,
@@ -35,10 +47,13 @@ export class Button {
 		fontSize = 28,
 		fill = "white",
 		hoverFill = "#eeeeee",
+		disabled = false,
+		disabledFill = "white",
 	}: ButtonConfig) {
 		this.height = height;
 		this.fill = fill;
 		this.hoverFill = hoverFill;
+		this.disabledFill = disabledFill;
  
 		this.group = new Konva.Group({ x, y });
  
@@ -80,6 +95,8 @@ export class Button {
 		if (onClick) {
 			this.enableInteraction(onClick);
 		}
+
+		this.setEnabled(!disabled);
 	}
  
 	// Show, change, or remove (pass undefined) the second line
@@ -100,20 +117,54 @@ export class Button {
 		}
 	}
  
+	// Turn the button on or off. Disabled buttons are greyed out and ignore clicks and hover.
+	setEnabled(enabled: boolean): void {
+		this.enabled = enabled;
+
+		this.rect.stroke(enabled ? STROKE_COLOR : DISABLED_STROKE_COLOR);
+		this.labelText.fill(enabled ? TEXT_COLOR : DISABLED_TEXT_COLOR);
+		this.subtitleText.fill(enabled ? TEXT_COLOR : DISABLED_TEXT_COLOR);
+		this.updateLook();
+
+		// If the mouse is already over it, fix the cursor right away
+		if (this.hovered) {
+			this.setCursor(enabled ? "pointer" : "default");
+		}
+
+		this.group.getLayer()?.batchDraw();
+	}
+
+	isEnabled(): boolean {
+		return this.enabled;
+	}
+ 
 	private enableInteraction(onClick: () => void): void {
-		this.group.on("click tap", onClick);
+		this.group.on("click tap", () => {
+			if (this.enabled) onClick();
+		});
  
 		this.group.on("mouseenter", () => {
-			this.setCursor("pointer");
-			this.rect.fill(this.hoverFill);
+			this.hovered = true;
+			if (this.enabled) this.setCursor("pointer");
+			this.updateLook();
 			this.group.getLayer()?.batchDraw();
 		});
  
 		this.group.on("mouseleave", () => {
+			this.hovered = false;
 			this.setCursor("default");
-			this.rect.fill(this.fill);
+			this.updateLook();
 			this.group.getLayer()?.batchDraw();
 		});
+	}
+
+	// Pick the fill for the current state, either when hovered, disabled, or normal (nothing)
+	private updateLook(): void {
+		if (!this.enabled) {
+			this.rect.fill(this.disabledFill);
+		} else {
+			this.rect.fill(this.hovered ? this.hoverFill : this.fill);
+		}
 	}
  
 	private setCursor(cursor: string): void {
@@ -125,4 +176,3 @@ export class Button {
 		return this.group;
 	}
 }
- 

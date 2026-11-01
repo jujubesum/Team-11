@@ -15,7 +15,9 @@ const HOME_BUTTON_LABELS = [
 	"Save & Exit",
 ];
  
-const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Save & Exit");
+const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter(
+	(label) => label !== "Save & Exit" && label !== "Shop",
+);
  
 describe("HomeScreenController", () => {
 	let screenSwitcher: ScreenSwitcher;
@@ -52,6 +54,13 @@ describe("HomeScreenController", () => {
 		clickButton(controller.getView().getGroup(), "Save & Exit");
 
 		expect(new SaveManager().load()!.level).toBe(4);
+	});
+
+	it("goes to the shop when Shop is clicked", () => {
+		clickButton(controller.getView().getGroup(), "Shop");
+
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "shop" });
 	});
  
 	it.each(NOT_YET_WIRED_LABELS)("does not navigate when '%s' is clicked (not built yet)", (label) => {

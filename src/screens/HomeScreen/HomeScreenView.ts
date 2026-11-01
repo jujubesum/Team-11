@@ -6,6 +6,7 @@ import { Button } from "../../components/Button.ts";
 // Callbacks the controller provides. Subject to more.
 export interface HomeScreenHandlers {
 	onSaveExit: () => void;
+	onShop: () => void;
 }
  
 // Layout as fractions of the stage for future scalability.
@@ -47,7 +48,7 @@ export class HomeScreenView implements View {
 		this.addButton("Minigame: Order Dividing", leftX, rowY(2), COL_WIDTH);
 		this.addButton("Recipe Book", rightX, rowY(2), COL_WIDTH);
  
-		this.addButton("Shop", leftX, rowY(3), COL_WIDTH);
+		this.addButton("Shop", leftX, rowY(3), COL_WIDTH, handlers.onShop);
 		this.addButton("Save & Exit", rightX, rowY(3), COL_WIDTH, handlers.onSaveExit);
 	}
  
