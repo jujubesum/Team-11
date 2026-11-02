@@ -4,6 +4,12 @@ import {
   isMathOperation,
   type MathOperation
 } from "../mathTutorials";
+import {
+  RECIPE_IDS,
+  getRecipeTutorial,
+  isRecipeId,
+  type RecipeId
+} from "../recipeTutorials";
 import { TutorialManager } from "../tutorialManager";
 
 describe("math tutorial content", () => {
@@ -25,6 +31,22 @@ describe("math tutorial content", () => {
     expect(isMathOperation("division")).toBe(true);
     expect(isMathOperation("fractions")).toBe(true);
     expect(isMathOperation("algebra")).toBe(false);
+  });
+});
+
+describe("recipe tutorial content", () => {
+  it.each(RECIPE_IDS)("has complete steps, operations, and practice problems for %s", (recipeId: RecipeId) => {
+    const tutorial = getRecipeTutorial(recipeId);
+
+    expect(tutorial.steps.length).toBeGreaterThan(1);
+    expect(tutorial.mathOperations.length).toBeGreaterThan(0);
+    expect(tutorial.practiceProblems.length).toBeGreaterThan(0);
+  });
+
+  it("recognizes supported and unsupported recipe IDs", () => {
+    expect(isRecipeId("recipe_01")).toBe(true);
+    expect(isRecipeId("recipe_05")).toBe(true);
+    expect(isRecipeId("recipe_99")).toBe(false);
   });
 });
 
@@ -116,5 +138,90 @@ describe("TutorialManager", () => {
     ).toThrow("Unsupported operation");
 
     expect(manager.getSnapshot().operation).toBe("addition");
+  });
+
+  it("loads a recipe tutorial and steps through recipe steps", () => {
+    const manager = new TutorialManager();
+
+    manager.selectRecipeTutorial("recipe_01");
+
+    expect(manager.getSnapshot()).toMatchObject({
+      recipeId: "recipe_01",
+      mode: "recipe",
+      title: "Cookies",
+      step: "Add flour, sugar, eggs, and butter",
+      stepNumber: 1
+    });
+
+    manager.nextStep();
+    expect(manager.getCurrentStep()).toBe("Stir until smooth");
+  });
+
+  it("lists tested math skills for a recipe and accesses a specific skill tutorial", () => {
+    const manager = new TutorialManager();
+
+    const cakeSkills = manager.getRecipeSkills("recipe_05");
+    expect(cakeSkills.map((s) => s.operation)).toEqual([
+      "addition",
+      "subtraction",
+      "division",
+      "multiplication"
+    ]);
+
+    manager.selectRecipeSkillTutorial("recipe_05", "division");
+    expect(manager.getSnapshot()).toMatchObject({
+      mode: "math",
+      operation: "division",
+      title: "Division",
+      stepNumber: 1
+    });
+
+    expect(() =>
+      manager.selectRecipeSkillTutorial("recipe_01", "division")
+    ).toThrow("Operation is not tested in this recipe");
+  });
+
+  it("marks a skill as learned after completing a tutorial and reflects overlap across recipes", () => {
+    const manager = new TutorialManager("addition");
+
+    expect(manager.isSkillLearned("addition")).toBe(false);
+
+    while (manager.nextStep()) {
+      // advance to end
+    }
+
+    expect(manager.isSkillLearned("addition")).toBe(true);
+
+    expect(manager.getRecipeSkills("recipe_01")).toEqual([
+      { operation: "addition", learned: true, mark: "✓" }
+    ]);
+
+    const cakeSkills = manager.getRecipeSkills("recipe_05");
+    expect(cakeSkills).toContainEqual({
+      operation: "addition",
+      learned: true,
+      mark: "✓"
+    });
+    expect(cakeSkills).toContainEqual({
+      operation: "subtraction",
+      learned: false,
+      mark: ""
+    });
+  });
+
+  it("provides practice problems for recipes and validates answers", () => {
+    const manager = new TutorialManager();
+    manager.selectRecipeTutorial("recipe_03");
+
+    const problems = manager.getPracticeProblems();
+    const firstProblem = problems[0];
+
+    expect(firstProblem).toBeDefined();
+    if (!firstProblem) {
+      throw new Error("Expected at least one practice problem");
+    }
+
+    expect(manager.checkPracticeAnswer(firstProblem, firstProblem.answer)).toBe(true);
+    expect(manager.checkPracticeAnswer(firstProblem, firstProblem.answer + 1)).toBe(false);
   });
 });
