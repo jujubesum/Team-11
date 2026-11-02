@@ -8,17 +8,18 @@ import { TitleScreenView } from "./TitleScreenView.ts";
 export class TitleScreenController extends ScreenController {
 	private view: TitleScreenView;
 	private screenSwitcher: ScreenSwitcher;
-	private saveManager: SaveManager;
+  private saveManager: SaveManager;
  
 	constructor(screenSwitcher: ScreenSwitcher, saveManager: SaveManager) {
 		super();
 		this.screenSwitcher = screenSwitcher;
-		this.saveManager = saveManager;
+    this.saveManager = saveManager;
 		this.view = new TitleScreenView({
 			onContinue: () => this.handleContinue(),
 			onNewGame: () => this.handleNewGame(),
-		});
-	}
+      onTutorial: () => this.handleTutorial(),
+  });
+  }
  
 	// Runs every time the screen opens, so the Continue button stays up to date after the player saves.
 	override show(): void {
@@ -44,6 +45,11 @@ export class TitleScreenController extends ScreenController {
 		this.saveManager.startNewGame();
 		this.screenSwitcher.switchToScreen({ type: "home" });
 	}
+
+  //
+  private handleTutorial(): void {
+    this.screenSwitcher.switchToScreen( { type: "gameTutorial" });
+  }
  
 	getView(): TitleScreenView {
 		return this.view;
