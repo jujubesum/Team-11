@@ -20,7 +20,7 @@ export class HomeScreenController extends ScreenController {
         });
 	}
 
-	// Handle start button click
+	// Handle save button click
 	private handleSaveExit(): void {
 		this.saveManager.save();
 		this.screenSwitcher.switchToScreen({type:"title"});
