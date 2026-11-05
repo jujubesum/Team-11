@@ -1,9 +1,4 @@
-export interface Recipe {
-    id: string;
-    name: string;
-    mathOperations: string[];
-}
-
+import { Recipe, RECIPES } from './recipeManager'
 export interface GameState {
     unlockedRecipes: Recipe[];
     currentOrder: Recipe | null;
@@ -19,14 +14,7 @@ export class OrderManager {
             return JSON.parse(stateData);
         }
         return {
-            // This is just a place holder for the initial recipe that gets unlocked upon starting a game.
-            unlockedRecipes: [
-                {
-                    id: 'recipe_01',
-                    name: 'Cookies',
-                    mathOperations: ['addition', 'subtraction']
-                }
-            ],
+            unlockedRecipes: [RECIPES[0]!],
             currentOrder: null,
             completedOrders: 0
         };
