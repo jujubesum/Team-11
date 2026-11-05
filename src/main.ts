@@ -5,6 +5,7 @@ import { HomeScreenController } from "./screens/HomeScreen/HomeScreenController.
 import { GameTutorialController } from "./screens/game-tutorials/gameTutorialController.ts";
 import { NewGameCheckScreenController } from "./screens/NewGameCheckScreen/NewGameCheckScreenController.ts";
 import { RecipeTutorialController } from "./screens/RecipeTutorialScreen/RecipeTutorialController.ts";
+import { MainGameScreenController } from "./screens/MainGameScreen/MainGameScreenController.ts";
 import { SaveManager } from "./saveManager.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
 
@@ -31,6 +32,7 @@ class App implements ScreenSwitcher {
 	private newGameCheckController: NewGameCheckScreenController;
 	private gameTutorialController: GameTutorialController;
 	private recipeTutorialController: RecipeTutorialController;
+  private mainGameScreenController: MainGameScreenController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -51,6 +53,7 @@ class App implements ScreenSwitcher {
 		this.newGameCheckController = new NewGameCheckScreenController(this, this.saveManager);
 		this.gameTutorialController = new GameTutorialController(this);
 		this.recipeTutorialController = new RecipeTutorialController(this);
+    this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
 
 		// Add all screen groups to the layer
 		// All screens exist simultaneously but only one is visible at a time
@@ -59,6 +62,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.gameTutorialController.getView().getGroup());
 		this.layer.add(this.newGameCheckController.getView().getGroup());
 		this.layer.add(this.recipeTutorialController.getView().getGroup());
+    this.layer.add(this.mainGameScreenController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
@@ -109,7 +113,9 @@ class App implements ScreenSwitcher {
 			case "recipeTutorial":
 				this.recipeTutorialController.show();
 				break;
-
+      
+      case "mainGame":
+        this.mainGameScreenController.show();
 			// 	more cases to add in the future: games, tutorials, etc.
 		}
 	}
