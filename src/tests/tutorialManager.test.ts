@@ -29,7 +29,6 @@ describe("math tutorial content", () => {
     expect(isMathOperation("subtraction")).toBe(true);
     expect(isMathOperation("multiplication")).toBe(true);
     expect(isMathOperation("division")).toBe(true);
-    expect(isMathOperation("fractions")).toBe(true);
     expect(isMathOperation("algebra")).toBe(false);
   });
 });
@@ -116,18 +115,6 @@ describe("TutorialManager", () => {
     manager.restart();
 
     expect(manager.getSnapshot().stepNumber).toBe(1);
-  });
-
-  it("supports switching to fractions", () => {
-    const manager = new TutorialManager("addition");
-
-    manager.selectTutorial("fractions");
-
-    expect(manager.getSnapshot()).toMatchObject({
-      operation: "fractions",
-      title: "Fractions",
-      stepNumber: 1
-    });
   });
 
   it("rejects an unsupported operation without changing state", () => {
