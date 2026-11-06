@@ -43,5 +43,6 @@ export class MainGameScreenController extends ScreenController {
   updateRecipe(recipe: Recipe): void {
     this.view.updateTitle(recipe.name);
     this.view.fillLeftPanel(recipe.steps);
+    this.view.setProgress(0, recipe.steps.length);
   }
 }
