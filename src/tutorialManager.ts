@@ -6,6 +6,7 @@ import {
 import {
   recipeTutorials,
   isRecipeId,
+  buildPracticeProblem,
   type RecipeId,
   type PracticeProblem
 } from "./recipeTutorials";
@@ -153,9 +154,7 @@ export class TutorialManager {
       return recipeTutorials[targetId].practiceProblems;
     }
 
-    return Object.values(recipeTutorials)
-      .flatMap((rt) => rt.practiceProblems)
-      .filter((problem) => problem.operation === this.operation);
+    return [buildPracticeProblem(this.operation)];
   }
 
   checkPracticeAnswer(problem: PracticeProblem, userAnswer: number): boolean {
