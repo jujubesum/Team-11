@@ -14,11 +14,15 @@ export class MainGameScreenController extends ScreenController {
     this.screenSwitcher = screenSwitcher;
     this.saveManager = saveManager;
     this.view = new MainGameScreenView({
-
-    });
+      onHelp: () => this.handleHelp(),
+    }, this.screenSwitcher);
   }
 
   getView(): MainGameScreenView {
     return this.view;
+  }
+
+  handleHelp(): void {
+
   }
 }
