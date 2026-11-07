@@ -90,6 +90,7 @@ class App implements ScreenSwitcher {
 		this.gameTutorialController.hide();
 		this.newGameCheckController.hide();
 		this.recipeTutorialController.hide();
+    this.mainGameScreenController.hide();
 		// this.resultsController.hide();
 
 		// Show the requested screen based on the screen type
