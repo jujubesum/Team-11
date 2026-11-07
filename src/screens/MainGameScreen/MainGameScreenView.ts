@@ -5,10 +5,12 @@ import { Button } from "../../components/Button.ts";
 import { TopBar } from "../../components/TopBar.ts";
 import { TOPBAR_HEIGHT } from "../../constants.ts";
 
-// Object Dimensions
+// Spacing constants
 const MARGIN = 40;
 const PADDING = 40;
 const GAP = 30;
+
+// Progress bar constants
 const PROGRESS_HEIGHT = 40;
 const PROGRESS_GAP = 20;
 const PROGRESS_LABEL_WIDTH = 220;
@@ -16,12 +18,24 @@ const PROGRESS_ROW_WIDTH = STAGE_WIDTH - 2 * MARGIN;
 const PROGRESS_BAR_WIDTH = PROGRESS_ROW_WIDTH - PROGRESS_LABEL_WIDTH - PROGRESS_GAP;
 const PROGRESS_BAR_X = PROGRESS_LABEL_WIDTH + PROGRESS_GAP;
 const PROGRESS_Y = TOPBAR_HEIGHT + PROGRESS_HEIGHT * 2;
+
+// Panel constants
 const PANELS_Y = PROGRESS_Y + PROGRESS_HEIGHT + PADDING;
 const PANEL_HEIGHT = STAGE_HEIGHT - PANELS_Y - MARGIN;
 const PANEL_COUNT = 3;
 const PANEL_WIDTH = (STAGE_WIDTH - 2 * MARGIN - (PANEL_COUNT - 1) * GAP) / PANEL_COUNT;
+
+// Step box constants
 const STEPS_START_Y = MARGIN + PADDING * 3;
 
+//Submission Box Constants
+const ANSWER_ROW_HEIGHT = 44;
+const SUBMIT_HEIGHT = 56;
+const SUBMIT_Y = PANEL_HEIGHT - PADDING - SUBMIT_HEIGHT;
+const ANSWER_Y = SUBMIT_Y - 24 - ANSWER_ROW_HEIGHT;
+const LABEL_WIDTH = 50;
+const INPUT_X = PADDING + LABEL_WIDTH + 10;
+const INPUT_WIDTH = PANEL_WIDTH - INPUT_X - PADDING;
 
 // Colors
 const WHITE = "#FFFFFF"
@@ -30,6 +44,7 @@ const DARKGRAY = "#888888"
 
 export interface MainGameScreenHandlers {
   onHelp: () => void;
+  onSubmit: (answer: string) => void;
 }
 
 export class MainGameScreenView implements View {
@@ -43,6 +58,10 @@ export class MainGameScreenView implements View {
   private progress: Konva.Group;
   private progressFill: Konva.Rect;
   private progressLabel: Konva.Text;
+  private inputSlot: Konva.Rect;
+  private input: HTMLInputElement;
+  private submitButton: Konva.Group;
+  private problemText: Konva.Text[] = [];
 
 
   constructor(handlers: MainGameScreenHandlers, screenSwitcher: ScreenSwitcher){
@@ -140,9 +159,38 @@ export class MainGameScreenView implements View {
 
     this.progress.add(this.progressLabel, track, this.progressFill);
     this.group.add(this.progress);
+
+    // Answer box
+    this.rightPanel.add(new Konva.Text({
+      x: PADDING, y: ANSWER_Y, width: LABEL_WIDTH, height: ANSWER_ROW_HEIGHT,
+      text: "? =", fontSize: 24, fill: "black", verticalAlign: "middle",
+    }));
+    this.inputSlot = new Konva.Rect({
+      x: INPUT_X, y: ANSWER_Y, width: INPUT_WIDTH, height: ANSWER_ROW_HEIGHT,
+    });
+    this.rightPanel.add(this.inputSlot);
+
+    this.input = document.createElement("input");
+    this.input.type = "text";
+    this.input.inputMode = "numeric";
+    Object.assign(this.input.style, {
+      position: "absolute", display: "none", boxSizing: "border-box",
+      border: "2px solid black", borderRadius: "22px", background: GRAY,
+      textAlign: "center", fontSize: "24px", outline: "none",
+    });
+
+    // Submission Button
+    this.submitButton = this.makeSubmitButton();
+    const submit = () => handlers.onSubmit(this.input.value.trim());
+
+    this.makeClickable(this.submitButton, submit);
+    this.input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submit();
+    })
+    this.rightPanel.add(this.submitButton);
   }
 
-  makePanel(width: number, height: number, x: number, y: number): Konva.Group {
+  private makePanel(width: number, height: number, x: number, y: number): Konva.Group {
     const panel = new Konva.Group({x: x, y: y});
     const box = new Konva.Rect({
       width: width,
@@ -153,6 +201,28 @@ export class MainGameScreenView implements View {
     });
     panel.add(box);
     return panel;
+  }
+
+  private makeSubmitButton(): Konva.Group {
+    const button = new Konva.Group({ x: PADDING, y: SUBMIT_Y });
+    button.add(
+      new Konva.Rect({
+        width: PANEL_WIDTH - 2 * PADDING, height: SUBMIT_HEIGHT,
+        fill: DARKGRAY, stroke: "black", strokeWidth: 2, cornerRadius: 16,
+      }),
+      new Konva.Text({
+        width: PANEL_WIDTH - 2 * PADDING, height: SUBMIT_HEIGHT,
+        text: "Submit", fontSize: 28, fill: "black",
+        align: "center", verticalAlign: "middle", listening: false,
+      }),
+    );
+    return button;
+  }
+
+  private makeClickable(node: Konva.Node, fn: () => void): void {
+    node.on("click tap", fn);
+    node.on("mouseenter", () => { node.getStage()!.container().style.cursor = "pointer"; });
+    node.on("mouseleave", () => { node.getStage()!.container().style.cursor = "default"; });
   }
 
   fillLeftPanel(steps: string[]): void {
@@ -214,17 +284,34 @@ export class MainGameScreenView implements View {
   }
 
   updateTitle(newTitle: string): void {
-    this.recipeTitle.text(newTitle);
+    this.recipeTitle.text(`Recipe: ${newTitle}`);
     this.group.getLayer()?.batchDraw();
+  }
+
+  clearAnswer(): void { 
+    this.input.value = "";
+    if (this.input.isConnected) this.input.focus();
   }
 
   show(): void {
     this.group.show();
+    const container = this.group.getStage()?.container();
+    if (container){ // Checks if input HTML element exists as part of container, if not adds it
+      container.style.position = "relative";
+      if (!this.input.parentElement) container.appendChild(this.input);
+      const pos = this.inputSlot.getAbsolutePosition();
+      Object.assign(this.input.style, {
+        left: `${pos.x}px`, top: `${pos.y}px`,
+        width: `${INPUT_WIDTH}px`, height: `${ANSWER_ROW_HEIGHT}px`,
+        display: "block",
+      })
+    }
     this.group.getLayer()?.batchDraw();
   }
 
   hide(): void {
     this.group.hide();
+    this.input.style.display = "none";
     this.group.getLayer()?.batchDraw();
   }
 

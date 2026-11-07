@@ -28,6 +28,7 @@ export class MainGameScreenController extends ScreenController {
     this.saveManager = saveManager;
     this.view = new MainGameScreenView({
       onHelp: () => this.handleHelp(),
+      onSubmit: (answer: string) => this.handleSubmit(answer),
     }, this.screenSwitcher);
     this.updateRecipe(PLACEHOLDERCIPE); // remove when model is created and handles grabbing random order
   }
@@ -40,9 +41,15 @@ export class MainGameScreenController extends ScreenController {
 
   }
 
+  handleSubmit(answer: string): void {
+    // add logic to validate user input and handle if answer is correct/incorrect
+    this.view.clearAnswer();
+  }
+
   updateRecipe(recipe: Recipe): void {
     this.view.updateTitle(recipe.name);
     this.view.fillLeftPanel(recipe.steps);
     this.view.setProgress(0, recipe.steps.length);
+    this.view.clearAnswer();
   }
 }
