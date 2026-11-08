@@ -1,5 +1,5 @@
 import Konva from "konva";
-import type { View, ScreenSwitcher } from "../../types.ts";
+import type { View } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import type { ShopItem } from "../../ShopItems.ts";
@@ -7,6 +7,7 @@ import { TopBar } from "../../components/TopBar.ts";
 import { makeCircleButton, addPointerCursor, setCursor } from "../../components/CircleButton.ts";
 
 export interface ShopScreenHandlers {
+	onHome: () => void;
 	onHelp: () => void;
 	onItemClick: (item: ShopItem) => void;
 	onPurchase: () => void;
@@ -83,13 +84,13 @@ export class ShopScreenView implements View {
 	private cartItemsGroup = new Konva.Group();
 	private gridGroup = new Konva.Group();
 
-	constructor(handlers: ShopScreenHandlers, screenSwitcher: ScreenSwitcher) {
+	constructor(handlers: ShopScreenHandlers) {
 		this.handlers = handlers;
 
 		this.group.add(new Konva.Rect({ width: STAGE_WIDTH, height: STAGE_HEIGHT, fill: FILL }));
 
 		// Top Bar
-		this.group.add(new TopBar({ title: "Shop", screenSwitcher, onHelp: handlers.onHelp }).getGroup());
+		this.group.add(new TopBar({ title: "Shop", onHome: handlers.onHome, onHelp: handlers.onHelp }).getGroup());
 
 		this.buildInfoRow();
 		this.buildCart();

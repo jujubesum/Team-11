@@ -13,7 +13,7 @@ export interface TopBarConfig {
 	// Page name
 	title: string;
 	// For the home button, always directs to home screen
-	screenSwitcher: ScreenSwitcher;
+	onHome: () => void;
 	// For the help button, unique to every page
 	onHelp: () => void;
 }
@@ -22,7 +22,7 @@ export interface TopBarConfig {
 export class TopBar {
 	private group = new Konva.Group();
 
-	constructor({ title, screenSwitcher, onHelp }: TopBarConfig) {
+	constructor({ title, onHome, onHelp }: TopBarConfig) {
 		this.group.add(
 			new Konva.Rect({ width: STAGE_WIDTH, height: TOP_BAR_HEIGHT, fill: BAR_FILL }),
 			new Konva.Text({
@@ -34,9 +34,7 @@ export class TopBar {
 				align: "center",
 				verticalAlign: "middle",
 			}),
-			makeCircleButton("⌂", STAGE_WIDTH * 0.04, TOP_BAR_HEIGHT / 2, ICON_RADIUS, BAR_FILL, () =>
-				screenSwitcher.switchToScreen({ type: "home" }),
-			),
+			makeCircleButton("⌂", STAGE_WIDTH * 0.04, TOP_BAR_HEIGHT / 2, ICON_RADIUS, BAR_FILL, onHome),
 			makeCircleButton("?", STAGE_WIDTH * 0.96, TOP_BAR_HEIGHT / 2, ICON_RADIUS, BAR_FILL, onHelp),
 		);
 	}

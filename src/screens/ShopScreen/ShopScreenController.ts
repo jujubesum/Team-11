@@ -21,13 +21,14 @@ export class ShopScreenController extends ScreenController {
 		this.screenSwitcher = screenSwitcher;
 		this.saveManager = saveManager;
 		this.view = new ShopScreenView({
+			onHome: () => this.handleHome(),
 			onHelp: () => this.handleHelp(),
 			onItemClick: (item) => this.handleItemClick(item),
 			onPurchase: () => this.handlePurchase(),
 			onEmptyCart: () => this.handleEmptyCart(),
 			onPrevPage: () => this.handlePrevPage(),
 			onNextPage: () => this.handleNextPage(),
-		}, this.screenSwitcher);
+		});
 	}
 
 	override show(): void {
@@ -38,6 +39,10 @@ export class ShopScreenController extends ScreenController {
 	}
 
 	// ---------- Button Handlers ----------
+
+	private handleHome(): void {
+		this.screenSwitcher.switchToScreen({ type: "home" });
+	}
 
 	private handleHelp(): void {
 		// TODO: show how the shop works (skipped for now)
