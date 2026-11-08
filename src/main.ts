@@ -7,6 +7,7 @@ import { NewGameCheckScreenController } from "./screens/NewGameCheckScreen/NewGa
 import { RecipeTutorialController } from "./screens/RecipeTutorialScreen/RecipeTutorialController.ts";
 import { SaveManager } from "./saveManager.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
+import { CashierGameController } from "./CashierMiniGame/CashierGameController.ts";
 
 
 /**
@@ -31,6 +32,7 @@ class App implements ScreenSwitcher {
 	private newGameCheckController: NewGameCheckScreenController;
 	private gameTutorialController: GameTutorialController;
 	private recipeTutorialController: RecipeTutorialController;
+	private cashierGameController: CashierGameController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -51,6 +53,7 @@ class App implements ScreenSwitcher {
 		this.newGameCheckController = new NewGameCheckScreenController(this, this.saveManager);
 		this.gameTutorialController = new GameTutorialController(this);
 		this.recipeTutorialController = new RecipeTutorialController(this);
+		this.cashierGameController = new CashierGameController(this);
 
 		// Add all screen groups to the layer
 		// All screens exist simultaneously but only one is visible at a time
@@ -59,6 +62,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.gameTutorialController.getView().getGroup());
 		this.layer.add(this.newGameCheckController.getView().getGroup());
 		this.layer.add(this.recipeTutorialController.getView().getGroup());
+		this.layer.add(this.cashierGameController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
@@ -86,6 +90,8 @@ class App implements ScreenSwitcher {
 		this.gameTutorialController.hide();
 		this.newGameCheckController.hide();
 		this.recipeTutorialController.hide();
+		this.cashierGameController.hide();
+		
 		// this.resultsController.hide();
 
 		// Show the requested screen based on the screen type
@@ -108,6 +114,9 @@ class App implements ScreenSwitcher {
 
 			case "recipeTutorial":
 				this.recipeTutorialController.show();
+				break;
+			case "cashierGame":
+				this.cashierGameController.getView().show();
 				break;
 
 			// 	more cases to add in the future: games, tutorials, etc.
