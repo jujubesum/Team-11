@@ -29,7 +29,8 @@ export class MainGameScreenController extends ScreenController {
     this.view = new MainGameScreenView({
       onHelp: () => this.handleHelp(),
       onSubmit: (answer: string) => this.handleSubmit(answer),
-    }, this.screenSwitcher);
+      onHome: () => this.handleHome(),
+    });
     this.updateRecipe(PLACEHOLDERCIPE); // remove when model is created and handles grabbing random order
   }
 
@@ -39,6 +40,12 @@ export class MainGameScreenController extends ScreenController {
 
   handleHelp(): void {
 
+  }
+
+  handleHome(): void {
+    // for now take user back to home screen
+    // TODO Create popup and display "Are you sure?" popup
+    this.screenSwitcher.switchToScreen({ type: "home" });
   }
 
   handleSubmit(answer: string): void {

@@ -44,6 +44,7 @@ const DARKGRAY = "#888888"
 
 export interface MainGameScreenHandlers {
   onHelp: () => void;
+  onHome: () => void;
   onSubmit: (answer: string) => void;
 }
 
@@ -64,7 +65,7 @@ export class MainGameScreenView implements View {
   private problemText: Konva.Text[] = [];
 
 
-  constructor(handlers: MainGameScreenHandlers, screenSwitcher: ScreenSwitcher){
+  constructor(handlers: MainGameScreenHandlers){
     this.group = new Konva.Group({ visible: false });
 
     // background
@@ -77,7 +78,7 @@ export class MainGameScreenView implements View {
         );
 
     // topbar
-    this.group.add(new TopBar({ title: "Baking", screenSwitcher, onHelp: handlers.onHelp }).getGroup());
+    this.group.add(new TopBar({ title: "Baking", onHome: handlers.onHome, onHelp: handlers.onHelp }).getGroup());
   
     // game panels
     this.leftPanel = this.makePanel(PANEL_WIDTH, PANEL_HEIGHT, MARGIN, PANELS_Y);
