@@ -5,7 +5,7 @@ import { MainGameScreenView } from "./MainGameScreenView";
 import { HomeScreenController } from "../HomeScreen/HomeScreenController";
 import type { Recipe } from "../../recipeManager";
 
-const PLACEHOLDERCIPE: Recipe = {
+const PLACEHOLDERCIPE: Recipe = { //TO BE DELETED
     id: 'recipe_01',
     name: 'Cookies',
     mathOperations: ['addition'],
@@ -30,6 +30,8 @@ export class MainGameScreenController extends ScreenController {
       onHelp: () => this.handleHelp(),
       onSubmit: (answer: string) => this.handleSubmit(answer),
       onHome: () => this.handleHome(),
+      onNext: () => this.handleNext(),
+      onReplay: () => this.handleReplay(),
     });
     this.updateRecipe(PLACEHOLDERCIPE); // remove when model is created and handles grabbing random order
   }
@@ -38,19 +40,34 @@ export class MainGameScreenController extends ScreenController {
     return this.view;
   }
 
-  handleHelp(): void {
-
+  handleHelp(): void { 
+    // TODO: Create popup explaining summary of what is to be expected
   }
 
   handleHome(): void {
     // for now take user back to home screen
-    // TODO Create popup and display "Are you sure?" popup
+    // TODO: Create popup and display "Are you sure?" popup
     this.screenSwitcher.switchToScreen({ type: "home" });
+  }
+
+  handleNext(): void {
+    // TODO: Cycle to next question, use setProgress to set new progress
+    this.view.hideCongrats();
+  }
+
+  handleReplay(): void {
+    // I think nothing is fine? If no cycling happens, question is not changed and progress bar remains the same
+    this.view.hideCongrats();
   }
 
   handleSubmit(answer: string): void {
     // add logic to validate user input and handle if answer is correct/incorrect
     this.view.clearAnswer();
+    this.correctAnswer();
+  }
+
+  correctAnswer(): void {
+    this.view.showCongrats();
   }
 
   updateRecipe(recipe: Recipe): void {

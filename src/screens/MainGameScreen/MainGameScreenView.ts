@@ -3,6 +3,7 @@ import type { ScreenSwitcher, View } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import { TopBar } from "../../components/TopBar.ts";
+import { Popup, makePopup } from "../../components/popup.ts";
 import { TOPBAR_HEIGHT } from "../../constants.ts";
 
 // Spacing constants
@@ -45,6 +46,8 @@ const DARKGRAY = "#888888"
 export interface MainGameScreenHandlers {
   onHelp: () => void;
   onHome: () => void;
+  onNext: () => void;
+  onReplay: () => void;
   onSubmit: (answer: string) => void;
 }
 
@@ -62,7 +65,7 @@ export class MainGameScreenView implements View {
   private inputSlot: Konva.Rect;
   private input: HTMLInputElement;
   private submitButton: Konva.Group;
-  private problemText: Konva.Text[] = [];
+  private congratsPopup: Popup;
 
 
   constructor(handlers: MainGameScreenHandlers){
@@ -189,6 +192,18 @@ export class MainGameScreenView implements View {
       if (e.key === "Enter") submit();
     })
     this.rightPanel.add(this.submitButton);
+
+    // The following will all be popup declarations (hidden by default)
+
+    //Correct answer popup
+    this.congratsPopup = makePopup({
+      message: "Congrats, you were correct!",
+      buttons: [
+        { label: "Next Question", onClick: () => handlers.onNext() },
+        { label: "Replay", onClick: () => handlers.onReplay()},
+      ],
+    });
+    this.group.add(this.congratsPopup.getGroup());
   }
 
   private makePanel(width: number, height: number, x: number, y: number): Konva.Group {
@@ -314,6 +329,27 @@ export class MainGameScreenView implements View {
     this.group.hide();
     this.input.style.display = "none";
     this.group.getLayer()?.batchDraw();
+  }
+
+  setInputEnabled(enabled: boolean): void {
+    this.input.disabled = !enabled;
+    this.input.style.filter = enabled ? "none" : "brightness(0.74)";
+    if (enabled){
+      this.input.focus();
+    }
+    else {
+      this.input.blur();
+    }
+  }
+
+  showCongrats(): void {
+    this.setInputEnabled(false);
+    this.congratsPopup.show();
+  }
+
+  hideCongrats(): void {
+    this.congratsPopup.hide();
+    this.setInputEnabled(true);
   }
 
   getGroup(): Konva.Group {
