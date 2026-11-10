@@ -48,6 +48,8 @@ export interface MainGameScreenHandlers {
   onHome: () => void;
   onNext: () => void;
   onReplay: () => void;
+  onRetry: () => void;
+  onHint: () => void;
   onSubmit: (answer: string) => void;
 }
 
@@ -66,6 +68,8 @@ export class MainGameScreenView implements View {
   private input: HTMLInputElement;
   private submitButton: Konva.Group;
   private congratsPopup: Popup;
+  private incorrectPopup: Popup;
+  private activePopup: Popup;
 
 
   constructor(handlers: MainGameScreenHandlers){
@@ -204,6 +208,15 @@ export class MainGameScreenView implements View {
       ],
     });
     this.group.add(this.congratsPopup.getGroup());
+
+    this.incorrectPopup = makePopup({
+      message: "Sorry that's incorrect :(",
+      buttons: [
+        { label: "Try Again", onClick: () => handlers.onRetry() },
+        { label: "View Hint", onClick: () => handlers.onHint() },
+      ],
+    });
+    this.group.add(this.incorrectPopup.getGroup());
   }
 
   private makePanel(width: number, height: number, x: number, y: number): Konva.Group {
@@ -342,14 +355,25 @@ export class MainGameScreenView implements View {
     }
   }
 
-  showCongrats(): void {
+  showPopup(): void {
     this.setInputEnabled(false);
-    this.congratsPopup.show();
+    this.activePopup.show();
   }
 
-  hideCongrats(): void {
-    this.congratsPopup.hide();
+  hidePopup(): void {
+    this.activePopup.hide();
     this.setInputEnabled(true);
+  }
+
+  setActivePopup(popup: string): void {
+    switch (popup) {
+      case "congrats":
+        this.activePopup = this.congratsPopup;
+        break;
+      case "incorrect":
+        this.activePopup = this.incorrectPopup;
+        break;
+    }
   }
 
   getGroup(): Konva.Group {

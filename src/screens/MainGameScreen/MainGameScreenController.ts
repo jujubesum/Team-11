@@ -32,6 +32,8 @@ export class MainGameScreenController extends ScreenController {
       onHome: () => this.handleHome(),
       onNext: () => this.handleNext(),
       onReplay: () => this.handleReplay(),
+      onRetry: () => this.handleRetry(),
+      onHint: () => this.handleHint(),
     });
     this.updateRecipe(PLACEHOLDERCIPE); // remove when model is created and handles grabbing random order
   }
@@ -52,22 +54,47 @@ export class MainGameScreenController extends ScreenController {
 
   handleNext(): void {
     // TODO: Cycle to next question, use setProgress to set new progress
-    this.view.hideCongrats();
+    this.view.hidePopup();
   }
 
   handleReplay(): void {
-    // I think nothing is fine? If no cycling happens, question is not changed and progress bar remains the same
-    this.view.hideCongrats();
+    // I think nothing is fine? If no cycling happens, question is not changed/advanced and progress bar remains the same
+    this.view.hidePopup();
   }
 
   handleSubmit(answer: string): void {
     // add logic to validate user input and handle if answer is correct/incorrect
     this.view.clearAnswer();
-    this.correctAnswer();
+    if (answer == "yes") {
+      this.correctAnswer();
+    }
+    else {
+      this.incorrectAnswer();
+    }
+  }
+
+  handleRetry(): void {
+    // TODO: Implement logic for lowering remaining attempts remaining
+    this.view.hidePopup();
+  }
+
+  handleHint(): void {
+    this.view.hidePopup();
+    // TODO: When hint screen is ready, call to show it
   }
 
   correctAnswer(): void {
-    this.view.showCongrats();
+    this.view.setActivePopup("congrats");
+    this.view.showPopup();
+  }
+
+  incorrectAnswer(): void {
+    this.view.setActivePopup("incorrect");
+    this.view.showPopup();
+  }
+
+  orderComplete(): void {
+    // TODO: Create order complete popup
   }
 
   updateRecipe(recipe: Recipe): void {
