@@ -1,33 +1,44 @@
-//Types and layout for math questions
-
-//different operations each question can use
+//types for questions
+ 
+//question operations
 export type Operation = "+" | "-" | "×" | "÷";
+ 
 
-
-//what questions we can randomly select from
-export interface QuestionConfig{
+//what kind of question to make
+export interface QuestionConfig {
+    //operations the generator may pick from 
     allowedOperations: Operation[];
-    //how many steps each question has, 1 for everything except hardest level
-    steps: number;
+    //biggest # allowed on right side of equation
+    operandLimits: Record<Operation, number>;
+    //max # allowed anywhere
     maxNumber: number;
 }
-
-//defining what question should look like
-export interface Question{
-    //variables in the equation
-    numbers: number[];
-    operations: Operation[];
+ 
+//one math question, e.g. 12 + 5 = ?
+export interface Question {
+    //left side number
+    left: number;
+    //right side number
+    right: number;
+    operation: Operation;
     answer: number;
-    //question shown to player
-    prompt: String;
+    //question for player, ex: 2 + 3 = ?
+    prompt: string;
 }
-
-export type AnswerStatus = "correct" | "incorrect" | "invalid";
-
-export interface AnswerResult{
-    answer: AnswerStatus;
-    message: String;
+ 
+//answer status 
+export type AnswerStatus =
+    | "correct"
+    | "incorrect"
+    | "invalid";
+ 
+//what is returned after each submission for questions
+export interface AnswerResult {
+    status: AnswerStatus;
+    //feedback to display
+    message: string;
     attemptsRemaining: number;
-    //did the user answer correctly, or are they out of attempts
+    //true when question is over (correct, or no more attempts)
     finished: boolean;
 }
+ 
