@@ -38,6 +38,9 @@ const LABEL_WIDTH = 50;
 const INPUT_X = PADDING + LABEL_WIDTH + 10;
 const INPUT_WIDTH = PANEL_WIDTH - INPUT_X - PADDING;
 
+// Problem Constants
+const PROBLEM_Y = 20;
+
 // Colors
 const WHITE = "#FFFFFF"
 const GRAY = "#d9d9d9"
@@ -52,6 +55,8 @@ export interface MainGameScreenHandlers {
   onHint: () => void;
   onNextOrder: () => void;
   onSaveQuit: () => void;
+  onReroll: () => void;
+  onFailQuit: () => void;
   onSubmit: (answer: string) => void;
 }
 
@@ -66,12 +71,14 @@ export class MainGameScreenView implements View {
   private progress: Konva.Group;
   private progressFill: Konva.Rect;
   private progressLabel: Konva.Text;
+  private problemText: Konva.Text;
   private inputSlot: Konva.Rect;
   private input: HTMLInputElement;
   private submitButton: Konva.Group;
   private congratsPopup: Popup;
   private incorrectPopup: Popup;
   private completePopup: Popup;
+  private failPopup: Popup;
   private activePopup: Popup;
 
 
@@ -200,6 +207,22 @@ export class MainGameScreenView implements View {
     })
     this.rightPanel.add(this.submitButton);
 
+    // Problem text
+
+    this.problemText = new Konva.Text({
+      x: PADDING, y: PROBLEM_Y,
+      width: PANEL_WIDTH - 2 * PADDING,
+      height: ANSWER_Y - PROBLEM_Y - 20,
+      text:"Test",
+      fontSize: 36,
+      lineHeight: 1.6,
+      fill: "black",
+      align: "center",
+      verticalAlign: "middle",
+      listening: false,
+    });
+    this.rightPanel.add(this.problemText)
+
     // The following will all be popup declarations (hidden by default)
 
     //Correct answer popup
@@ -228,10 +251,20 @@ export class MainGameScreenView implements View {
       message: "You have completed the order!",
       buttons: [
         { label: "Next Order", onClick: () => handlers.onNextOrder() },
-        {label: "Save & Quit", onClick: () => handlers.SaveQuit()},
+        { label: "Save & Quit", onClick: () => handlers.onSaveQuit()},
       ],
     });
     this.group.add(this.completePopup.getGroup());
+
+    // Fail popup
+
+    this.failPopup = makePopup({
+      message: "You have run out of attempts ;-;",
+      buttons: [
+        { label: "New Question", onClick: () => handlers.onReroll() },
+        { label: "Save & Quit", onClick: () => handlers.onFailQuit() },
+      ],
+    });
   }
 
   private makePanel(width: number, height: number, x: number, y: number): Konva.Group {
@@ -315,6 +348,12 @@ export class MainGameScreenView implements View {
     this.group.getLayer()?.batchDraw();
   }
 
+  fillRightPanel(x: number, y: number, operation: string){
+    this.problemText.text(`x = ${x}\ny = ${y}\nx ${operation} y = ?`);
+    this.clearAnswer();
+    this.group.getLayer()?.batchDraw();
+  }
+
   setStepChecked(index: number, checked: boolean): void {
     this.stepsCheck[index]?.visible(checked);
     this.group.getLayer()?.batchDraw();
@@ -390,6 +429,9 @@ export class MainGameScreenView implements View {
         break;
       case "complete":
         this.activePopup = this.completePopup;
+        break;
+      case "fail":
+        this.activePopup = this.failPopup;
         break;
     }
   }
