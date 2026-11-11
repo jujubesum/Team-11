@@ -5,6 +5,7 @@ import { Button } from "../../components/Button.ts";
 import { TopBar } from "../../components/TopBar.ts";
 import { Popup, makePopup } from "../../components/popup.ts";
 import { TOPBAR_HEIGHT } from "../../constants.ts";
+import { HintPopup, makeHintPopup } from "../../components/hint.ts";
 
 // Spacing constants
 const MARGIN = 40;
@@ -81,6 +82,8 @@ export class MainGameScreenView implements View {
   private failPopup: Popup;
   private homePopup: Popup;
   private startPopup: Popup;
+  private hintPopup: HintPopup;
+  private guidePopup: HintPopup;
   private activePopup: Popup;
 
 
@@ -286,6 +289,21 @@ export class MainGameScreenView implements View {
       ]
     });
     this.group.add(this.startPopup.getGroup());
+
+    // Hint popup
+    this.hintPopup = makeHintPopup({
+      hint:"", 
+      onDone: () => this.hideHint(),
+    });
+    this.group.add(this.hintPopup.getGroup());
+
+    // Guide popup
+    this.guidePopup = makeHintPopup({
+      hint: "Fulfill customer orders to earn profits! Keep in mind you have a limited number of attempts per question!",
+      title: "Baking guide",
+      onDone: () => this.hideGuide(),
+    });
+    this.group.add(this.guidePopup.getGroup());
   }
 
   private makePanel(width: number, height: number, x: number, y: number): Konva.Group {
@@ -428,6 +446,27 @@ export class MainGameScreenView implements View {
     else {
       this.input.blur();
     }
+  }
+
+  showHint(text: string): void {
+    this.setInputEnabled(false);
+    this.hintPopup.setHint(text);
+    this.hintPopup.show();
+  } 
+
+  hideHint(): void {
+    this.hintPopup.hide();
+    this.setInputEnabled(true);
+  }
+
+  showGuide(): void {
+    this.setInputEnabled(false);
+    this.guidePopup.show();
+  }
+
+  hideGuide(): void {
+    this.setInputEnabled(true);
+    this.guidePopup.hide();
   }
 
   showPopup(): void {

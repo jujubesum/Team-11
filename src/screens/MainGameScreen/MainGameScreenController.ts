@@ -40,7 +40,7 @@ export class MainGameScreenController extends ScreenController {
   // HANDLERS
 
   handleHelp(): void { 
-
+    this.view.showGuide();
   }
 
   handleHome(): void {
@@ -89,7 +89,10 @@ export class MainGameScreenController extends ScreenController {
 
   handleHint(): void {
     this.view.hidePopup();
-    // TODO: When hint screen is ready, call to show it
+    // TODO: Call model and get absolute different of input from correct answer
+    const diff = 44;
+    const hint = `You were ${diff} off from the correct answer!`;
+    this.view.showHint(hint);
   }
 
   handleNextOrder(): void {

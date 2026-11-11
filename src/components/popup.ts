@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../constants";
-import { addPointerCursor } from "./CircleButton";
+import { makeBackdrop, makeRoundedButton } from "./overlay";
 import { title } from "node:process";
 
 const DARKGRAY = "#888888"
@@ -30,19 +30,19 @@ export function makePopup({ message, details, buttons, width = STAGE_WIDTH * 0.6
   const BOX_HEIGHT = 200;
   const BUTTON_HEIGHT = 70;
   const GAP = 30;
-  const totalHeight = BOX_HEIGHT + GAP + BUTTON_HEIGHT;
-  const buttonWidth = (width - (buttons.length - 1) * GAP) / buttons.length;
+  const TOTAL_HEIGHT = BOX_HEIGHT + GAP + BUTTON_HEIGHT;
+  const BUTTON_WIDTH = (width - (buttons.length - 1) * GAP) / buttons.length;
   const TITLE_SIZE = 40;
   const DETAIL_SIZE = 26;
   const BOX_PADDING = 24;
 
   const group = new Konva.Group({ visible: false });
 
-  group.add(new Konva.Rect({ width: STAGE_WIDTH, height: STAGE_HEIGHT, fill: DARKGRAY, opacity: 0.7}))
+  group.add(makeBackdrop())
 
   const panel = new Konva.Group({
     x: (STAGE_WIDTH - width) / 2,
-    y: (STAGE_HEIGHT - totalHeight) / 2,
+    y: (STAGE_HEIGHT - TOTAL_HEIGHT) / 2,
   });
   group.add(panel);
 
@@ -74,19 +74,8 @@ export function makePopup({ message, details, buttons, width = STAGE_WIDTH * 0.6
   );
   layoutBox();
   buttons.forEach(({ label, onClick }, i) => {
-    const button = new Konva.Group({ x: i * (buttonWidth + GAP), y: BOX_HEIGHT + GAP});
-    button.add(
-      new Konva.Rect({
-        width: buttonWidth, height: BUTTON_HEIGHT, fill: LIGHTGRAY,
-        stroke: "black", strokeWidth: 2, cornerRadius: 20,
-      }),
-      new Konva.Text({
-        width: buttonWidth, height: BUTTON_HEIGHT, text: label, fontSize: 28,
-        align: "center", verticalAlign: "middle", listening: false,
-      }),
-    );
-    button.on("click tap", onClick);
-    addPointerCursor(button);
+    const button = makeRoundedButton(label, BUTTON_WIDTH, BUTTON_HEIGHT, onClick);
+    button.position({ x: i * (BUTTON_WIDTH + GAP), y: BOX_HEIGHT + GAP});
     panel.add(button);
   });
 
