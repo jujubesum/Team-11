@@ -155,7 +155,7 @@ export class MainGameScreenController extends ScreenController {
   }
 
   invalidInput(): void {
-
+    this.view.showWarning();
   }
 
   orderComplete(): void {

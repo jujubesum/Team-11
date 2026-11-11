@@ -84,6 +84,7 @@ export class MainGameScreenView implements View {
   private startPopup: Popup;
   private hintPopup: HintPopup;
   private guidePopup: HintPopup;
+  private warningPopup: HintPopup;
   private activePopup: Popup;
 
 
@@ -304,6 +305,14 @@ export class MainGameScreenView implements View {
       onDone: () => this.hideGuide(),
     });
     this.group.add(this.guidePopup.getGroup());
+
+    // Warning popup
+    this.warningPopup = makeHintPopup({
+      hint: "You entered an invalid input! Please enter a valid numerical value.",
+      title: "Warning",
+      onDone: () => this.hideWarning(),
+    }),
+    this.group.add(this.warningPopup.getGroup());
   }
 
   private makePanel(width: number, height: number, x: number, y: number): Konva.Group {
@@ -467,6 +476,16 @@ export class MainGameScreenView implements View {
   hideGuide(): void {
     this.setInputEnabled(true);
     this.guidePopup.hide();
+  }
+
+  showWarning(): void {
+    this.setInputEnabled(false);
+    this.warningPopup.show();
+  }
+
+  hideWarning(): void {
+    this.setInputEnabled(true);
+    this.warningPopup.hide();
   }
 
   showPopup(): void {
