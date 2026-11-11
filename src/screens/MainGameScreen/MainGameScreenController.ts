@@ -34,6 +34,8 @@ export class MainGameScreenController extends ScreenController {
       onReplay: () => this.handleReplay(),
       onRetry: () => this.handleRetry(),
       onHint: () => this.handleHint(),
+      onNextOrder: () => this.handleNextOrder(),
+      onSaveQuit: () => this.handleSaveQuit(),
     });
     this.updateRecipe(PLACEHOLDERCIPE); // remove when model is created and handles grabbing random order
   }
@@ -41,6 +43,8 @@ export class MainGameScreenController extends ScreenController {
   getView(): MainGameScreenView {
     return this.view;
   }
+
+  // HANDLERS
 
   handleHelp(): void { 
     // TODO: Create popup explaining summary of what is to be expected
@@ -65,8 +69,11 @@ export class MainGameScreenController extends ScreenController {
   handleSubmit(answer: string): void {
     // add logic to validate user input and handle if answer is correct/incorrect
     this.view.clearAnswer();
-    if (answer == "yes") {
+    if (answer == "yes") { //these cases are only for testing atm, to be deleted
       this.correctAnswer();
+    }
+    else if (answer == "complete"){
+      this.orderComplete();
     }
     else {
       this.incorrectAnswer();
@@ -83,6 +90,18 @@ export class MainGameScreenController extends ScreenController {
     // TODO: When hint screen is ready, call to show it
   }
 
+  handleNextOrder(): void {
+    // TODO: Get next order from model and call updateRecipe() with new order
+    this.view.hidePopup();
+  }
+
+  handleSaveQuit(): void {
+    // TODO: Get model to save current game state 
+    this.screenSwitcher.switchToScreen({ type: "home" });
+  }
+
+  // METHODS
+
   correctAnswer(): void {
     this.view.setActivePopup("congrats");
     this.view.showPopup();
@@ -95,6 +114,11 @@ export class MainGameScreenController extends ScreenController {
 
   orderComplete(): void {
     // TODO: Create order complete popup
+    // Get stats from model (questions answered, correct answers, earnings)
+    let placeholder = 44;
+    this.view.setOrderStats(placeholder, placeholder, placeholder);
+    this.view.setActivePopup("complete");
+    this.view.showPopup();
   }
 
   updateRecipe(recipe: Recipe): void {

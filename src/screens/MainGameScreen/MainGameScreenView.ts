@@ -50,6 +50,8 @@ export interface MainGameScreenHandlers {
   onReplay: () => void;
   onRetry: () => void;
   onHint: () => void;
+  onNextOrder: () => void;
+  onSaveQuit: () => void;
   onSubmit: (answer: string) => void;
 }
 
@@ -69,6 +71,7 @@ export class MainGameScreenView implements View {
   private submitButton: Konva.Group;
   private congratsPopup: Popup;
   private incorrectPopup: Popup;
+  private completePopup: Popup;
   private activePopup: Popup;
 
 
@@ -209,6 +212,7 @@ export class MainGameScreenView implements View {
     });
     this.group.add(this.congratsPopup.getGroup());
 
+    //Incorrect Answer popup
     this.incorrectPopup = makePopup({
       message: "Sorry that's incorrect :(",
       buttons: [
@@ -217,6 +221,17 @@ export class MainGameScreenView implements View {
       ],
     });
     this.group.add(this.incorrectPopup.getGroup());
+
+    // Order complete popup
+
+    this.completePopup = makePopup({
+      message: "You have completed the order!",
+      buttons: [
+        { label: "Next Order", onClick: () => handlers.onNextOrder() },
+        {label: "Save & Quit", onClick: () => handlers.SaveQuit()},
+      ],
+    });
+    this.group.add(this.completePopup.getGroup());
   }
 
   private makePanel(width: number, height: number, x: number, y: number): Konva.Group {
@@ -373,7 +388,17 @@ export class MainGameScreenView implements View {
       case "incorrect":
         this.activePopup = this.incorrectPopup;
         break;
+      case "complete":
+        this.activePopup = this.completePopup;
+        break;
     }
+  }
+
+  setOrderStats(questions: number, correctAnswers: number, earnings: number){
+    this.completePopup.setDetails([
+      `Your statistics: ${correctAnswers}/${questions} correct!`,
+      `$${earnings} made!`
+    ]);
   }
 
   getGroup(): Konva.Group {

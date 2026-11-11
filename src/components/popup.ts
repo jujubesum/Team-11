@@ -1,6 +1,7 @@
 import Konva from "konva";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../constants";
 import { addPointerCursor } from "./CircleButton";
+import { title } from "node:process";
 
 const DARKGRAY = "#888888"
 const LIGHTGRAY = "#F0EEEE"
@@ -12,6 +13,7 @@ export interface PopupButton {
 
 export interface PopupConfig {
   message: string;
+  details?: string[];
   buttons: PopupButton[];
   width?: number;
 }
@@ -21,14 +23,18 @@ export interface Popup {
   show(): void;
   hide(): void;
   setMessage(text: string): void;
+  setDetails(lines: string[]): void;
 }
 
-export function makePopup({ message, buttons, width = STAGE_WIDTH * 0.6}: PopupConfig): Popup{
+export function makePopup({ message, details, buttons, width = STAGE_WIDTH * 0.6}: PopupConfig): Popup{
   const BOX_HEIGHT = 200;
   const BUTTON_HEIGHT = 70;
   const GAP = 30;
   const totalHeight = BOX_HEIGHT + GAP + BUTTON_HEIGHT;
   const buttonWidth = (width - (buttons.length - 1) * GAP) / buttons.length;
+  const TITLE_SIZE = 40;
+  const DETAIL_SIZE = 26;
+  const BOX_PADDING = 24;
 
   const group = new Konva.Group({ visible: false });
 
@@ -40,21 +46,33 @@ export function makePopup({ message, buttons, width = STAGE_WIDTH * 0.6}: PopupC
   });
   group.add(panel);
 
-  const messageText = new Konva.Text({
-    width,
-    height: BOX_HEIGHT,
-    text: message,
-    fontSize: 40,
-    fill: "black",
-    align: "center",
-    verticalAlign: "middle",
-    listening: false,
+  const titleText = new Konva.Text({
+    x: 0, y: BOX_PADDING, width, text: message, fontSize: TITLE_SIZE,
+    fill: "black", align: "center", listening: false,
   });
+
+  const detailsText = new Konva.Text({
+    x: 0, width, text: (details ?? []).join("\n"), fontSize: DETAIL_SIZE, 
+    fill: "black", lineHeight: 1.4, align: "center", listening: false,
+  })
+
+  const layoutBox = () => {
+    const hasDetails = detailsText.text().length > 0;
+    detailsText.visible(hasDetails);
+    if (hasDetails) {
+      titleText.y(BOX_PADDING);
+      detailsText.y(BOX_PADDING + titleText.height() + 20);
+    }
+    else {
+      titleText.y((BOX_HEIGHT - titleText.height()) / 2);
+    }
+  }
+
   panel.add(
     new Konva.Rect({ width, height: BOX_HEIGHT, fill: "white", stroke: "black", strokeWidth: 2, cornerRadius: 24}),
-    messageText,
+    titleText, detailsText,
   );
-
+  layoutBox();
   buttons.forEach(({ label, onClick }, i) => {
     const button = new Konva.Group({ x: i * (buttonWidth + GAP), y: BOX_HEIGHT + GAP});
     button.add(
@@ -78,6 +96,7 @@ export function makePopup({ message, buttons, width = STAGE_WIDTH * 0.6}: PopupC
     getGroup: () => group,
     show() { group.moveToTop(); group.show(); redraw(); },
     hide() { group.hide(); redraw();},
-    setMessage(text) { messageText.text(text); redraw();}
+    setMessage(text) { titleText.text(text); layoutBox(); redraw();},
+    setDetails(lines){ detailsText.text(lines.join("\n")); layoutBox(); redraw();}
   }
 }
