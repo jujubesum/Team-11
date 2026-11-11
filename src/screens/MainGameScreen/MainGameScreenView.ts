@@ -80,6 +80,7 @@ export class MainGameScreenView implements View {
   private completePopup: Popup;
   private failPopup: Popup;
   private homePopup: Popup;
+  private startPopup: Popup;
   private activePopup: Popup;
 
 
@@ -214,7 +215,7 @@ export class MainGameScreenView implements View {
       x: PADDING, y: PROBLEM_Y,
       width: PANEL_WIDTH - 2 * PADDING,
       height: ANSWER_Y - PROBLEM_Y - 20,
-      text:"Test",
+      text:"",
       fontSize: 36,
       lineHeight: 1.6,
       fill: "black",
@@ -247,7 +248,6 @@ export class MainGameScreenView implements View {
     this.group.add(this.incorrectPopup.getGroup());
 
     // Order complete popup
-
     this.completePopup = makePopup({
       message: "You have completed the order!",
       buttons: [
@@ -258,7 +258,6 @@ export class MainGameScreenView implements View {
     this.group.add(this.completePopup.getGroup());
 
     // Fail popup
-
     this.failPopup = makePopup({
       message: "You have run out of attempts ;-;",
       buttons: [
@@ -269,7 +268,6 @@ export class MainGameScreenView implements View {
     this.group.add(this.failPopup.getGroup())
 
     // Home popup
-
     this.homePopup = makePopup({
       message: "Are you sure you would like to return to home?",
       buttons: [
@@ -278,6 +276,16 @@ export class MainGameScreenView implements View {
       ],
     });
     this.group.add(this.homePopup.getGroup());
+
+    // Start popup
+    this.startPopup = makePopup({
+      message: "There is no order you are fulfilling, would you like to take a new one?",
+      buttons: [
+        { label: "Start new order", onClick: () => handlers.onNextOrder()},
+        { label: "Return to home", onClick: () => handlers.onSaveQuit()},
+      ]
+    });
+    this.group.add(this.startPopup.getGroup());
   }
 
   private makePanel(width: number, height: number, x: number, y: number): Konva.Group {
@@ -448,6 +456,9 @@ export class MainGameScreenView implements View {
         break;
       case "home":
         this.activePopup = this.homePopup;
+        break;
+      case "start":
+        this.activePopup = this.startPopup;
         break;
     }
   }

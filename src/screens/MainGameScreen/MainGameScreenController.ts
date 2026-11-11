@@ -24,13 +24,18 @@ export class MainGameScreenController extends ScreenController {
       onReroll: () => this.handleReroll(),
       onFailQuit: () => this.handleFailQuit(),
     });
-    this.updateRecipe(); 
-    this.updateProblem();
+    this.onStart();
   }
 
   getView(): MainGameScreenView {
     return this.view;
   }
+
+  // OVERLOADED SHOW()
+  show(): void {
+    this.onStart();
+		this.getView().show();
+	}
 
   // HANDLERS
 
@@ -72,13 +77,14 @@ export class MainGameScreenController extends ScreenController {
   }
 
   handleReroll(): void {
-    // TODO: Call model to generate a new problem of the same type and save the order state
+    // TODO: Call model to generate a new problem of the same type
+    this.updateProblem();
     this.view.hidePopup();
   }
 
   handleFailQuit(): void {
     this.handleReroll(); //gets a new problem ready and hides the popup for switching screens
-    this.screenSwitcher.switchToScreen({ type: "home" })
+    this.handleSaveQuit();
   }
 
   handleHint(): void {
@@ -88,7 +94,7 @@ export class MainGameScreenController extends ScreenController {
 
   handleNextOrder(): void {
     // TODO: Call model to get next order/recipe to make
-    this.updateRecipe();
+    this.nextOrder();
     this.view.hidePopup();
   }
 
@@ -99,6 +105,15 @@ export class MainGameScreenController extends ScreenController {
   }
 
   // METHODS
+
+  onStart() {
+    // TODO: Call model to check if an order exists in save (at the moment it should popup on each screen switch to game)
+    const save = false;
+    if (!save){
+      this.view.setActivePopup("start");
+      this.view.showPopup();
+    }
+  }
 
   validateAnswer(input: string): boolean {
     if (!input || input.trim() === ""){
@@ -141,12 +156,18 @@ export class MainGameScreenController extends ScreenController {
   }
 
   orderComplete(): void {
-    // TODO: Create order complete popup
-    // Get stats from model (questions answered, correct answers, earnings)
+    // TODO: Get stats from model and replace placeholder (questions answered, correct answers, earnings)
     let placeholder = 44;
     this.view.setOrderStats(placeholder, placeholder, placeholder);
     this.view.setActivePopup("complete");
     this.view.showPopup();
+  }
+
+  nextOrder(): void {
+    // TODO: Ask model to generate new order and starting question for that order
+    this.updateProblem();
+    this.updateRecipe();
+    this.updateProgress();
   }
 
   updateRecipe(): void {
@@ -168,8 +189,8 @@ export class MainGameScreenController extends ScreenController {
   }
 
   updateProgress(): void {
-    const steps = 4; // replace with a call to model asking how many steps are in the current recipe
-    const stepsCompleted = 0; // replace with a call to model asking how many steps have been completed
+    const steps = 4; // TODO: replace with a call to model asking how many steps are in the current recipe
+    const stepsCompleted = 0; // TODO: replace with a call to model asking how many steps have been completed
     for (let i = 0; i < stepsCompleted; i++){
       this.view.setStepChecked(i, true);
     }
