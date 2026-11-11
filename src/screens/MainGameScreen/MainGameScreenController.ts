@@ -3,31 +3,14 @@ import type { ScreenSwitcher } from "../../types";
 import type { SaveManager } from "../../saveManager";
 import { MainGameScreenView } from "./MainGameScreenView";
 import { HomeScreenController } from "../HomeScreen/HomeScreenController";
-import type { Recipe } from "../../recipeManager";
-
-export type Operation = "+" | "-" | "×" | "÷";
-
-interface Question {
-  //left side number
-  left: number;
-  //right side number
-  right: number;
-  operation: Operation;
-  answer: number;
-  //question for player, ex: 2 + 3 = ?
-  prompt: string;
-}
-
 
 export class MainGameScreenController extends ScreenController {
   private view: MainGameScreenView;
   private screenSwitcher: ScreenSwitcher;
-  private saveManager: SaveManager;
 
   constructor(screenSwitcher: ScreenSwitcher, saveManager: SaveManager){
     super();
     this.screenSwitcher = screenSwitcher;
-    this.saveManager = saveManager;
     this.view = new MainGameScreenView({
       onHelp: () => this.handleHelp(),
       onSubmit: (answer: string) => this.handleSubmit(answer),
@@ -42,7 +25,7 @@ export class MainGameScreenController extends ScreenController {
       onFailQuit: () => this.handleFailQuit(),
     });
     this.updateRecipe(); 
-    this.updateProblem()
+    this.updateProblem();
   }
 
   getView(): MainGameScreenView {
@@ -56,9 +39,8 @@ export class MainGameScreenController extends ScreenController {
   }
 
   handleHome(): void {
-    // for now take user back to home screen
-    // TODO: Create popup and display "Are you sure?" popup
-    this.screenSwitcher.switchToScreen({ type: "home" });
+    this.view.setActivePopup("home");
+    this.view.showPopup();
   }
 
   handleNext(): void {
@@ -90,13 +72,12 @@ export class MainGameScreenController extends ScreenController {
   }
 
   handleReroll(): void {
-    // TODO: Call model to generate a new problem of the same type
+    // TODO: Call model to generate a new problem of the same type and save the order state
     this.view.hidePopup();
   }
 
   handleFailQuit(): void {
-    // TODO: Call model to save current game state AND reroll problem (so upon user re-entering they have a new problem ready)
-    this.view.hidePopup();
+    this.handleReroll(); //gets a new problem ready and hides the popup for switching screens
     this.screenSwitcher.switchToScreen({ type: "home" })
   }
 
@@ -106,7 +87,8 @@ export class MainGameScreenController extends ScreenController {
   }
 
   handleNextOrder(): void {
-    // TODO: Get next order from model and call updateRecipe() with new order
+    // TODO: Call model to get next order/recipe to make
+    this.updateRecipe();
     this.view.hidePopup();
   }
 
@@ -120,15 +102,20 @@ export class MainGameScreenController extends ScreenController {
 
   validateAnswer(input: string): boolean {
     if (!input || input.trim() === ""){
+      this.invalidInput();
       return false;
     }
     const num = Number(input);
     if (Number.isNaN(num)) {
       this.invalidInput();
-      return false; // Validating input is a valid number
+      return false; // Input could not be cleanly converted to a number
     }
 
     // TODO: Call model to check if num is the correct answer 
+    const correct = false;
+    if (correct) return true;
+
+    this.incorrectAnswer(); // if this is reached, the answer was valid but incorrect
     return false;
   }
 
@@ -138,7 +125,7 @@ export class MainGameScreenController extends ScreenController {
   }
 
   incorrectAnswer(): void {
-    // TODO: Call model and see if this is users last attempt
+    // TODO: Call model and see if this was users last attempt
     const fail = false;
     if (fail){
       this.view.setActivePopup("fail");

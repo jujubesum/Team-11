@@ -79,6 +79,7 @@ export class MainGameScreenView implements View {
   private incorrectPopup: Popup;
   private completePopup: Popup;
   private failPopup: Popup;
+  private homePopup: Popup;
   private activePopup: Popup;
 
 
@@ -265,6 +266,18 @@ export class MainGameScreenView implements View {
         { label: "Save & Quit", onClick: () => handlers.onFailQuit() },
       ],
     });
+    this.group.add(this.failPopup.getGroup())
+
+    // Home popup
+
+    this.homePopup = makePopup({
+      message: "Are you sure you would like to return to home?",
+      buttons: [
+        { label: "Return to game", onClick: () => this.hidePopup()},
+        { label: "Save & Quit", onClick: () => handlers.onSaveQuit()},
+      ],
+    });
+    this.group.add(this.homePopup.getGroup());
   }
 
   private makePanel(width: number, height: number, x: number, y: number): Konva.Group {
@@ -432,6 +445,9 @@ export class MainGameScreenView implements View {
         break;
       case "fail":
         this.activePopup = this.failPopup;
+        break;
+      case "home":
+        this.activePopup = this.homePopup;
         break;
     }
   }
