@@ -2,15 +2,18 @@ import { ScreenController } from "../../types";
 import type { ScreenSwitcher } from "../../types";
 import type { SaveManager } from "../../saveManager";
 import { MainGameScreenView } from "./MainGameScreenView";
+import { MainGameScreenModel } from "./MainGameScreenModel";
 import { HomeScreenController } from "../HomeScreen/HomeScreenController";
 
 export class MainGameScreenController extends ScreenController {
+  private model: MainGameScreenModel;
   private view: MainGameScreenView;
   private screenSwitcher: ScreenSwitcher;
 
   constructor(screenSwitcher: ScreenSwitcher, saveManager: SaveManager){
     super();
     this.screenSwitcher = screenSwitcher;
+    this.model = new MainGameScreenModel(saveManager);
     this.view = new MainGameScreenView({
       onHelp: () => this.handleHelp(),
       onSubmit: (answer: string) => this.handleSubmit(answer),
@@ -49,14 +52,14 @@ export class MainGameScreenController extends ScreenController {
   }
 
   handleNext(): void {
-    // TODO: Call model & cycle to next question
+    this.model.advanceProblem();
     this.updateProblem();
+    this.updateProgress();
     this.view.hidePopup();
-
   }
 
   handleReplay(): void {
-    // TODO: Call model to reset attempt count back to full
+    this.model.replayProblem();
     this.view.hidePopup();
   }
 
@@ -72,37 +75,35 @@ export class MainGameScreenController extends ScreenController {
   }
 
   handleRetry(): void {
-    // TODO: Call model to decrement number of attempts by 1
+    this.model.decrementAttempts();
     this.view.hidePopup();
   }
 
   handleReroll(): void {
-    // TODO: Call model to generate a new problem of the same type
+    this.model.retryProblem();
     this.updateProblem();
     this.view.hidePopup();
   }
 
   handleFailQuit(): void {
-    this.handleReroll(); //gets a new problem ready and hides the popup for switching screens
+    this.handleReroll(); //gets a new problem ready and hides the popup
     this.handleSaveQuit();
   }
 
   handleHint(): void {
     this.view.hidePopup();
-    // TODO: Call model and get absolute different of input from correct answer
-    const diff = 44;
+    const diff = this.model.getHint();
     const hint = `You were ${diff} off from the correct answer!`;
     this.view.showHint(hint);
   }
 
   handleNextOrder(): void {
-    // TODO: Call model to get next order/recipe to make
     this.nextOrder();
     this.view.hidePopup();
   }
 
   handleSaveQuit(): void {
-    // TODO: Get model to save current game state 
+    this.model.save(); 
     this.view.hidePopup();
     this.screenSwitcher.switchToScreen({ type: "home" });
   }
@@ -110,8 +111,7 @@ export class MainGameScreenController extends ScreenController {
   // METHODS
 
   onStart() {
-    // TODO: Call model to check if an order exists in save (at the moment it should popup on each screen switch to game)
-    const save = false;
+    const save = this.model.isOrderTaken();
     if (!save){
       this.view.setActivePopup("start");
       this.view.showPopup();
@@ -128,9 +128,7 @@ export class MainGameScreenController extends ScreenController {
       this.invalidInput();
       return false; // Input could not be cleanly converted to a number
     }
-
-    // TODO: Call model to check if num is the correct answer 
-    const correct = false;
+    const correct = this.model.checkAnswer(num);
     if (correct) return true;
 
     this.incorrectAnswer(); // if this is reached, the answer was valid but incorrect
@@ -143,8 +141,7 @@ export class MainGameScreenController extends ScreenController {
   }
 
   incorrectAnswer(): void {
-    // TODO: Call model and see if this was users last attempt
-    const fail = false;
+    const fail = this.model.isOrderFailed();
     if (fail){
       this.view.setActivePopup("fail");
     }
@@ -159,32 +156,22 @@ export class MainGameScreenController extends ScreenController {
   }
 
   orderComplete(): void {
-    // TODO: Get stats from model and replace placeholder (questions answered, correct answers, earnings)
-    let placeholder = 44;
-    this.view.setOrderStats(placeholder, placeholder, placeholder);
+    const stats = this.model.getStats();
+    this.view.setOrderStats(stats.qAnswered, stats.qCorrect, stats.earnings);
     this.view.setActivePopup("complete");
     this.view.showPopup();
+    this.model.resetOrder();
   }
 
   nextOrder(): void {
-    // TODO: Ask model to generate new order and starting question for that order
+    this.model.advanceOrder();
     this.updateProblem();
     this.updateRecipe();
     this.updateProgress();
   }
 
   updateRecipe(): void {
-    const recipe = { 
-    id: 'recipe_01',
-    name: 'Cookies',
-    mathOperations: ['addition'],
-    steps: [
-      'Add flour, sugar, eggs, and butter',
-      'Stir until smooth',
-      'Bake in oven',
-      'Decorate with sprinkles'
-    ],
-  }; // TODO: Replace with call to model for current recipe
+    const recipe = this.model.getCurrentRecipe();
     this.view.updateTitle(recipe.name);
     this.view.fillLeftPanel(recipe.steps);
     this.view.setProgress(0, recipe.steps.length);
@@ -192,28 +179,25 @@ export class MainGameScreenController extends ScreenController {
   }
 
   updateProgress(): void {
-    const steps = 4; // TODO: replace with a call to model asking how many steps are in the current recipe
-    const stepsCompleted = 0; // TODO: replace with a call to model asking how many steps have been completed
-    for (let i = 0; i < stepsCompleted; i++){
+    const steps = this.model.getProgress();
+    const stepsTotal = steps.total; 
+    const stepsDone = steps.done; 
+    for (let i = 0; i < stepsDone; i++){
       this.view.setStepChecked(i, true);
     }
-    this.view.setProgress(stepsCompleted, steps);
+    this.view.setProgress(stepsDone, stepsTotal);
   }
 
   updateProblem(): void {
-    //TODO: Call model and retrieve question, then use retrieved info to call fillRightPanel()
-    const x = 10;
-    const y = 14;
-    const operation = "*"; // PLACEHOLDERS
+    const problem = this.model.getProblem()
+    const x = problem.x;
+    const y = problem.y;
+    const operation = problem.operation;
     this.view.fillRightPanel(x, y, operation);
   }
 
-  // MODEL CALLS
-
   retrieveOrderStatus(): boolean {
-    //TODO: Call model to retrieve order status, if order is complete, return true
-
-    return false;
+    return this.model.isOrderComplete();
   }
 
 
