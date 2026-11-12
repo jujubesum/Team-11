@@ -9,6 +9,7 @@ export interface GameStats {
   earnings: number;
 }
 
+// These methods are called by the controller! Any not methods not within this API can be removed as long as things still function without them
 export interface MainGameModelApi {
   checkAnswer(answer: number): boolean;
   advanceProblem(): void;
@@ -27,6 +28,7 @@ export interface MainGameModelApi {
 }
 
 export class MainGameScreenModel implements MainGameModelApi {
+  // Add/remove instance vars as necessary!
   private saveManager: SaveManager;
   private currentRecipe: Recipe | undefined;
   private currentStep: number;
@@ -34,7 +36,6 @@ export class MainGameScreenModel implements MainGameModelApi {
   private gameStats: GameStats;
 
   constructor(saveManager: SaveManager){
-    // Add/remove instance vars as necessary!
     this.saveManager = saveManager;
     this.currentRecipe = undefined;
     this.currentStep = 0;

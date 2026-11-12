@@ -85,7 +85,7 @@ export class MainGameScreenView implements View {
   private hintPopup: HintPopup;
   private guidePopup: HintPopup;
   private warningPopup: HintPopup;
-  private activePopup: Popup;
+  private activePopup: Popup | undefined;
 
 
   constructor(handlers: MainGameScreenHandlers){
