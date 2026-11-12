@@ -15,9 +15,9 @@ const HOME_BUTTON_LABELS = [
 	"Save & Exit",
 ];
  
-const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter(
-	(label) => label !== "Save & Exit" && label !== "Shop",
-);
+
+const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Save & Exit" && label !== "Minigame: Change Counting" && label !== "Shop");
+
  
 describe("HomeScreenController", () => {
 	let screenSwitcher: ScreenSwitcher;
@@ -36,7 +36,7 @@ describe("HomeScreenController", () => {
 		const root = controller.getView().getGroup();
  
 		for (const label of HOME_BUTTON_LABELS) {
-			expect(hasVisibleText(root, label), ).toBe(true);
+			expect(hasVisibleText(root, label)).toBe(true);
 		}
 	});
  
@@ -55,6 +55,19 @@ describe("HomeScreenController", () => {
 
 		expect(new SaveManager().load()!.level).toBe(4);
 	});
+	it("navigates to cashierGame when Change Counting is clicked", () => {
+		clickButton(
+			controller.getView().getGroup(),
+			"Minigame: Change Counting"
+		);
+
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({
+			type: "cashierGame",
+		});
+	});
+	
 
 	it("goes to the shop when Shop is clicked", () => {
 		clickButton(controller.getView().getGroup(), "Shop");

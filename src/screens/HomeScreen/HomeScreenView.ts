@@ -8,6 +8,7 @@ export interface HomeScreenHandlers {
 	onSaveExit: () => void;
 	onShop: () => void;
 	onRecipeTutorials?: () => void;
+	onCashierGame?: () => void;
 }
 
 // Layout as fractions of the stage for future scalability (5 rows).
@@ -40,7 +41,7 @@ export class HomeScreenView implements View {
 
 		this.addButton("Start Baking!", leftX, rowY(0), FULL_WIDTH);
 
-		this.addButton("Minigame: Change Counting", leftX, rowY(1), COL_WIDTH);
+		this.addButton("Minigame: Change Counting", leftX, rowY(1), COL_WIDTH, handlers.onCashierGame,);
 		this.addButton("Math Tutorials", rightX, rowY(1), COL_WIDTH);
 
 		this.addButton("Minigame: Order Dividing", leftX, rowY(2), COL_WIDTH);
