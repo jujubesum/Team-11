@@ -12,6 +12,8 @@ export type Screen =
 	| { type: "title" }
 	| { type: "home" }
 	| { type: "game" }
+	| { type: "newGameCheck" }
+	| { type: "shop" }
 	| { type: "gameTutorial" }
 	| { type: "newGameCheck" }
 	| { type: "recipeTutorial" }

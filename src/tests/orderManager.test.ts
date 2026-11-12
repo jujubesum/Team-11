@@ -1,4 +1,6 @@
-import { OrderManager, GameState } from '../orderManager';
+import { OrderManager } from '../orderManager';
+import { SaveManager } from '../saveManager';
+import { RECIPES } from '../recipeManager';
 
 const localStorageMock = (function () {
     let store: Record<string, string> = {};
@@ -18,36 +20,15 @@ Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 
 describe('OrderManager', () => {
     let orderManager: OrderManager;
+    let saveManager: SaveManager;
+    const unlockedIds = RECIPES.slice(0, 3).map((recipe) => recipe.id);
 
     beforeEach(() => {
         localStorage.clear();
-        orderManager = new OrderManager();
-
-        const mockState: GameState = {
-            unlockedRecipes: [
-                { id: 'recipe_01', name: 'Cookies', mathOperations: ['addition'], steps: [
-                    'Add flour, sugar, eggs, and butter',
-                    'Stir until smooth',
-                    'Bake in oven',
-                    'Decorate with sprinkles'] 
-                },
-                { id: 'recipe_02', name: 'Jello', mathOperations: ['subtraction'], steps: [
-                    'Subtract the water',
-                    'Stir until the powder dissolves',
-                    'Let it refrigerate',
-                    'Remove the Jello from the mold']
-                },
-                { id: 'recipe_03', name: 'Cupcakes', mathOperations: ['multiplication'], steps: [
-                    'Multiply how much flour, sugar, eggs, and butter is needed for 6 cupcakes',
-                    'Stir until smooth',
-                    'Pour the batter and bake',
-                    'Decorate with the right amount of frosting for 6 cupcakes']
-                },
-            ],
-            currentOrder: null,
-            completedOrders: 0
-        };
-        localStorage.setItem('bakeryGameState', JSON.stringify(mockState));
+        saveManager = new SaveManager();
+        saveManager.startNewGame();
+        saveManager.update({ unlockedRecipeIds: unlockedIds });
+        orderManager = new OrderManager(saveManager);
     });
 
     // Test randomizer works as intended
@@ -55,18 +36,13 @@ describe('OrderManager', () => {
         const nextOrder = orderManager.generateRandomOrder();
 
         expect(nextOrder).not.toBeNull();
-        expect(['recipe_01', 'recipe_02', 'recipe_03']).toContain(nextOrder!.id);
+        expect(unlockedIds).toContain(nextOrder!.id);
 
-        const savedState: GameState = JSON.parse(localStorage.getItem('bakeryGameState')!);
-        expect(savedState.currentOrder?.id).toBe(nextOrder!.id);
+        expect(saveManager.getCurrent()!.currentOrderId).toBe(nextOrder!.id);
     });
 
     test('generateRandomOrder returns null if no recipes are unlocked', () => {
-        localStorage.setItem('bakeryGameState', JSON.stringify({
-            unlockedRecipes: [],
-            currentOrder: null,
-            completedOrders: 0
-        }));
+        saveManager.update({ unlockedRecipeIds: [] });
 
         const nextOrder = orderManager.generateRandomOrder();
         expect(nextOrder).toBeNull();
@@ -76,16 +52,13 @@ describe('OrderManager', () => {
     test('completeRecipeAndFetchNextOrder completes current order and fetches a new one', () => {
         orderManager.generateRandomOrder();
 
-        const initialSavedState: GameState = JSON.parse(localStorage.getItem('bakeryGameState')!);
-        const initialCompletedCount = initialSavedState.completedOrders;
+        const initialCompletedCount = saveManager.getCurrent()!.completedOrders;
 
         const newOrder = orderManager.completeRecipeAndFetchNextOrder();
 
-        const finalSavedState: GameState = JSON.parse(localStorage.getItem('bakeryGameState')!);
-
         // Assertions
-        expect(finalSavedState.completedOrders).toBe(initialCompletedCount + 1);
+        expect(saveManager.getCurrent()!.completedOrders).toBe(initialCompletedCount + 1);
         expect(newOrder).not.toBeNull();
-        expect(finalSavedState.currentOrder?.id).toBe(newOrder!.id);
+        expect(saveManager.getCurrent()!.currentOrderId).toBe(newOrder!.id);
     });
 });
