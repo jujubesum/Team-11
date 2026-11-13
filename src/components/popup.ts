@@ -38,7 +38,7 @@ export function makePopup({ message, details, buttons, width = STAGE_WIDTH * 0.6
 
   const group = new Konva.Group({ visible: false });
 
-  group.add(makeBackdrop())
+  group.add(makeBackdrop());
 
   const panel = new Konva.Group({
     x: (STAGE_WIDTH - width) / 2,
@@ -54,7 +54,7 @@ export function makePopup({ message, details, buttons, width = STAGE_WIDTH * 0.6
   const detailsText = new Konva.Text({
     x: 0, width, text: (details ?? []).join("\n"), fontSize: DETAIL_SIZE, 
     fill: "black", lineHeight: 1.4, align: "center", listening: false,
-  })
+  });
 
   const layoutBox = () => {
     const hasDetails = detailsText.text().length > 0;

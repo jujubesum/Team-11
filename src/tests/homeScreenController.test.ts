@@ -92,5 +92,12 @@ describe("HomeScreenController", () => {
 		freshController.getView().hide();
 		expect(group.visible()).toBe(false);
 	});
+
+  it("goes to main game when 'Start baking' is cliked", () => {
+    clickButton(controller.getView().getGroup(), "Start Baking!");
+
+    expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+    expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "mainGame" });
+  });
 });
  
