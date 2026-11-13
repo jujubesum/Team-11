@@ -1,5 +1,10 @@
 import { RECIPES, type Recipe } from "./recipeManager";
-import { isMathOperation, type MathOperation } from "./mathTutorials";
+import {
+    getMathTutorial,
+    isMathOperation,
+    type MathOperation,
+    type MathTutorial
+} from "./mathTutorials";
 
 export type RecipeId =
     | "recipe_01"
@@ -16,7 +21,7 @@ export const RECIPE_IDS = [
     "recipe_05"
 ] as const;
 
-export interface PracticeProblem {
+export interface PracticeProblem extends MathTutorial {
     question: string;
     operation: MathOperation;
     answer: number;
@@ -30,58 +35,21 @@ export interface RecipeTutorial {
     practiceProblems: PracticeProblem[];
 }
 
-const PRACTICE_PROBLEMS_BY_RECIPE: Record<RecipeId, PracticeProblem[]> = {
-    recipe_01: [
-        {
-            question: "Add 2 cups of flour and 3 cups of sugar. What is 2 + 3?",
-            operation: "addition",
-            answer: 5
-        }
-    ],
-    recipe_02: [
-        {
-            question: "Start with 8 cups of water and subtract 3 cups. What is 8 - 3?",
-            operation: "subtraction",
-            answer: 5
-        }
-    ],
-    recipe_03: [
-        {
-            question: "Each cupcake needs 2 eggs per batch for 6 batches. What is 2 × 6?",
-            operation: "multiplication",
-            answer: 12
-        }
-    ],
-    recipe_04: [
-        {
-            question: "Cut 12 apple slices equally for 4 pies. What is 12 ÷ 4?",
-            operation: "division",
-            answer: 3
-        }
-    ],
-    recipe_05: [
-        {
-            question: "Add 4 cups of flour and 2 cups of sugar. What is 4 + 2?",
-            operation: "addition",
-            answer: 6
-        },
-        {
-            question: "Take 6 eggs and subtract 2. What is 6 - 2?",
-            operation: "subtraction",
-            answer: 4
-        },
-        {
-            question: "Multiply 3 layers of frosting by 2 cups each. What is 3 × 2?",
-            operation: "multiplication",
-            answer: 6
-        },
-        {
-            question: "Divide 8 cake slices among 4 plates. What is 8 ÷ 4?",
-            operation: "division",
-            answer: 2
-        }
-    ]
-};
+function extractAnswerFromSteps(steps: string[]): number {
+    const lastStep = steps[steps.length - 1] ?? "";
+    const numberMatch = lastStep.match(/\d+/);
+    return numberMatch ? Number(numberMatch[0]) : 0;
+}
+
+export function buildPracticeProblem(operation: MathOperation): PracticeProblem {
+    const tutorial = getMathTutorial(operation);
+    return {
+        ...tutorial,
+        question: tutorial.steps[0] ?? tutorial.title,
+        operation,
+        answer: extractAnswerFromSteps(tutorial.steps)
+    };
+}
 
 function buildRecipeTutorial(recipe: Recipe): RecipeTutorial {
     const id = recipe.id as RecipeId;
@@ -92,7 +60,7 @@ function buildRecipeTutorial(recipe: Recipe): RecipeTutorial {
         title: recipe.name,
         mathOperations,
         steps: [...recipe.steps],
-        practiceProblems: PRACTICE_PROBLEMS_BY_RECIPE[id] ?? []
+        practiceProblems: mathOperations.map(buildPracticeProblem)
     };
 }
 
