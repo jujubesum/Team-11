@@ -9,13 +9,14 @@ const HOME_BUTTON_LABELS = [
 	"Start Baking!",
 	"Minigame: Change Counting",
 	"Math Tutorials",
-	"Minigame: Order Dividing",
+	"Minigame: Pie Fractions",
 	"Recipe Book",
 	"Shop",
 	"Save & Exit",
 ];
- 
-const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Save & Exit");
+
+const WIRED_LABELS = ["Save & Exit", "Minigame: Pie Fractions"];
+const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => !WIRED_LABELS.includes(label));
  
 describe("HomeScreenController", () => {
 	let screenSwitcher: ScreenSwitcher;
@@ -43,6 +44,13 @@ describe("HomeScreenController", () => {
  
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "title" });
+	});
+
+	it("goes to the pie minigame when Minigame: Pie Fractions is clicked", () => {
+		clickButton(controller.getView().getGroup(), "Minigame: Pie Fractions");
+ 
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "pieMinigame" });
 	});
 
 	it("saves progress when Save & Exit is clicked", () => {
