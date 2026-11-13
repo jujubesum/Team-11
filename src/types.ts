@@ -17,6 +17,7 @@ export type Screen =
 	| { type: "gameTutorial" }
 	| { type: "newGameCheck" }
 	| { type: "recipeTutorial" }
+  | { type: "mainGame" }
 	| { type: "cashierGame" };
 
 export abstract class ScreenController {

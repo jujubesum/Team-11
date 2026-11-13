@@ -15,10 +15,9 @@ const HOME_BUTTON_LABELS = [
 	"Save & Exit",
 ];
  
+const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Save & Exit" && label !== "Minigame: Change Counting" && label !== "Shop" && label !== "Start Baking!");
 
-const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Save & Exit" && label !== "Minigame: Change Counting" && label !== "Shop");
 
- 
 describe("HomeScreenController", () => {
 	let screenSwitcher: ScreenSwitcher;
 	let controller: HomeScreenController;
@@ -93,5 +92,12 @@ describe("HomeScreenController", () => {
 		freshController.getView().hide();
 		expect(group.visible()).toBe(false);
 	});
+
+  it("goes to main game when 'Start baking' is cliked", () => {
+    clickButton(controller.getView().getGroup(), "Start Baking!");
+
+    expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+    expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "mainGame" });
+  });
 });
  
