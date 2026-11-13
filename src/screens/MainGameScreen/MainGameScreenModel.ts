@@ -10,7 +10,7 @@ export interface GameStats {
 }
 
 // These methods are called by the controller! Any not methods not within this API can be removed as long as things still function without them
-export interface MainGameModelApi {
+export interface MainGameScreenModelApi {
   checkAnswer(answer: number): boolean;
   advanceProblem(): void;
   retryProblem(): void;
@@ -25,9 +25,10 @@ export interface MainGameModelApi {
   getProgress(): { done: number; total: number };
   getProblem(): { x: number, y: number, operation: Operation };
   getHint(): number;
+  getStats(): { questionsAnswered: number, questionsCorrect: number , earnings: number };
 }
 
-export class MainGameScreenModel implements MainGameModelApi {
+export class MainGameScreenModel implements MainGameScreenModelApi {
   // Add/remove instance vars as necessary!
   private saveManager: SaveManager;
   private currentRecipe: Recipe | undefined;
@@ -206,8 +207,8 @@ export class MainGameScreenModel implements MainGameModelApi {
   /**
    * @returns GameStats object containing game statistics (questions answered/correct and earnings)
    */
-  getStats(): { qAnswered: number, qCorrect: number, earnings: number} {
-    return { qAnswered: 4, qCorrect: 4, earnings: 44};
+  getStats(): { questionsAnswered: number, questionsCorrect: number , earnings: number } {
+    return this.gameStats;
   }
 
   /**

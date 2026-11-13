@@ -15,8 +15,9 @@ const HOME_BUTTON_LABELS = [
 	"Save & Exit",
 ];
  
-const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Save & Exit");
- 
+const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Save & Exit" && label !== "Minigame: Change Counting" && label !== "Shop" && label !== "Start Baking!");
+
+
 describe("HomeScreenController", () => {
 	let screenSwitcher: ScreenSwitcher;
 	let controller: HomeScreenController;

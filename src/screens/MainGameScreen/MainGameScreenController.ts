@@ -1,20 +1,24 @@
 import { ScreenController } from "../../types";
 import type { ScreenSwitcher } from "../../types";
 import type { SaveManager } from "../../saveManager";
-import { MainGameScreenView } from "./MainGameScreenView";
+import { MainGameScreenHandlers, MainGameScreenView } from "./MainGameScreenView";
 import { MainGameScreenModel } from "./MainGameScreenModel";
-import { HomeScreenController } from "../HomeScreen/HomeScreenController";
+import type { MainGameScreenModelApi } from "./MainGameScreenModel";
 
 export class MainGameScreenController extends ScreenController {
-  private model: MainGameScreenModel;
+  private model: MainGameScreenModelApi;
   private view: MainGameScreenView;
   private screenSwitcher: ScreenSwitcher;
 
-  constructor(screenSwitcher: ScreenSwitcher, saveManager: SaveManager){
+  constructor(screenSwitcher: ScreenSwitcher, saveManager: SaveManager, 
+              model: MainGameScreenModelApi = new MainGameScreenModel(saveManager),
+              createView: (handlers: MainGameScreenHandlers) => MainGameScreenView =
+                (h) => new MainGameScreenView(h),
+              ){
     super();
     this.screenSwitcher = screenSwitcher;
-    this.model = new MainGameScreenModel(saveManager);
-    this.view = new MainGameScreenView({
+    this.model = model;
+    this.view = createView({
       onHelp: () => this.handleHelp(),
       onSubmit: (answer: string) => this.handleSubmit(answer),
       onHome: () => this.handleHome(),
@@ -94,7 +98,7 @@ export class MainGameScreenController extends ScreenController {
    * Called when the user presses the "retry" button upon submitting an incorrect answer
    */
   handleRetry(): void {
-    this.model.decrementAttempts();
+    this.model.retryProblem();
     this.view.hidePopup();
   }
 
@@ -126,7 +130,7 @@ export class MainGameScreenController extends ScreenController {
   }
 
   /**
-   * Called when the user presses the "Next Order" button on order completion
+   * Called when the user presses the "Next Order" button on order completion or "Start new order" on screen switch
    */
   handleNextOrder(): void {
     this.nextOrder();
@@ -217,7 +221,7 @@ export class MainGameScreenController extends ScreenController {
    */
   orderComplete(): void {
     const stats = this.model.getStats();
-    this.view.setOrderStats(stats.qAnswered, stats.qCorrect, stats.earnings);
+    this.view.setOrderStats(stats.questionsAnswered, stats.questionsCorrect, stats.earnings);
     this.view.setActivePopup("complete");
     this.view.showPopup();
     this.model.resetOrder();
@@ -241,7 +245,6 @@ export class MainGameScreenController extends ScreenController {
     const recipe = this.model.getCurrentRecipe();
     this.view.updateTitle(recipe.name);
     this.view.fillLeftPanel(recipe.steps);
-    this.view.setProgress(0, recipe.steps.length);
     this.view.clearAnswer();
   }
 
@@ -276,6 +279,4 @@ export class MainGameScreenController extends ScreenController {
   retrieveOrderStatus(): boolean {
     return this.model.isOrderComplete();
   }
-
-
 }

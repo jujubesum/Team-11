@@ -490,11 +490,11 @@ export class MainGameScreenView implements View {
 
   showPopup(): void {
     this.setInputEnabled(false);
-    this.activePopup.show();
+    this.activePopup?.show();
   }
 
   hidePopup(): void {
-    this.activePopup.hide();
+    this.activePopup?.hide();
     this.setInputEnabled(true);
   }
 
