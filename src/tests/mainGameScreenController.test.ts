@@ -58,6 +58,7 @@ describe("MainGameScreenController", () => {
       setStepChecked: jest.fn(), clearAnswer: jest.fn(), showPopup: jest.fn(),
       hidePopup: jest.fn(), setActivePopup: jest.fn(), showHint: jest.fn(),
       updateTitle: jest.fn(), showWarning: jest.fn(), setOrderStats: jest.fn(),
+      showGuide: jest.fn(),
     } as unknown as MainGameScreenView;
     screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
     model = makeFakeModel();
@@ -92,7 +93,16 @@ describe("MainGameScreenController", () => {
     controller.handleNextOrder();
     controller.handleSubmit("junktext");
 
+    expect(view.clearAnswer).toHaveBeenCalled();
     expect(view.showWarning).toHaveBeenCalledTimes(1);
+    expect(model.checkAnswer).not.toHaveBeenCalled();
+  });
+
+  it.each(["", "   ", "abc", "12abc"])("rejects invalid input %j", (input) => {
+    makeController();
+    handlers.onSubmit(input);
+    expect(view.showWarning).toHaveBeenCalledTimes(1);
+    expect(model.checkAnswer).not.toHaveBeenCalled();
   });
 
   it("displays incorrect answer popup when user enters a valid but incorrect input", () => {
@@ -131,5 +141,52 @@ describe("MainGameScreenController", () => {
     expect(model.checkAnswer).toHaveBeenCalledWith(0);
     expect(model.isOrderComplete).toHaveBeenCalled();
     expect(view.setActivePopup).toHaveBeenCalledWith("complete");
+  });
+
+  it("displays help popup when user presses help (question mark button)", () => {
+    const controller = makeController();
+    controller.handleNextOrder();
+
+    controller.handleHelp();
+    expect(view.showGuide).toHaveBeenCalledTimes(1);
+  });
+
+  it("advances to next problem and updates ui when user answers a question correctly and advances", () => {
+    const controller = makeController({ getProgress: jest.fn(() => ({ done: 1, total: 4 }))})
+    controller.handleNextOrder();
+
+    controller.handleNext();
+    expect(model.advanceProblem).toHaveBeenCalledTimes(1);
+    expect(view.setProgress).toHaveBeenCalledTimes(2);
+    expect(view.setStepChecked).toHaveBeenCalled();
+    expect(view.fillRightPanel).toHaveBeenCalledTimes(2);
+  });
+
+  it("replays question and doesn't advance question when user presses retry", () => {
+    const controller = makeController();
+    controller.handleNextOrder();
+
+    controller.handleReplay();
+    expect(model.advanceProblem).not.toHaveBeenCalled();
+  });
+
+  it("displays are you sure popup when user presses home button mid-game", () => {
+    const controller = makeController();
+    controller.handleNextOrder();
+
+    controller.handleHome();
+
+    expect(view.setActivePopup).toHaveBeenCalledWith("home");
+    expect(screenSwitcher.switchToScreen).not.toHaveBeenCalled();
+  });
+
+  it("rerolls and displays new question when user chooses to try again", () => {
+    const controller = makeController();
+    controller.handleNextOrder();
+
+    controller.handleReroll();
+
+    expect(model.advanceProblem).not.toHaveBeenCalled();
+    expect(view.fillRightPanel).toHaveBeenCalledTimes(2);
   });
 });

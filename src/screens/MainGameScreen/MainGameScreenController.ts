@@ -173,7 +173,7 @@ export class MainGameScreenController extends ScreenController {
       return false;
     }
     const num = Number(input);
-    if (Number.isNaN(num)) {
+    if (!Number.isFinite(num)) {
       this.invalidInput();
       return false; // Input could not be cleanly converted to a number
     }
