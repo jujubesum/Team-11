@@ -5,6 +5,7 @@ import { HomeScreenController } from "./screens/HomeScreen/HomeScreenController.
 import { GameTutorialController } from "./screens/game-tutorials/gameTutorialController.ts";
 import { NewGameCheckScreenController } from "./screens/NewGameCheckScreen/NewGameCheckScreenController.ts";
 import { RecipeTutorialController } from "./screens/RecipeTutorialScreen/RecipeTutorialController.ts";
+import { PieMinigameController } from "./screens/PieMinigame/PieMinigameController.ts";
 import { SaveManager } from "./saveManager.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
 
@@ -31,6 +32,7 @@ class App implements ScreenSwitcher {
 	private newGameCheckController: NewGameCheckScreenController;
 	private gameTutorialController: GameTutorialController;
 	private recipeTutorialController: RecipeTutorialController;
+	private pieMinigameController: PieMinigameController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -51,6 +53,7 @@ class App implements ScreenSwitcher {
 		this.newGameCheckController = new NewGameCheckScreenController(this, this.saveManager);
 		this.gameTutorialController = new GameTutorialController(this);
 		this.recipeTutorialController = new RecipeTutorialController(this);
+		this.pieMinigameController = new PieMinigameController(this);
 
 		// Add all screen groups to the layer
 		// All screens exist simultaneously but only one is visible at a time
@@ -59,6 +62,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.gameTutorialController.getView().getGroup());
 		this.layer.add(this.newGameCheckController.getView().getGroup());
 		this.layer.add(this.recipeTutorialController.getView().getGroup());
+		this.layer.add(this.pieMinigameController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
@@ -86,6 +90,7 @@ class App implements ScreenSwitcher {
 		this.gameTutorialController.hide();
 		this.newGameCheckController.hide();
 		this.recipeTutorialController.hide();
+		this.pieMinigameController.hide();
 		// this.resultsController.hide();
 
 		// Show the requested screen based on the screen type
@@ -110,6 +115,9 @@ class App implements ScreenSwitcher {
 				this.recipeTutorialController.show();
 				break;
 
+			case "pieMinigame":
+				this.pieMinigameController.show();
+				break;
 			// 	more cases to add in the future: games, tutorials, etc.
 		}
 	}
