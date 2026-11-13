@@ -12,7 +12,7 @@ const ICON_RADIUS = TOP_BAR_HEIGHT * 0.3;
 export interface TopBarConfig {
 	// Page name
 	title: string;
-	// For the home button, always directs to home screen
+	// For the home button, will be unique to the page. Ex. tutorials will bring you back to title, and games will check before exiting
 	onHome: () => void;
 	// For the help button, unique to every page
 	onHelp: () => void;
