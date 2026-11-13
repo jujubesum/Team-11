@@ -4,7 +4,7 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import type { ShopItem } from "../../ShopItems.ts";
 import { TopBar } from "../../components/TopBar.ts";
-import { makeCircleButton, addPointerCursor, setCursor } from "../../components/CircleButton.ts";
+import { makeCircleButton, addPointerCursor, setCursor, setArrowEnabled } from "../../components/CircleButton.ts";
 
 export interface ShopScreenHandlers {
 	onHome: () => void;
@@ -333,13 +333,6 @@ function cartSlot(i: number): { x: number; y: number } {
 		x: CART_ITEM_X + col * (CART_ITEM_WIDTH + CART_ITEM_GAP),
 		y: CART_ITEM_Y + row * (CART_ITEM_HEIGHT + CART_ITEM_GAP),
 	};
-}
-
-// Dimmed arrows means you cannot click it
-function setArrowEnabled(arrow: Konva.Group, enabled: boolean): void {
-	arrow.opacity(enabled ? 1 : 0.3);
-	arrow.listening(enabled);
-	if (!enabled) setCursor(arrow, "default");
 }
 
 // Preview

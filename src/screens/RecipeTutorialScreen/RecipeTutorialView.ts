@@ -4,11 +4,11 @@ import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import type { MathOperation } from "../../mathTutorials.ts";
 import type { RecipeSkillStatus } from "../../tutorialManager.ts";
+import { TopBar } from "../../components/TopBar.ts";
+import { makeCircleButton, setArrowEnabled } from "../../components/CircleButton.ts";
 
-const HEADERCOLOR = "#989898";
 const BGCOLOR = "#D9D9D9";
 const WHITE = "#FFFFFF";
-const HOVERFILL = "#eeeeee";
 const MARGIN = 50;
 const GAP = 60;
 const BOX_WIDTH = (STAGE_WIDTH - 2 * MARGIN - GAP) / 2;
@@ -32,11 +32,13 @@ export class RecipeTutorialView implements View {
     private skillButtonsGroup: Konva.Group;
     private leftArrow: Konva.Group;
     private rightArrow: Konva.Group;
-    private backButton: Konva.Group;
 
     private onSkillSelectHandler?: (operation: MathOperation) => void;
     private onRecipeChangeHandler?: (next: boolean) => void;
     private onBackToRecipeStepsHandler?: () => void;
+    private onHome?: () => void;
+    private onHelp?: () => void;
+    private onArrowHandler?: (rightShift: boolean) => void;
 
     constructor() {
         this.group = new Konva.Group({ visible: false });
@@ -51,20 +53,10 @@ export class RecipeTutorialView implements View {
             fill: BGCOLOR,
         });
 
-        const topBar = new Konva.Rect({
-            width: STAGE_WIDTH,
-            height: TOPBAR_HEIGHT,
-            fill: HEADERCOLOR,
-        });
-
-        const headerText = new Konva.Text({
-            width: STAGE_WIDTH,
-            height: TOPBAR_HEIGHT,
-            text: "Recipe Tutorials",
-            fontSize: 56,
-            fill: "black",
-            align: "center",
-            verticalAlign: "middle",
+        const topBar = new TopBar({
+            title: "Recipe Tutorials",
+            onHome: () => this.onHome?.(),
+            onHelp: () => this.onHelp?.(),
         });
 
         this.titleDisplay = new Konva.Text({
@@ -134,9 +126,12 @@ export class RecipeTutorialView implements View {
             onClick: () => this.onRecipeChangeHandler?.(true),
         });
 
-        this.leftArrow = this.makeArrowButton("left", LEFT_ARROW_X, LEFT_ARROW_Y);
-        this.rightArrow = this.makeArrowButton("right", RIGHT_ARROW_X, RIGHT_ARROW_Y);
-        this.backButton = this.makeArrowButton("left", MARGIN, TOPBAR_HEIGHT / 2);
+        this.leftArrow = makeCircleButton("<", LEFT_ARROW_X, LEFT_ARROW_Y, BUTTON_RADIUS, "white", () =>
+            this.onArrowHandler?.(false),
+        );
+        this.rightArrow = makeCircleButton(">", RIGHT_ARROW_X, RIGHT_ARROW_Y, BUTTON_RADIUS, "white", () =>
+            this.onArrowHandler?.(true),
+        );
 
         leftPanel.add(
             this.makeBox(),
@@ -154,13 +149,11 @@ export class RecipeTutorialView implements View {
 
         this.group.add(
             bg,
-            topBar,
-            headerText,
+            topBar.getGroup(),
             leftPanel,
             rightPanel,
             this.leftArrow,
             this.rightArrow,
-            this.backButton,
         );
     }
 
@@ -224,12 +217,15 @@ export class RecipeTutorialView implements View {
     }
 
     onArrowPress(handler: (rightShift: boolean) => void): void {
-        this.leftArrow.on("click tap", () => handler(false));
-        this.rightArrow.on("click tap", () => handler(true));
+        this.onArrowHandler = handler;
     }
 
-    onBackPress(handler: () => void): void {
-        this.backButton.on("click tap", () => handler());
+    onHomePress(handler: () => void): void {
+        this.onHome = handler;
+    }
+
+    onHelpPress(handler: () => void): void {
+        this.onHelp = handler;
     }
 
     onSkillSelect(handler: (operation: MathOperation) => void): void {
@@ -254,48 +250,11 @@ export class RecipeTutorialView implements View {
         });
     }
 
-    private makeArrowButton(
-        direction: "left" | "right",
-        x: number,
-        y: number,
-    ): Konva.Group {
-        const RADIUS = 30;
-        const sign = direction === "left" ? 1 : -1;
-        const button = new Konva.Group({ x, y });
-
-        const circle = new Konva.Circle({
-            radius: BUTTON_RADIUS,
-            stroke: "black",
-            strokeWidth: 6,
-            fill: BGCOLOR,
-        });
-
-        const arrow = new Konva.Line({
-            points: [
-                sign * RADIUS * 0.15,
-                -RADIUS * 0.4,
-                -sign * RADIUS * 0.2,
-                0,
-                sign * RADIUS * 0.15,
-                RADIUS * 0.4,
-            ],
-            stroke: "black",
-            strokeWidth: 6,
-            lineCap: "round",
-            lineJoin: "round",
-        });
-
-        button.add(circle, arrow);
-        button.on("mouseenter", () => {
-            const container = button.getStage()?.container();
-            if (container) container.style.cursor = "pointer";
-            circle.fill(HOVERFILL);
-        });
-        button.on("mouseleave", () => {
-            const container = button.getStage()?.container();
-            if (container) container.style.cursor = "default";
-            circle.fill(BGCOLOR);
-        });
-        return button;
+    // Dim the arrows when there's no step to go to
+    setArrows(canGoBack: boolean, canGoForward: boolean): void {
+        setArrowEnabled(this.leftArrow, canGoBack);
+        setArrowEnabled(this.rightArrow, canGoForward);
+        this.group.getLayer()?.batchDraw();
     }
+
 }
