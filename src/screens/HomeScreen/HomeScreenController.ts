@@ -17,6 +17,7 @@ export class HomeScreenController extends ScreenController {
 		this.view = new HomeScreenView({
 			onSaveExit: () => this.handleSaveExit(),
 			onRecipeTutorials: () => this.handleRecipeTutorials(),
+			onPieFractions: () => this.handlePieFractions(),
 		});
 	}
 
@@ -29,6 +30,11 @@ export class HomeScreenController extends ScreenController {
 	// Handle Recipe Tutorials button click
 	private handleRecipeTutorials(): void {
 		this.screenSwitcher.switchToScreen({ type: "recipeTutorial" });
+	}
+
+	// Handle Pie Fraction Minigame button click
+	private handlePieFractions(): void {
+		this.screenSwitcher.switchToScreen({ type: "pieMinigame"});
 	}
 
 	// Return the view
