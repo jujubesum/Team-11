@@ -1,4 +1,3 @@
-import { before } from "node:test";
 import { MainGameScreenController } from "../screens/MainGameScreen/MainGameScreenController";
 import { MainGameScreenModelApi } from "../screens/MainGameScreen/MainGameScreenModel";
 import type { MainGameScreenHandlers, MainGameScreenView } from "../screens/MainGameScreen/MainGameScreenView";
