@@ -7,6 +7,7 @@ import { Button } from "../../components/Button.ts";
 export interface HomeScreenHandlers {
 	onSaveExit: () => void;
 	onRecipeTutorials?: () => void;
+	onPieFractions?: () => void;
 }
 
 // Layout as fractions of the stage for future scalability (5 rows).
@@ -42,7 +43,14 @@ export class HomeScreenView implements View {
 		this.addButton("Minigame: Change Counting", leftX, rowY(1), COL_WIDTH);
 		this.addButton("Math Tutorials", rightX, rowY(1), COL_WIDTH);
 
-		this.addButton("Minigame: Order Dividing", leftX, rowY(2), COL_WIDTH);
+		this.addButton(
+			"Minigame: Pie Fractions", 
+			leftX, 
+			rowY(2), 
+			COL_WIDTH,
+			handlers.onPieFractions,
+		);
+		
 		this.addButton(
 			"Recipe Tutorials",
 			rightX,
