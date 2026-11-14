@@ -6,8 +6,11 @@ import { Button } from "../../components/Button.ts";
 // Callbacks the controller provides. Subject to more.
 export interface HomeScreenHandlers {
 	onSaveExit: () => void;
+	onShop: () => void;
 	onRecipeTutorials?: () => void;
 	onPieFractions?: () => void;
+  onMainGame: () => void;
+	onCashierGame?: () => void;
 }
 
 // Layout as fractions of the stage for future scalability (5 rows).
@@ -38,9 +41,9 @@ export class HomeScreenView implements View {
 		const leftX = PAD_X;
 		const rightX = PAD_X + COL_WIDTH + COL_GAP;
 
-		this.addButton("Start Baking!", leftX, rowY(0), FULL_WIDTH);
+		this.addButton("Start Baking!", leftX, rowY(0), FULL_WIDTH, handlers.onMainGame);
 
-		this.addButton("Minigame: Change Counting", leftX, rowY(1), COL_WIDTH);
+		this.addButton("Minigame: Change Counting", leftX, rowY(1), COL_WIDTH, handlers.onCashierGame,);
 		this.addButton("Math Tutorials", rightX, rowY(1), COL_WIDTH);
 
 		this.addButton(
@@ -59,9 +62,8 @@ export class HomeScreenView implements View {
 			handlers.onRecipeTutorials,
 		);
 
-		this.addButton("Shop", leftX, rowY(3), COL_WIDTH);
+		this.addButton("Shop", leftX, rowY(3), COL_WIDTH, handlers.onShop);
 		this.addButton("Recipe Book", rightX, rowY(3), COL_WIDTH);
-
 		this.addButton("Save & Exit", leftX, rowY(4), FULL_WIDTH, handlers.onSaveExit);
 	}
 

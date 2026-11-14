@@ -14,10 +14,16 @@ const HOME_BUTTON_LABELS = [
 	"Shop",
 	"Save & Exit",
 ];
-
-const WIRED_LABELS = ["Save & Exit", "Minigame: Pie Fractions"];
-const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => !WIRED_LABELS.includes(label));
  
+const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => 
+  label !== "Save & Exit" && 
+  label !== "Minigame: Change Counting" && 
+  label !== "Shop" && 
+  label !== "Start Baking!" &&
+  label !== "Minigame: Pie Fractions"
+ );
+
+
 describe("HomeScreenController", () => {
 	let screenSwitcher: ScreenSwitcher;
 	let controller: HomeScreenController;
@@ -35,7 +41,7 @@ describe("HomeScreenController", () => {
 		const root = controller.getView().getGroup();
  
 		for (const label of HOME_BUTTON_LABELS) {
-			expect(hasVisibleText(root, label), ).toBe(true);
+			expect(hasVisibleText(root, label)).toBe(true);
 		}
 	});
  
@@ -61,6 +67,26 @@ describe("HomeScreenController", () => {
 
 		expect(new SaveManager().load()!.level).toBe(4);
 	});
+	it("navigates to cashierGame when Change Counting is clicked", () => {
+		clickButton(
+			controller.getView().getGroup(),
+			"Minigame: Change Counting"
+		);
+
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({
+			type: "cashierGame",
+		});
+	});
+	
+
+	it("goes to the shop when Shop is clicked", () => {
+		clickButton(controller.getView().getGroup(), "Shop");
+
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "shop" });
+	});
  
 	it.each(NOT_YET_WIRED_LABELS)("does not navigate when '%s' is clicked (not built yet)", (label) => {
 		clickButton(controller.getView().getGroup(), label);
@@ -79,5 +105,12 @@ describe("HomeScreenController", () => {
 		freshController.getView().hide();
 		expect(group.visible()).toBe(false);
 	});
+
+  it("goes to main game when 'Start baking' is cliked", () => {
+    clickButton(controller.getView().getGroup(), "Start Baking!");
+
+    expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+    expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "mainGame" });
+  });
 });
  

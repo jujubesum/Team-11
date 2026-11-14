@@ -41,6 +41,8 @@ describe('SaveManager', () => {
 
         expect(save.level).toBe(1);
         expect(save.money).toBe(STARTING_MONEY);
+        expect(save.currentOrderId).toBeNull();
+        expect(save.completedOrders).toBe(0);
         expect(manager.hasSave()).toBe(true);
     });
 
