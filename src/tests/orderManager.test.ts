@@ -29,36 +29,6 @@ describe('OrderManager', () => {
         saveManager.startNewGame();
         saveManager.update({ unlockedRecipeIds: unlockedIds });
         orderManager = new OrderManager(saveManager);
-        orderManager = new OrderManager();
-
-        const mockState: GameState = {
-            unlockedRecipes: [
-                {
-                    id: 'recipe_01', name: 'Cookies', mathOperations: ['addition'], steps: [
-                        'Add flour, sugar, eggs, and butter',
-                        'Stir until smooth',
-                        'Bake in oven',
-                        'Decorate with sprinkles']
-                },
-                {
-                    id: 'recipe_02', name: 'Jello', mathOperations: ['subtraction'], steps: [
-                        'Subtract the water',
-                        'Stir until the powder dissolves',
-                        'Let it refrigerate',
-                        'Remove the Jello from the mold']
-                },
-                {
-                    id: 'recipe_03', name: 'Cupcakes', mathOperations: ['multiplication'], steps: [
-                        'Multiply how much flour, sugar, eggs, and butter is needed for 6 cupcakes',
-                        'Stir until smooth',
-                        'Pour the batter and bake',
-                        'Decorate with the right amount of frosting for 6 cupcakes']
-                },
-            ],
-            currentOrder: null,
-            completedOrders: 0
-        };
-        localStorage.setItem('bakeryGameState', JSON.stringify(mockState));
     });
 
     // Test randomizer works as intended
@@ -94,105 +64,49 @@ describe('OrderManager', () => {
 });
 
 describe("OrderManager recipe unlocking", () => {
+    let orderManager: OrderManager;
+    let saveManager: SaveManager;
+
     beforeEach(() => {
         localStorage.clear();
+        saveManager = new SaveManager();
+        saveManager.startNewGame();
+        orderManager = new OrderManager(saveManager);
     });
 
     it("starts with only the first recipe (Cookies) unlocked", () => {
-        const manager = new OrderManager();
-
-        expect(manager.getUnlockedRecipes()).toEqual([RECIPES[0]]);
-        expect(manager.isRecipeUnlocked("recipe_01")).toBe(true);
-        expect(manager.isRecipeUnlocked("recipe_02")).toBe(false);
+        expect(orderManager.getUnlockedRecipes()).toEqual([RECIPES[0]]);
+        expect(orderManager.isRecipeUnlocked("recipe_01")).toBe(true);
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(false);
     });
 
     it("unlocks a specific recipe and prevents duplicates", () => {
-        const manager = new OrderManager();
-
-        expect(manager.unlockRecipe("recipe_02")).toBe(true);
-        expect(manager.isRecipeUnlocked("recipe_02")).toBe(true);
+        expect(orderManager.unlockRecipe("recipe_02")).toBe(true);
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
 
         // Calling unlockRecipe again for the same recipe returns false
-        expect(manager.unlockRecipe("recipe_02")).toBe(false);
-        expect(manager.getUnlockedRecipes()).toHaveLength(2);
+        expect(orderManager.unlockRecipe("recipe_02")).toBe(false);
+        expect(orderManager.getUnlockedRecipes()).toHaveLength(2);
     });
 
     it("throws an error when unlocking an invalid recipe ID", () => {
-        const manager = new OrderManager();
-
-        expect(() => manager.unlockRecipe("recipe_99")).toThrow(
+        expect(() => orderManager.unlockRecipe("recipe_99")).toThrow(
             'Recipe "recipe_99" does not exist'
         );
     });
 
     it("unlocks the next locked recipe in sequence", () => {
-        const manager = new OrderManager();
-
-        const next = manager.unlockNextRecipe();
+        const next = orderManager.unlockNextRecipe();
         expect(next?.id).toBe("recipe_02");
-        expect(manager.isRecipeUnlocked("recipe_02")).toBe(true);
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
     });
 
     it("automatically unlocks the next recipe after completing 2 orders", () => {
-        const manager = new OrderManager();
-
         for (let i = 0; i < 2; i++) {
-            manager.generateRandomOrder();
-            manager.completeRecipeAndFetchNextOrder();
+            orderManager.generateRandomOrder();
+            orderManager.completeRecipeAndFetchNextOrder();
         }
 
-        expect(manager.isRecipeUnlocked("recipe_02")).toBe(true);
-    });
-});
-
-describe("OrderManager recipe unlocking", () => {
-    beforeEach(() => {
-        localStorage.clear();
-    });
-
-    it("starts with only the first recipe (Cookies) unlocked", () => {
-        const manager = new OrderManager();
-
-        expect(manager.getUnlockedRecipes()).toEqual([RECIPES[0]]);
-        expect(manager.isRecipeUnlocked("recipe_01")).toBe(true);
-        expect(manager.isRecipeUnlocked("recipe_02")).toBe(false);
-    });
-
-    it("unlocks a specific recipe and prevents duplicates", () => {
-        const manager = new OrderManager();
-
-        expect(manager.unlockRecipe("recipe_02")).toBe(true);
-        expect(manager.isRecipeUnlocked("recipe_02")).toBe(true);
-
-        // Calling unlockRecipe again for the same recipe returns false
-        expect(manager.unlockRecipe("recipe_02")).toBe(false);
-        expect(manager.getUnlockedRecipes()).toHaveLength(2);
-    });
-
-    it("throws an error when unlocking an invalid recipe ID", () => {
-        const manager = new OrderManager();
-
-        expect(() => manager.unlockRecipe("recipe_99")).toThrow(
-            'Recipe "recipe_99" does not exist'
-        );
-    });
-
-    it("unlocks the next locked recipe in sequence", () => {
-        const manager = new OrderManager();
-
-        const next = manager.unlockNextRecipe();
-        expect(next?.id).toBe("recipe_02");
-        expect(manager.isRecipeUnlocked("recipe_02")).toBe(true);
-    });
-
-    it("automatically unlocks the next recipe after completing 2 orders", () => {
-        const manager = new OrderManager();
-
-        for (let i = 0; i < 2; i++) {
-            manager.generateRandomOrder();
-            manager.completeRecipeAndFetchNextOrder();
-        }
-
-        expect(manager.isRecipeUnlocked("recipe_02")).toBe(true);
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
     });
 });
