@@ -4,12 +4,14 @@ export interface SaveData {
 	money: number;
 	unlockedRecipeIds: string[];
 	customizations: string[];
+	currentOrderId: string | null;	// Recipe id of the order in progress, or null if none
+	completedOrders: number;
 	createdAt: number;
 	lastSavedAt: number;
 }
 
 export const SAVE_KEY = "bakeryGameSave";
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 export const STARTING_MONEY = 100;
 
 export function createDefaultSave(): SaveData {
@@ -20,6 +22,8 @@ export function createDefaultSave(): SaveData {
 		money: STARTING_MONEY,
 		unlockedRecipeIds: ["recipe_01"],
 		customizations: [],
+		currentOrderId: null,
+		completedOrders: 0,
 		createdAt: now,
 		lastSavedAt: now,
 	};
@@ -96,6 +100,8 @@ function isValidSave(data: unknown): data is SaveData {
 		typeof d["money"] === "number" &&
 		Array.isArray(d["unlockedRecipeIds"]) &&
 		Array.isArray(d["customizations"]) &&
+		(d["currentOrderId"] === null || typeof d["currentOrderId"] === "string") &&
+		typeof d["completedOrders"] === "number" &&
 		typeof d["createdAt"] === "number" &&
 		typeof d["lastSavedAt"] === "number"
 	);

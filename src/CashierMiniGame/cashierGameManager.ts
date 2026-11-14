@@ -29,7 +29,7 @@ export function calculateTotal(subtotalCents: number, discountPercent: number): 
 }
 export function generateQuestion(difficulty: Difficulty, random: () => number = Math.random): CustomerQuestion {
   const pick = (max: number) => Math.floor(random() * max);
-  const item = ITEMS[pick(ITEMS.length)];
+  const item = ITEMS[pick(ITEMS.length)]!;
   let subtotalCents: number;
   let discountPercent = 0;
   if (difficulty === 1) subtotalCents = (2 + pick(8)) * 100;
@@ -37,7 +37,7 @@ export function generateQuestion(difficulty: Difficulty, random: () => number = 
   else if (difficulty === 3) subtotalCents = 250 + pick(80) * 5;
   else {
     subtotalCents = (5 + pick(16)) * 100;
-    discountPercent = [10, 20, 25, 50][pick(4)];
+    discountPercent = [10, 20, 25, 50][pick(4)]!;
   }
   const totalCents = calculateTotal(subtotalCents, discountPercent);
   const bills = [500, 1000, 2000, 5000];
