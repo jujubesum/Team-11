@@ -104,7 +104,7 @@ class App implements ScreenSwitcher {
 		this.shopController.hide();
 		this.recipeTutorialController.hide();
 		this.pieMinigameController.hide();
-    this.mainGameScreenController.hide();
+    	this.mainGameScreenController.hide();
 		this.cashierGameController.hide();
 		
 		// this.resultsController.hide();
@@ -136,8 +136,9 @@ class App implements ScreenSwitcher {
 				this.recipeTutorialController.show();
 				break;
       
-      case "mainGame":
-        this.mainGameScreenController.show();
+			case "mainGame":
+				this.mainGameScreenController.show();
+				break;
 			case "cashierGame":
 				this.cashierGameController.getView().show();
 				break;
@@ -145,8 +146,8 @@ class App implements ScreenSwitcher {
 			case "pieMinigame":
 				this.pieMinigameController.show();
 				break;
-			// 	more cases to add in the future: games, tutorials, etc.
-		}
+		// 	more cases to add in the future: games, tutorials, etc.
+	}
 	}
 }
 
