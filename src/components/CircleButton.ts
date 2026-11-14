@@ -40,3 +40,10 @@ export function addPointerCursor(node: Konva.Group): void {
 	node.on("mouseenter", () => setCursor(node, "pointer"));
 	node.on("mouseleave", () => setCursor(node, "default"));
 }
+
+// Dimmed arrows means you cannot click it
+export function setArrowEnabled(arrow: Konva.Group, enabled: boolean): void {
+	arrow.opacity(enabled ? 1 : 0.3);
+	arrow.listening(enabled);
+	if (!enabled) setCursor(arrow, "default");
+}

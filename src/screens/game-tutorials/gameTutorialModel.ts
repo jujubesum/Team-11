@@ -1,4 +1,4 @@
-import { error } from "node:console";
+// import { error } from "node:console";
 import { TUTORIAL_DATA } from "./data/tutorialData";
 
 
@@ -61,11 +61,25 @@ export class GameTutorialModel {
    * @param rightShift if true shift right, otherwise shift left
    */
   shiftTutorialIdxRight(rightShift: boolean): void{
-    if (rightShift) this.currentTutorialIdx = (this.currentTutorialIdx + 1) % this.getNumberOfTutorials();
-    else {
-      if (this.currentTutorialIdx == 0) this.currentTutorialIdx = this.getNumberOfTutorials() - 1;
-      else this.currentTutorialIdx = this.currentTutorialIdx - 1
+    if (rightShift && this.canGoForward()){
+      this.currentTutorialIdx++;
     }
+    else if (!rightShift && this.canGoBack()){
+      this.currentTutorialIdx--;
+    }
+  }
+
+
+  /** 
+   * Checks
+   */
+
+  canGoBack(): boolean {
+    return this.currentTutorialIdx > 0;
+  }
+
+  canGoForward(): boolean {
+    return this.currentTutorialIdx < this.getNumberOfTutorials() - 1;
   }
 
   /**

@@ -1,6 +1,5 @@
 import { GameTutorialModel, GameTutorial } from "../screens/game-tutorials/gameTutorialModel";
 import { TUTORIAL_DATA } from "../screens/game-tutorials/data/tutorialData";
-import { error } from "node:console";
 
 /** 
  * Test loading of tutorials
@@ -42,24 +41,26 @@ describe("GameTutorialModel.shiftTutorialIdx", () => {
   });
 
   it("moves to the previous tutorial when shifting left", () => {
-    model.shiftTutorialIdxRight(true); // shift right by 1 to avoid wrapping scenario for this test
+    model.shiftTutorialIdxRight(true); // move right by 1 to avoid left being blocked for this test
     const before = model.getCurrentTutorialIdx();
     model.shiftTutorialIdxRight(false);
     expect(model.getCurrentTutorialIdx()).toBe(before - 1);
   });
 
-  it("wraps to the final entry when shifting left from the start", () => {
+  it("stays on the first entry when shifting left from the start", () => {
     model.shiftTutorialIdxRight(false);
-    expect(model.getCurrentTutorialIdx()).toBe(model.getNumberOfTutorials() - 1);
+    expect(model.getCurrentTutorialIdx()).toBe(0);
   });
 
-  it("wraps to the first entry when shifting right from the final entry", () => {
-    model.shiftTutorialIdxRight(false); //shift to final entry
+  it("stays on the last entry when shifting right from the end", () => {
+    const last = model.getNumberOfTutorials() - 1;
+    model.updateTutorialIdx(last); //move to final entry
     model.shiftTutorialIdxRight(true); // shift right at final entry
-    expect(model.getCurrentTutorialIdx()).toBe(0);
+    expect(model.getCurrentTutorialIdx()).toBe(last);
   })
 
   it("moves nowhere from a left shift followed by a rightshift", () => {
+    model.shiftTutorialIdxRight(true);
     const start = model.getCurrentTutorialIdx();
     model.shiftTutorialIdxRight(false);
     model.shiftTutorialIdxRight(true);
@@ -73,13 +74,12 @@ describe("GameTutorialModel.shiftTutorialIdx", () => {
     expect(model.getCurrentTutorialIdx()).toBe(start);
   })
 
-  it("ends at the start after shifting through all the tutorials", () => {
-    const start = model.getCurrentTutorialIdx();
+  it("stops at the last tutorial after shifting through all the tutorials", () => {
     const iterations = model.getNumberOfTutorials();
     for (let i = 0; i < iterations; i++){
       model.shiftTutorialIdxRight(true);
     }
-    expect(model.getCurrentTutorialIdx()).toBe(start);
+    expect(model.getCurrentTutorialIdx()).toBe(model.getNumberOfTutorials() - 1);
   })
 });
 
@@ -111,3 +111,30 @@ describe("GameTutorialModel.updateTutorialIdx", () => {
     expect(model.getCurrentTutorialIdx()).toBe(model.getNumberOfTutorials()-1);
   });
 })
+
+/**
+ * Test whether there is a tutorial before/after the current one (used to dim the arrows)
+ */
+describe("GameTutorialModel.canGoBack / canGoForward", () => {
+  let model: GameTutorialModel;
+  beforeEach(() => {
+    model = new GameTutorialModel();
+  });
+
+  it("can only go forward on the first tutorial", () => {
+    expect(model.canGoBack()).toBe(false);
+    expect(model.canGoForward()).toBe(true);
+  });
+
+  it("can only go back on the final tutorial", () => {
+    model.updateTutorialIdx(model.getNumberOfTutorials() - 1);
+    expect(model.canGoBack()).toBe(true);
+    expect(model.canGoForward()).toBe(false);
+  });
+
+  it("can go both ways on a middle tutorial", () => {
+    model.updateTutorialIdx(1);
+    expect(model.canGoBack()).toBe(true);
+    expect(model.canGoForward()).toBe(true);
+  });
+});

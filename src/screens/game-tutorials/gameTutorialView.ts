@@ -1,7 +1,8 @@
 import Konva from "konva";
 import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "./../../constants"
+import { TopBar } from "../../components/TopBar.ts";
+import { makeCircleButton, setArrowEnabled } from "../../components/CircleButton.ts";
 
-const HEADERCOLOR = "#989898";
 const BGCOLOR = "#D9D9D9";
 const WHITE = "#FFFFFF"
 const HOVERFILL = "#eeeeee"
@@ -28,7 +29,10 @@ export class GameTutorialView {
   private bodyDisplay: Konva.Text;
   private leftArrow: Konva.Group;
   private rightArrow: Konva.Group;
-  private backButton: Konva.Group;
+
+  private onHome?: () => void;
+  private onHelp?: () => void;
+  private onArrowHandler?: (rightShift: boolean) => void;
 
 
 
@@ -45,20 +49,10 @@ export class GameTutorialView {
       fill: BGCOLOR,
     });
 
-    const topBar = new Konva.Rect({
-      width: STAGE_WIDTH,
-      height: TOPBAR_HEIGHT,
-      fill: HEADERCOLOR,
-    });
-
-    const headerText = new Konva.Text({
-      width: STAGE_WIDTH,
-      height: TOPBAR_HEIGHT,
-      text: "How to play",
-      fontSize: 64,
-      fill: "black",
-      align: "center",
-      verticalAlign: "middle"
+    const topBar = new TopBar({
+        title: "How to Play",
+        onHome: () => this.onHome?.(),
+        onHelp: () => this.onHelp?.(),
     });
 
     this.titleDisplay = new Konva.Text({
@@ -93,23 +87,23 @@ export class GameTutorialView {
       verticalAlign: "middle"
     });
 
-    this.leftArrow = this.makeArrowButton("left", LEFT_ARROW_X, LEFT_ARROW_Y);
-    this.rightArrow = this.makeArrowButton("right", RIGHT_ARROW_X, RIGHT_ARROW_Y);
-    this.backButton = this.makeArrowButton("left", MARGIN, MARGIN);
-
+    this.leftArrow = makeCircleButton("<", LEFT_ARROW_X, LEFT_ARROW_Y, BUTTON_RADIUS, "white", () =>
+      this.onArrowHandler?.(false),
+    );
+    this.rightArrow = makeCircleButton(">", RIGHT_ARROW_X, RIGHT_ARROW_Y, BUTTON_RADIUS, "white", () =>
+      this.onArrowHandler?.(true),
+    );
 
     leftPanel.add(this.makeBox(), this.titleDisplay, this.bodyDisplay);
     rightPanel.add(this.makeBox(), placeholder);
 
     this.group.add(
       bg, 
-      topBar,
-      headerText,
+      topBar.getGroup(),
       leftPanel,
       rightPanel,
       this.leftArrow,
       this.rightArrow,
-      this.backButton,
     );
   }
 
@@ -142,20 +136,16 @@ export class GameTutorialView {
     this.group.getLayer()?.batchDraw();
   }
   
-  /**
-   * Calls handler to switch tutorials
-   * @param handler 
-   */
-  onArrowPress(handler: (rightShift:boolean) => void): void {
-    this.leftArrow.on("click tap", () => handler(false));
-    this.rightArrow.on("click tap", () => handler(true));
+  onArrowPress(handler: (rightShift: boolean) => void): void {
+      this.onArrowHandler = handler;
   }
 
-  /**
-   * Calls handler to return to main menu
-   */
-  onBackPress(handler: () => void): void {
-    this.backButton.on('click tap', () => handler());
+  onHomePress(handler: () => void): void {
+      this.onHome = handler;
+  }
+
+  onHelpPress(handler: () => void): void {
+      this.onHelp = handler;
   }
 
   /**
@@ -170,51 +160,6 @@ export class GameTutorialView {
       fill: WHITE,
       cornerRadius: 10,
     });
-  }
-
-  /**
-   * Creates arrow button
-   * @param direction of button arrow
-   * @param x of button
-   * @param y of button
-   * @returns button
-   */
-  private makeArrowButton(direction: "left" | "right", x: number, y: number): Konva.Group{
-    const RADIUS = 30;
-    const sign = direction === "left" ? 1 : -1 // will flip the arrow depending on direction
-    const button = new Konva.Group({ x, y }); // (x,y) is the circle's center
-
-    const circle = new Konva.Circle({
-      radius: BUTTON_RADIUS,
-      stroke: "black",
-      strokeWidth: 6,
-      fill: BGCOLOR,
-    });
-
-    const arrow = new Konva.Line({
-      points: [
-        sign * RADIUS * 0.15, -RADIUS * 0.4,
-        -sign * RADIUS * 0.2, 0,
-        sign * RADIUS * 0.15, RADIUS * 0.4,
-      ],
-      stroke: "black",
-      strokeWidth: 6,
-      lineCap: "round",
-      lineJoin: "round",
-    });
-
-    button.add(circle, arrow);
-    button.on("mouseenter", () => {
-      const container = button.getStage()?.container();
-      if (container) container.style.cursor = "pointer";
-      circle.fill(HOVERFILL);
-    });
-    button.on("mouseleave", () => {
-      const container = button.getStage()?.container();
-      if (container) container.style.cursor = "default";
-      circle.fill(BGCOLOR);
-    });
-    return button;
   }
 
   /** 
@@ -247,4 +192,11 @@ export class GameTutorialView {
       this.bodyDisplay.fontSize(size);
     }
   }
+
+  // Dim the arrows when there's no step to go to
+    setArrows(canGoBack: boolean, canGoForward: boolean): void {
+        setArrowEnabled(this.leftArrow, canGoBack);
+        setArrowEnabled(this.rightArrow, canGoForward);
+        this.group.getLayer()?.batchDraw();
+    }
 }

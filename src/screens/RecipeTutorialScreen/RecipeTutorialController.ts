@@ -24,7 +24,8 @@ export class RecipeTutorialController extends ScreenController {
         this.manager.selectRecipeTutorial(initialRecipe);
 
         this.view.onArrowPress((rightShift) => this.handleArrowButtonPress(rightShift));
-        this.view.onBackPress(() => this.handleBackButtonPress());
+        this.view.onHomePress(() => this.handleHome());
+        this.view.onHelpPress(() => this.handleHelp());
         this.view.onSkillSelect((operation) => this.handleSkillSelect(operation));
         this.view.onRecipeChange((next) => this.handleRecipeChange(next));
         this.view.onBackToRecipeSteps(() => {
@@ -34,6 +35,14 @@ export class RecipeTutorialController extends ScreenController {
 
         this.updateView();
     }
+
+    private handleHome(): void {
+		this.screenSwitcher.switchToScreen({ type: "home" });
+	}
+
+	private handleHelp(): void {
+		// TODO: show how the recipe tutorial works (skipped for now)
+	}
 
     private getCurrentRecipeId(): RecipeId {
         return RECIPE_IDS[this.currentRecipeIndex] ?? "recipe_01";
@@ -60,6 +69,8 @@ export class RecipeTutorialController extends ScreenController {
             skills,
             isSkillMode: snapshot.mode === "math",
         });
+
+        this.view.setArrows(snapshot.canGoBack, snapshot.canGoForward);
     }
 
     handleArrowButtonPress(rightShift: boolean): void {
@@ -86,10 +97,6 @@ export class RecipeTutorialController extends ScreenController {
         }
         this.manager.selectRecipeTutorial(this.getCurrentRecipeId());
         this.updateView();
-    }
-
-    handleBackButtonPress(): void {
-        this.screenSwitcher.switchToScreen({ type: "home" });
     }
 
     getView(): RecipeTutorialView {
