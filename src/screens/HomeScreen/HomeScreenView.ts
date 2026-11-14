@@ -9,6 +9,7 @@ export interface HomeScreenHandlers {
 	onShop: () => void;
 	onRecipeTutorials?: () => void;
 	onMathTutorials?: () => void;
+	onPieFractions?: () => void;
   onMainGame: () => void;
 	onCashierGame?: () => void;
 }
@@ -46,7 +47,14 @@ export class HomeScreenView implements View {
 		this.addButton("Minigame: Change Counting", leftX, rowY(1), COL_WIDTH, handlers.onCashierGame,);
 		this.addButton("Math Tutorials", rightX, rowY(1), COL_WIDTH, handlers.onMathTutorials);
 
-		this.addButton("Minigame: Order Dividing", leftX, rowY(2), COL_WIDTH);
+		this.addButton(
+			"Minigame: Pie Fractions", 
+			leftX, 
+			rowY(2), 
+			COL_WIDTH,
+			handlers.onPieFractions,
+		);
+		
 		this.addButton(
 			"Recipe Tutorials",
 			rightX,

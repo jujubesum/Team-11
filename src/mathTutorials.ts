@@ -3,13 +3,11 @@ export type MathOperation =
   | "subtraction"
   | "multiplication"
   | "division"
-  | "fractions";
 export const MATH_OPERATIONS = [
   "addition",
   "subtraction",
   "multiplication",
   "division",
-  "fractions"
 ] as const;
 export interface MathTutorial {
   title: string;
@@ -54,16 +52,6 @@ export const mathTutorials: Record<MathOperation, MathTutorial> = {
       "Imagine sharing 12 cookies among 3 friends.",
       "Give each friend the same number of cookies.",
       "Each friend gets 4 cookies!"
-    ]
-  },
-
-  fractions: {
-    title: "Fractions",
-    steps: [
-      "Let's learn about fractions!",
-      "Imagine a pie cut into 4 equal slices.",
-      "If you take 1 slice, you have 1 out of 4.",
-      "That's one-fourth, or 1/4!"
     ]
   }
 };

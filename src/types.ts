@@ -15,9 +15,9 @@ export type Screen =
 	| { type: "newGameCheck" }
 	| { type: "shop" }
 	| { type: "gameTutorial" }
-	| { type: "newGameCheck" }
 	| { type: "recipeTutorial" }
 	| { type: "mathTutorial" }
+	| { type: "pieMinigame"}
   | { type: "mainGame" }
 	| { type: "cashierGame" };
 

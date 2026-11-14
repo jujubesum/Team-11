@@ -19,6 +19,7 @@ export class HomeScreenController extends ScreenController {
 			onShop: () => this.handleShop(),
 			onRecipeTutorials: () => this.handleRecipeTutorials(),
 			onMathTutorials: () => this.handleMathTutorials(),
+			onPieFractions: () => this.handlePieFractions(),
       onMainGame: () => this.handleMainGame(),
 			onCashierGame: () => this.handleCashierGame(),
 		});
@@ -51,6 +52,11 @@ export class HomeScreenController extends ScreenController {
   private handleMainGame(): void {
     this.screenSwitcher.switchToScreen({ type: "mainGame" });
   }
+
+	// Handle Pie Fraction Minigame button click
+	private handlePieFractions(): void {
+		this.screenSwitcher.switchToScreen({ type: "pieMinigame"});
+	}
 
 	// Return the view
 	getView(): HomeScreenView {
