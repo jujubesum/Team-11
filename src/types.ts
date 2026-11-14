@@ -17,6 +17,7 @@ export type Screen =
 	| { type: "gameTutorial" }
 	| { type: "newGameCheck" }
 	| { type: "recipeTutorial" }
+	| { type: "mathTutorial" }
   | { type: "mainGame" }
 	| { type: "cashierGame" };
 

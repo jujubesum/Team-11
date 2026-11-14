@@ -15,7 +15,7 @@ const HOME_BUTTON_LABELS = [
 	"Save & Exit",
 ];
  
-const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Save & Exit" && label !== "Minigame: Change Counting" && label !== "Shop" && label !== "Start Baking!");
+const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) => label !== "Save & Exit" && label !== "Minigame: Change Counting" && label !== "Shop" && label !== "Start Baking!" && label !== "Math Tutorials");
 
 
 describe("HomeScreenController", () => {
@@ -73,6 +73,13 @@ describe("HomeScreenController", () => {
 
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "shop" });
+	});
+
+	it("goes to math tutorials when Math Tutorials is clicked", () => {
+		clickButton(controller.getView().getGroup(), "Math Tutorials");
+
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "mathTutorial" });
 	});
  
 	it.each(NOT_YET_WIRED_LABELS)("does not navigate when '%s' is clicked (not built yet)", (label) => {
