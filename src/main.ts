@@ -6,6 +6,7 @@ import { GameTutorialController } from "./screens/game-tutorials/gameTutorialCon
 import { NewGameCheckScreenController } from "./screens/NewGameCheckScreen/NewGameCheckScreenController.ts";
 import { ShopScreenController } from "./screens/ShopScreen/ShopScreenController.ts";
 import { RecipeTutorialController } from "./screens/RecipeTutorialScreen/RecipeTutorialController.ts";
+import { PieMinigameController } from "./screens/PieMinigame/PieMinigameController.ts";
 import { MainGameScreenController } from "./screens/MainGameScreen/MainGameScreenController.ts";
 import { SaveManager } from "./saveManager.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
@@ -35,7 +36,8 @@ class App implements ScreenSwitcher {
 	private shopController: ShopScreenController;
 	private gameTutorialController: GameTutorialController;
 	private recipeTutorialController: RecipeTutorialController;
-  	private mainGameScreenController: MainGameScreenController;
+	private pieMinigameController: PieMinigameController;
+  private mainGameScreenController: MainGameScreenController;
 	private cashierGameController: CashierGameController;
 
 	constructor(container: string) {
@@ -58,6 +60,7 @@ class App implements ScreenSwitcher {
 		this.shopController = new ShopScreenController(this, this.saveManager);
 		this.gameTutorialController = new GameTutorialController(this);
 		this.recipeTutorialController = new RecipeTutorialController(this);
+		this.pieMinigameController = new PieMinigameController(this);
     	this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
 		this.cashierGameController = new CashierGameController(this);
 
@@ -69,6 +72,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.newGameCheckController.getView().getGroup());
 		this.layer.add(this.shopController.getView().getGroup());
 		this.layer.add(this.recipeTutorialController.getView().getGroup());
+		this.layer.add(this.pieMinigameController.getView().getGroup());
     	this.layer.add(this.mainGameScreenController.getView().getGroup());
 		this.layer.add(this.cashierGameController.getView().getGroup());
 
@@ -99,6 +103,7 @@ class App implements ScreenSwitcher {
 		this.newGameCheckController.hide();
 		this.shopController.hide();
 		this.recipeTutorialController.hide();
+		this.pieMinigameController.hide();
     	this.mainGameScreenController.hide();
 		this.cashierGameController.hide();
 		
@@ -138,8 +143,11 @@ class App implements ScreenSwitcher {
 				this.cashierGameController.getView().show();
 				break;
 
-			// 	more cases to add in the future: games, tutorials, etc.
-		}
+			case "pieMinigame":
+				this.pieMinigameController.show();
+				break;
+		// 	more cases to add in the future: games, tutorials, etc.
+	}
 	}
 }
 
