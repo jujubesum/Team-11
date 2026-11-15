@@ -84,7 +84,6 @@ describe("OrderManager recipe unlocking", () => {
         expect(orderManager.unlockRecipe("recipe_02")).toBe(true);
         expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
 
-        // Calling unlockRecipe again for the same recipe returns false
         expect(orderManager.unlockRecipe("recipe_02")).toBe(false);
         expect(orderManager.getUnlockedRecipes()).toHaveLength(2);
     });
@@ -95,18 +94,25 @@ describe("OrderManager recipe unlocking", () => {
         );
     });
 
-    it("unlocks the next locked recipe in sequence", () => {
-        const next = orderManager.unlockNextRecipe();
-        expect(next?.id).toBe("recipe_02");
+    it("unlocks the next locked recipe in sequence and returns null when all are unlocked", () => {
+        const second = orderManager.unlockNextRecipe();
+        expect(second?.id).toBe("recipe_02");
         expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
+
+        expect(orderManager.unlockNextRecipe()?.id).toBe("recipe_03");
+        expect(orderManager.unlockNextRecipe()?.id).toBe("recipe_04");
+        expect(orderManager.unlockNextRecipe()?.id).toBe("recipe_05");
+
+        expect(orderManager.unlockNextRecipe()).toBeNull();
+        expect(orderManager.getUnlockedRecipes()).toHaveLength(RECIPES.length);
     });
 
-    it("automatically unlocks the next recipe after completing 2 orders", () => {
-        for (let i = 0; i < 2; i++) {
-            orderManager.generateRandomOrder();
-            orderManager.completeRecipeAndFetchNextOrder();
-        }
+    it("keeps recipe 2 locked after 1 order and unlocks it after 2 orders", () => {
+        orderManager.generateRandomOrder();
+        orderManager.completeRecipeAndFetchNextOrder();
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(false);
 
+        orderManager.completeRecipeAndFetchNextOrder();
         expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
     });
 });
