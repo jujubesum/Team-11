@@ -81,7 +81,7 @@ export class OrderManager {
     //until every recipe has been completed, each order is sequential and not random
     public generateNextOrder(): Recipe | null {
         const state = this.getGameState();
-        const nextInSequence = RECIPES[state.completedOrders];
+        const nextInSequence = RECIPES[Math.floor(state.completedOrders / ORDERS_PER_UNLOCK)];;
 
         if (!nextInSequence) {
             return this.generateRandomOrder(); // every recipe has had its turn
@@ -127,6 +127,6 @@ export class OrderManager {
             }
         }
 
-        return this.generateRandomOrder();
+        return this.generateNextOrder();
     }
 }

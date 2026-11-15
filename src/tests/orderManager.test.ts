@@ -120,10 +120,13 @@ describe("OrderManager recipe unlocking", () => {
 describe("OrderManager generateNextOrder", () => {
     let orderManager: OrderManager;
     let saveManager: SaveManager;
+    const ORDERS_PER_UNLOCK = 2;
 
     // Finish the current order, like main game when orders complete
-    const finishOrder = () => {
+    const playOrder = () => {
+        const recipe = orderManager.generateNextOrder();
         orderManager.completeRecipeAndFetchNextOrder();
+        return recipe;
     };
 
     beforeEach(() => {
@@ -144,22 +147,30 @@ describe("OrderManager generateNextOrder", () => {
         expect(saveManager.getCurrent()!.currentOrderId).toBe("recipe_01");
     });
 
-    it("goes through the recipes in order until each has been ordered once", () => {
+    it("orders each recipe ORDERS_PER_UNLOCK times, in RECIPES order", () => {
         for (const recipe of RECIPES) {
-            expect(orderManager.generateNextOrder()?.id).toBe(recipe.id);
-            finishOrder();
+            for (let i = 0; i < ORDERS_PER_UNLOCK; i++) {
+                expect(playOrder()?.id).toBe(recipe.id);
+            }
         }
     });
 
-    it("unlocks each recipe when its turn comes", () => {
-        orderManager.generateNextOrder();
-        finishOrder();
-        // after the every-2-orders rule, recipe 2 may still be locked here,
-        // but asking for the next order unlocks it because it's next in line
-        const second = orderManager.generateNextOrder();
+    it("only orders a recipe once it has been unlocked by the every-ORDERS_PER_UNLOCK rule", () => {
+        for (let i = 0; i < RECIPES.length * ORDERS_PER_UNLOCK; i++) {
+            const recipe = orderManager.generateNextOrder()!;
+            expect(orderManager.isRecipeUnlocked(recipe.id)).toBe(true);
+            orderManager.completeRecipeAndFetchNextOrder();
+        }
+    });
 
-        expect(second?.id).toBe("recipe_02");
+    it("keeps recipe 2 locked and not ordered until 2 orders are completed", () => {
+        playOrder();
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(false);
+        expect(orderManager.generateNextOrder()?.id).toBe("recipe_01");
+
+        orderManager.completeRecipeAndFetchNextOrder();
         expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
+        expect(orderManager.generateNextOrder()?.id).toBe("recipe_02");
     });
 
     it("repeats the same recipe if an order is started but not finished", () => {
@@ -169,11 +180,17 @@ describe("OrderManager generateNextOrder", () => {
         expect(again?.id).toBe(first?.id);
     });
 
-    it("picks randomly from unlocked recipes once every recipe has been ordered", () => {
-        for (let i = 0; i < RECIPES.length; i++) {
-            orderManager.generateNextOrder();
-            finishOrder();
-        }
+    it("completeRecipeAndFetchNextOrder returns the next order in the sequence", () => {
+        orderManager.generateNextOrder();
+        orderManager.completeRecipeAndFetchNextOrder();
+        const next = orderManager.completeRecipeAndFetchNextOrder();
+
+        expect(next?.id).toBe("recipe_02");
+        expect(saveManager.getCurrent()!.currentOrderId).toBe("recipe_02");
+    });
+
+    it("picks randomly from unlocked recipes once every recipe has had its turn", () => {
+        for (let i = 0; i < RECIPES.length * ORDERS_PER_UNLOCK; i++) playOrder();
         expect(orderManager.getUnlockedRecipes()).toHaveLength(RECIPES.length);
 
         // Math.random() = 0 picks the first unlocked recipe, 0.99 the last
@@ -184,4 +201,3 @@ describe("OrderManager generateNextOrder", () => {
         expect(orderManager.generateNextOrder()?.id).toBe(RECIPES[RECIPES.length - 1]!.id);
     });
 });
-
