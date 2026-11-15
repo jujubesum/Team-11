@@ -35,7 +35,7 @@ class App implements ScreenSwitcher {
 	private shopController: ShopScreenController;
 	private gameTutorialController: GameTutorialController;
 	private recipeTutorialController: RecipeTutorialController;
-  private mainGameScreenController: MainGameScreenController;
+  	private mainGameScreenController: MainGameScreenController;
 	private cashierGameController: CashierGameController;
 
 	constructor(container: string) {
@@ -58,7 +58,7 @@ class App implements ScreenSwitcher {
 		this.shopController = new ShopScreenController(this, this.saveManager);
 		this.gameTutorialController = new GameTutorialController(this);
 		this.recipeTutorialController = new RecipeTutorialController(this);
-    this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
+    	this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
 		this.cashierGameController = new CashierGameController(this);
 
 		// Add all screen groups to the layer
@@ -69,7 +69,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.newGameCheckController.getView().getGroup());
 		this.layer.add(this.shopController.getView().getGroup());
 		this.layer.add(this.recipeTutorialController.getView().getGroup());
-    this.layer.add(this.mainGameScreenController.getView().getGroup());
+    	this.layer.add(this.mainGameScreenController.getView().getGroup());
 		this.layer.add(this.cashierGameController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
@@ -99,7 +99,7 @@ class App implements ScreenSwitcher {
 		this.newGameCheckController.hide();
 		this.shopController.hide();
 		this.recipeTutorialController.hide();
-    this.mainGameScreenController.hide();
+    	this.mainGameScreenController.hide();
 		this.cashierGameController.hide();
 		
 		// this.resultsController.hide();
@@ -131,8 +131,9 @@ class App implements ScreenSwitcher {
 				this.recipeTutorialController.show();
 				break;
       
-      case "mainGame":
-        this.mainGameScreenController.show();
+			case "mainGame":
+				this.mainGameScreenController.show();
+				break;
 			case "cashierGame":
 				this.cashierGameController.getView().show();
 				break;
