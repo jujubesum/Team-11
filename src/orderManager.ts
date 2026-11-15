@@ -6,6 +6,8 @@ export interface GameState {
     completedOrders: number;
 }
 
+const ORDERS_PER_UNLOCK = 2;
+
 export class OrderManager {
     constructor(private saveManager: SaveManager) {}
 
@@ -28,6 +30,51 @@ export class OrderManager {
             completedOrders: state.completedOrders
         });
         this.saveManager.save();
+    }
+
+    public getUnlockedRecipes(): Recipe[] {
+        return this.getGameState().unlockedRecipes;
+    }
+
+    public isRecipeUnlocked(recipeId: string): boolean {
+        const state = this.getGameState();
+        return state.unlockedRecipes.some((recipe) => recipe.id === recipeId);
+    }
+
+    // For unlocking recipes in the shop
+    public unlockRecipe(recipeId: string): boolean {
+        const recipeToUnlock = RECIPES.find((r) => r.id === recipeId);
+        if (!recipeToUnlock) {
+            throw new Error(`Recipe "${recipeId}" does not exist`);
+        }
+
+        const state = this.getGameState();
+        const alreadyUnlocked = state.unlockedRecipes.some(
+            (r) => r.id === recipeId
+        );
+
+        if (alreadyUnlocked) {
+            return false;
+        }
+
+        state.unlockedRecipes.push(recipeToUnlock);
+        this.saveGameState(state);
+        return true;
+    }
+
+    public unlockNextRecipe(): Recipe | null {
+        const state = this.getGameState();
+        const nextRecipe = RECIPES.find(
+            (recipe) => !state.unlockedRecipes.some((u) => u.id === recipe.id)
+        );
+
+        if (!nextRecipe) {
+            return null;
+        }
+
+        state.unlockedRecipes.push(nextRecipe);
+        this.saveGameState(state);
+        return nextRecipe;
     }
 
     public generateRandomOrder(): Recipe | null {
@@ -56,6 +103,10 @@ export class OrderManager {
             state.completedOrders += 1;
             state.currentOrder = null;
             this.saveGameState(state);
+
+            if (state.completedOrders % ORDERS_PER_UNLOCK === 0) {
+                this.unlockNextRecipe();
+            }
         }
 
         return this.generateRandomOrder();
