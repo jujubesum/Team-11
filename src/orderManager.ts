@@ -77,6 +77,24 @@ export class OrderManager {
         return nextRecipe;
     }
 
+    //picks the next customer order (nonrandomized)
+    //until every recipe has been completed, each order is sequential and not random
+    public generateNextOrder(): Recipe | null {
+        const state = this.getGameState();
+        const nextInSequence = RECIPES[Math.floor(state.completedOrders / ORDERS_PER_UNLOCK)];;
+
+        if (!nextInSequence) {
+            return this.generateRandomOrder(); // every recipe has had its turn
+        }
+
+        if (!state.unlockedRecipes.some((r) => r.id === nextInSequence.id)) {
+            state.unlockedRecipes.push(nextInSequence);
+        }
+        state.currentOrder = nextInSequence;
+        this.saveGameState(state);
+        return nextInSequence;
+    }
+
     public generateRandomOrder(): Recipe | null {
         const state = this.getGameState();
         const availableRecipes = state.unlockedRecipes;
@@ -109,6 +127,6 @@ export class OrderManager {
             }
         }
 
-        return this.generateRandomOrder();
+        return this.generateNextOrder();
     }
 }
