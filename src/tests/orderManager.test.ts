@@ -116,3 +116,72 @@ describe("OrderManager recipe unlocking", () => {
         expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
     });
 });
+
+describe("OrderManager generateNextOrder", () => {
+    let orderManager: OrderManager;
+    let saveManager: SaveManager;
+
+    // Finish the current order, like main game when orders complete
+    const finishOrder = () => {
+        orderManager.completeRecipeAndFetchNextOrder();
+    };
+
+    beforeEach(() => {
+        localStorage.clear();
+        saveManager = new SaveManager();
+        saveManager.startNewGame();
+        orderManager = new OrderManager(saveManager);
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    it("gives Cookies as the first order of a new game and saves it as the current order", () => {
+        const first = orderManager.generateNextOrder();
+
+        expect(first?.id).toBe("recipe_01");
+        expect(saveManager.getCurrent()!.currentOrderId).toBe("recipe_01");
+    });
+
+    it("goes through the recipes in order until each has been ordered once", () => {
+        for (const recipe of RECIPES) {
+            expect(orderManager.generateNextOrder()?.id).toBe(recipe.id);
+            finishOrder();
+        }
+    });
+
+    it("unlocks each recipe when its turn comes", () => {
+        orderManager.generateNextOrder();
+        finishOrder();
+        // after the every-2-orders rule, recipe 2 may still be locked here,
+        // but asking for the next order unlocks it because it's next in line
+        const second = orderManager.generateNextOrder();
+
+        expect(second?.id).toBe("recipe_02");
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
+    });
+
+    it("repeats the same recipe if an order is started but not finished", () => {
+        const first = orderManager.generateNextOrder();
+        const again = orderManager.generateNextOrder(); // e.g. the player quit mid-order
+
+        expect(again?.id).toBe(first?.id);
+    });
+
+    it("picks randomly from unlocked recipes once every recipe has been ordered", () => {
+        for (let i = 0; i < RECIPES.length; i++) {
+            orderManager.generateNextOrder();
+            finishOrder();
+        }
+        expect(orderManager.getUnlockedRecipes()).toHaveLength(RECIPES.length);
+
+        // Math.random() = 0 picks the first unlocked recipe, 0.99 the last
+        jest.spyOn(Math, "random").mockReturnValue(0);
+        expect(orderManager.generateNextOrder()?.id).toBe(RECIPES[0]!.id);
+
+        jest.spyOn(Math, "random").mockReturnValue(0.99);
+        expect(orderManager.generateNextOrder()?.id).toBe(RECIPES[RECIPES.length - 1]!.id);
+    });
+});
+
