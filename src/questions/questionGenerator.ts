@@ -27,7 +27,7 @@ export function generateQuestion(config: QuestionConfig): Question {
 }
 
 //calculate the answer
-function applyOperation(left: number, operation: Operation, right: number): number {
+export function applyOperation(left: number, operation: Operation, right: number): number {
 	// one case per operation
 	switch (operation){
 		case "+":

@@ -65,9 +65,11 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
     this.lastResult = undefined;
     this.lastGuess = 0;
   }
+
   private isCurrentStepSolved(): boolean {
     return this.lastResult?.status === "correct";
   }
+
   /**
    * Generates a new random problem with the operation of the current step of the recipe, 
    */
@@ -84,10 +86,10 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
   }
 
   /**
-   * Selects a random recipe and sets it to the current recipe.
+   * Picks the next order’s recipe from the order manager (in order at first, then random when all recipes are unlocked)
    */
   chooseRandomRecipe(): void {
-    const recipe = this.orderManager.generateRandomOrder();
+    const recipe = this.orderManager.generateNextOrder();
     if (!recipe) {
       throw new Error("No recipes are unlocked");
     }
@@ -116,7 +118,7 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
   }
 
   /**
-   * Generates new problem of same type and updates stats
+   * After running out of attempts, generates new problem
    */
   retryProblem(): void {
     if (!this.session.isFinished()) {
@@ -134,8 +136,7 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
 
   /**
    * Called when user advances a problem. Should:
-   * Reset the attempt count, advance the step of the recipe,
-   * increment questions answered/correct, and generate a new problem for that step's operation
+   * Reset the attempt count, advance the step of the recipe
    */
   advanceProblem(): void {
     this.advanceStep();
@@ -171,9 +172,11 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
   }
 
   /**
-   * Upon order completion, reset state back to default
+   * Upon order completion, reset state back to default.
+   * Tells order manager the order is complete.
    */
   resetOrder(): void {
+    this.orderManager.completeRecipeAndFetchNextOrder();
     this.currentRecipe = undefined;
     this.currentStep = 0;
     this.resetAttempts();
@@ -217,14 +220,14 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
 
   /**
    * Checks if user was on their last attempt
-   * @returns false if user is out of attempts
+   * @returns true if user is out of attempts
    */
   isOrderFailed(): boolean {
     return this.lastResult?.attemptsRemaining === 0;
   }
 
   /**
-   * Should return the absolute difference between the user's answer and the correct answer
+   * Returns the absolute difference between the user's answer and the correct answer
    */
   getHint(): number {
     // It might be annoying passing around the answer so I might save the 
