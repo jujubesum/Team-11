@@ -62,3 +62,57 @@ describe('OrderManager', () => {
         expect(saveManager.getCurrent()!.currentOrderId).toBe(newOrder!.id);
     });
 });
+
+describe("OrderManager recipe unlocking", () => {
+    let orderManager: OrderManager;
+    let saveManager: SaveManager;
+
+    beforeEach(() => {
+        localStorage.clear();
+        saveManager = new SaveManager();
+        saveManager.startNewGame();
+        orderManager = new OrderManager(saveManager);
+    });
+
+    it("starts with only the first recipe (Cookies) unlocked", () => {
+        expect(orderManager.getUnlockedRecipes()).toEqual([RECIPES[0]]);
+        expect(orderManager.isRecipeUnlocked("recipe_01")).toBe(true);
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(false);
+    });
+
+    it("unlocks a specific recipe and prevents duplicates", () => {
+        expect(orderManager.unlockRecipe("recipe_02")).toBe(true);
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
+
+        expect(orderManager.unlockRecipe("recipe_02")).toBe(false);
+        expect(orderManager.getUnlockedRecipes()).toHaveLength(2);
+    });
+
+    it("throws an error when unlocking an invalid recipe ID", () => {
+        expect(() => orderManager.unlockRecipe("recipe_99")).toThrow(
+            'Recipe "recipe_99" does not exist'
+        );
+    });
+
+    it("unlocks the next locked recipe in sequence and returns null when all are unlocked", () => {
+        const second = orderManager.unlockNextRecipe();
+        expect(second?.id).toBe("recipe_02");
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
+
+        expect(orderManager.unlockNextRecipe()?.id).toBe("recipe_03");
+        expect(orderManager.unlockNextRecipe()?.id).toBe("recipe_04");
+        expect(orderManager.unlockNextRecipe()?.id).toBe("recipe_05");
+
+        expect(orderManager.unlockNextRecipe()).toBeNull();
+        expect(orderManager.getUnlockedRecipes()).toHaveLength(RECIPES.length);
+    });
+
+    it("keeps recipe 2 locked after 1 order and unlocks it after 2 orders", () => {
+        orderManager.generateRandomOrder();
+        orderManager.completeRecipeAndFetchNextOrder();
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(false);
+
+        orderManager.completeRecipeAndFetchNextOrder();
+        expect(orderManager.isRecipeUnlocked("recipe_02")).toBe(true);
+    });
+});
