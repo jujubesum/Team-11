@@ -18,9 +18,18 @@ export class GameTutorialController extends ScreenController{
     this.view = view;
     this.screenSwitcher = screenSwitcher;
     this.view.onArrowPress((rightShift) => this.handleArrowButtonPress(rightShift));
-    this.view.onBackPress(() => this.handleBackButtonPress());
+    this.view.onHomePress(() => this.handleHome());
+    this.view.onHelpPress(() => this.handleHelp());
     this.updateView();
   }
+
+  private handleHome(): void {
+		this.screenSwitcher.switchToScreen({ type: "title" });
+	}
+
+	private handleHelp(): void {
+		// TODO: show how the recipe tutorial works (skipped for now)
+	}
 
   /**
    * Make tutorials visible
@@ -56,6 +65,7 @@ export class GameTutorialController extends ScreenController{
   updateView(): void {
     const currentTutorial = this.model.getCurrentTutorial();
     this.view.setTutorial(currentTutorial.getTitle(), currentTutorial.getBody());
+    this.view.setArrows(this.model.canGoBack(), this.model.canGoForward());
   }
   
   /**

@@ -18,8 +18,10 @@ describe("gameTutorialController.handleArrowButtonPress", () => {
     screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
     view = {
        setTutorial: jest.fn(), 
+       setArrows: jest.fn(),
        onArrowPress: jest.fn(),
-       onBackPress: jest.fn()} as unknown as GameTutorialView // create a mock to detect if visual change occurred
+       onHomePress: jest.fn(),
+       onHelpPress: jest.fn()} as unknown as GameTutorialView // create a mock to detect if visual change occurred
     controller = new GameTutorialController(screenSwitcher, model, view);
     (view.setTutorial as jest.Mock).mockClear(); //override default setTutorial call
   });
@@ -43,23 +45,22 @@ describe("gameTutorialController.handleArrowButtonPress", () => {
     expect(view.setTutorial).toHaveBeenCalledWith(firstTutorial.getTitle(), firstTutorial.getBody());
   });
 
-  it("shows the final tutorial when left arrow is pressed on first tutorial", () => {
+  it("stays on the first tutorial when left arrow is pressed on first tutorial", () => {
     controller.handleArrowButtonPress(false);
     const tutorial = model.getCurrentTutorial();
-    expect(model.getCurrentTutorialIdx()).toBe(model.getNumberOfTutorials() - 1);
+    expect(model.getCurrentTutorialIdx()).toBe(0);
     expect(view.setTutorial).toHaveBeenCalledWith(tutorial.getTitle(), tutorial.getBody());
   });
 
-  it("shows the first tutorial when right arrow is pressed on final tutorial", () => {
-    const firstTutorial = model.getCurrentTutorial();
-    model.updateTutorialIdx(model.getNumberOfTutorials() - 1);
-
+  it("stays on the final tutorial when right arrow is pressed on final tutorial", () => {
+    const last = model.getNumberOfTutorials() - 1;
+    model.updateTutorialIdx(last);
     controller.handleArrowButtonPress(true);
-
-    expect(model.getCurrentTutorialIdx()).toBe(0)
-    expect(view.setTutorial).toHaveBeenCalledWith(firstTutorial.getTitle(), firstTutorial.getBody());
+    const finaltutorial = model.getCurrentTutorial();
+    expect(model.getCurrentTutorialIdx()).toBe(last);
+    expect(view.setTutorial).toHaveBeenCalledWith(finaltutorial.getTitle(), finaltutorial.getBody());
   });
-
+  
   it("routes the view's arrow callback to handleArrowButtonPress", () => {
     const handler = (view.onArrowPress as jest.Mock).mock.calls[0][0]; // this line is a little confusing but essentially mocks .onArrowPress, [0][0] being the argument passed to the callback (eg (rightShift))
 
@@ -81,8 +82,10 @@ describe("GameTutorialController.constructor", () => {
     model = new GameTutorialModel();
     view = {
        setTutorial: jest.fn(), 
+       setArrows: jest.fn(),
        onArrowPress: jest.fn(),
-       onBackPress: jest.fn()} as unknown as GameTutorialView
+       onHomePress: jest.fn(),
+       onHelpPress: jest.fn()} as unknown as GameTutorialView
     screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
   });
 
@@ -97,6 +100,22 @@ describe("GameTutorialController.constructor", () => {
     controller = new GameTutorialController(screenSwitcher, model,view);
     expect(view.onArrowPress).toHaveBeenCalledTimes(1);
   });
+
+  it("dims the left arrow on the first tutorial", () => {
+    controller = new GameTutorialController(screenSwitcher, model, view);
+    expect(view.setArrows).toHaveBeenCalledWith(false, true);
+  });
+
+  it("dims the right arrow when it starts on the last tutorial", () => {
+    model.updateTutorialIdx(model.getNumberOfTutorials() - 1);
+    controller = new GameTutorialController(screenSwitcher, model, view);
+    expect(view.setArrows).toHaveBeenCalledWith(true, false);
+  });
+
+  it("returns to the title screen when the home button is pressed", () => {
+    controller = new GameTutorialController(screenSwitcher, model, view);
+    const homeHandler = (view.onHomePress as jest.Mock).mock.calls[0][0];
+    homeHandler();
+    expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "title" });
+  });
 });
-
-
