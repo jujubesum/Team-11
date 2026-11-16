@@ -1,7 +1,22 @@
 import type { SaveManager } from "../../saveManager";
 import type { Recipe } from "../../recipeManager";
+import { generateQuestion } from "../../questions/questionGenerator.ts";
+import { QuestionSession } from "../../questions/questionSession.ts";
+import type { AnswerResult, Operation, Question, QuestionConfig } from "../../questions/questionTypes.ts";
+import {OrderManager} from "../../orderManager";
 
-export type Operation = "+" | "-" | "×" | "÷"; // REMOVE WHEN MERGING!
+//recipes says operations in words, but question uses symbols
+const TO_SYMBOL: Record<string, Operation> = {
+	addition: "+", subtraction: "-", multiplication: "×", division: "÷",
+};
+
+const EARNINGS_PER_CORRECT = 5;
+
+/** Number limits for every question (3rd/4th grade: everything within 100). */
+const QUESTION_LIMITS: Omit<QuestionConfig, "allowedOperations"> = {
+  operandLimits: { "+": 50, "-": 50, "×": 10, "÷": 10 },
+  maxNumber: 100,
+};
 
 export interface GameStats {
   questionsAnswered: number;
@@ -33,71 +48,98 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
   private saveManager: SaveManager;
   private currentRecipe: Recipe | undefined;
   private currentStep: number;
-  private attempts: number;
   private gameStats: GameStats;
+  //current question and the player's attempts on it
+  private question!: Question;
+  private session!: QuestionSession;
+  private lastResult: AnswerResult | undefined;
+  private lastGuess = 0;
+  private orderManager: OrderManager;
 
   constructor(saveManager: SaveManager){
     this.saveManager = saveManager;
+    this.orderManager = new OrderManager(saveManager);
     this.currentRecipe = undefined;
     this.currentStep = 0;
-    this.attempts = 3;
     this.gameStats = { questionsAnswered: 0, questionsCorrect: 0 , earnings: 0 }
+    this.lastResult = undefined;
+    this.lastGuess = 0;
+  }
+
+  private isCurrentStepSolved(): boolean {
+    return this.lastResult?.status === "correct";
   }
 
   /**
    * Generates a new random problem with the operation of the current step of the recipe, 
    */
   generateProblem(): void {
-    // Checks the operation of the current step and uses it to generate a problem
-    // Should save the problem info (operation, left/right) to instance var/s to be used elsewhere
+    const operations = this.getCurrentRecipe().mathOperations;
+    const name = operations[this.currentStep % operations.length];
+    const operation = name === undefined ? undefined : TO_SYMBOL[name];
+    if (!operation) {
+      throw new Error(`Recipe has an unknown math operation: ${name}`);
+    }
+ 
+    this.question = generateQuestion({ allowedOperations: [operation], ...QUESTION_LIMITS });
     this.resetAttempts(); // each time a new problem is made attempts should be reset
   }
 
   /**
-   * Selects a random recipe and sets it to the current recipe.
+   * Picks the next order’s recipe from the order manager (in order at first, then random when all recipes are unlocked)
    */
   chooseRandomRecipe(): void {
-
+    const recipe = this.orderManager.generateNextOrder();
+    if (!recipe) {
+      throw new Error("No recipes are unlocked");
+    }
+    this.currentRecipe = recipe;
   }
 
   /**
    * Checks if the inputted answer is correct
    */
   checkAnswer(answer: number): boolean {
-    return false;
+    this.lastResult = this.session.submit(String(answer));
+    if (this.lastResult.status === "incorrect") {
+      this.lastGuess = answer;
+    }
+    if (this.lastResult.finished) {
+      this.updateStats(this.lastResult.status === "correct");
+    }
+    return this.lastResult.status === "correct";
   }
 
   /**
    * Advances to next step of recipe 
    */
   advanceStep(): void {
-
+    this.currentStep += 1;
   }
 
   /**
-   * Generates new problem of same type and updates stats
+   * After running out of attempts, generates new problem
    */
   retryProblem(): void {
+    if (!this.session.isFinished()) {
+      return; // "Try Again": nothing to change
+    }
     this.generateProblem();
-    this.updateStats(false);
   }
 
   /**
-   * Resets attempt count for user to replay and updates stats
+   * Resets attempt count for user to replay
    */
   replayProblem(): void {
-    this.updateStats(true);
     this.resetAttempts();
   }
 
   /**
    * Called when user advances a problem. Should:
-   * Reset the attempt count, advance the step of the recipe,
-   * increment questions answered/correct, and generate a new problem for that step's operation
+   * Reset the attempt count, advance the step of the recipe
    */
   advanceProblem(): void {
     this.advanceStep();
-    this.updateStats(true);
     this.generateProblem();
   }
 
@@ -109,34 +151,32 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
   advanceOrder(): void {
     this.chooseRandomRecipe();
     this.currentStep = 0;
+    this.resetStats();
     this.generateProblem();
   }
 
-  /**
-   * Decrement number of attempts the user has left
-   */
-  decrementAttempts(): void {
-
-  }
 
   /**
    * Reset attempts remaining to full amount
    */
   resetAttempts(): void {
-
+    this.session = new QuestionSession(this.question);
+    this.lastResult = undefined;
   }
 
   /**
    * Reset user statistics to default (questions answered, questions correct, earnings)
    */
   resetStats(): void {
-
+    this.gameStats = { questionsAnswered: 0, questionsCorrect: 0, earnings: 0 };
   }
 
   /**
-   * Upon order completion, reset state back to default
+   * Upon order completion, reset state back to default.
+   * Tells order manager the order is complete.
    */
   resetOrder(): void {
+    this.orderManager.completeRecipeAndFetchNextOrder();
     this.currentRecipe = undefined;
     this.currentStep = 0;
     this.resetAttempts();
@@ -147,7 +187,11 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    * Updates saved stats on question correct/fail 
    */
   updateStats(qCorrect: boolean){
-
+    this.gameStats.questionsAnswered += 1;
+    if (qCorrect) {
+      this.gameStats.questionsCorrect += 1;
+      this.gameStats.earnings += EARNINGS_PER_CORRECT;
+    }
   }
 
   /**
@@ -170,38 +214,40 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    * @returns true if user was on last step
    */
   isOrderComplete(): boolean {
-    return false;
+    const lastStep = this.getCurrentRecipe().steps.length - 1;
+    return this.currentStep === lastStep && this.isCurrentStepSolved();
   }
 
   /**
    * Checks if user was on their last attempt
-   * @returns false if user is out of attempts
+   * @returns true if user is out of attempts
    */
   isOrderFailed(): boolean {
-    return false;
+    return this.lastResult?.attemptsRemaining === 0;
   }
 
   /**
-   * Should return the absolute difference between the user's answer and the correct answer
+   * Returns the absolute difference between the user's answer and the correct answer
    */
   getHint(): number {
     // It might be annoying passing around the answer so I might save the 
     // current answer as an instance var and just use that
-    return 0;
+    return Math.abs(this.question.answer - this.lastGuess);
   }
 
   /**
    * @returns object containing questions answered correctly and total number of questions
    */
   getProgress(): { done: number, total: number } {
-    return { done: 0, total: 0};
+    const done = this.currentStep + (this.isCurrentStepSolved() ? 1 : 0);
+    return { done, total: this.getCurrentRecipe().steps.length };
   }
 
   /**
    * @returns object containing problem info
    */
   getProblem(): { x: number, y: number, operation: Operation } {
-    return {x: 0, y: 0, operation: "-"};
+    return { x: this.question.left, y: this.question.right, operation: this.question.operation };
   }
 
   /**
@@ -216,18 +262,9 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    * @returns the current recipe
    */
   getCurrentRecipe(): Recipe {
-    // This is a placeholder recipe but in reality should just return this.currentRecipe
-    const recipe = { 
-      id: 'recipe_01',
-      name: 'Cookies',
-      mathOperations: ['addition'],
-      steps: [
-        'Add flour, sugar, eggs, and butter',
-        'Stir until smooth',
-        'Bake in oven',
-        'Decorate with sprinkles'
-      ]
-    }
-    return recipe;
+    if(!this.currentRecipe){
+      throw new Error("No order has been taken yet.");
+    }   
+    return this.currentRecipe;
   }
 }

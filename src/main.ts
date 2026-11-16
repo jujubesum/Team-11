@@ -61,7 +61,7 @@ class App implements ScreenSwitcher {
 		this.gameTutorialController = new GameTutorialController(this);
 		this.recipeTutorialController = new RecipeTutorialController(this);
 		this.pieMinigameController = new PieMinigameController(this);
-    this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
+    	this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
 		this.cashierGameController = new CashierGameController(this);
 
 		// Add all screen groups to the layer
@@ -73,7 +73,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.shopController.getView().getGroup());
 		this.layer.add(this.recipeTutorialController.getView().getGroup());
 		this.layer.add(this.pieMinigameController.getView().getGroup());
-    this.layer.add(this.mainGameScreenController.getView().getGroup());
+    	this.layer.add(this.mainGameScreenController.getView().getGroup());
 		this.layer.add(this.cashierGameController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
