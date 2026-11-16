@@ -1,4 +1,3 @@
-// import { error } from "node:console";
 import { TUTORIAL_DATA } from "./data/tutorialData";
 
 
