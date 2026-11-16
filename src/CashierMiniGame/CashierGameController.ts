@@ -11,7 +11,7 @@ export class CashierGameController extends ScreenController {
     super();
     this.view = new CashierGameView({
       onStart: () => this.start(),
-      onSubmit: answer => this.submit(answer),
+      onSubmit: changeCents => this.submit(changeCents),
       onBack: () => this.screenSwitcher.switchToScreen({ type: "home" })
     });
     this.view.render(this.manager.getSnapshot());
@@ -34,9 +34,9 @@ export class CashierGameController extends ScreenController {
     }, 1000);
   }
 
-  private submit(answer: string): void {
-    const result = this.manager.submitAnswer(answer);
-    this.view.render(this.manager.getSnapshot(), result.message);
+  private submit(changeCents: number): void {
+    const result = this.manager.submitChange(changeCents);
+    this.view.render(this.manager.getSnapshot(), result);
   }
 
   private stopTimer(): void {
