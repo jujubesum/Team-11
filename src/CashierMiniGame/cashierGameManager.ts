@@ -83,6 +83,11 @@ export class CashierGameManager {
     if (!this.active || !this.question) return { correct: false, points: 0, message: "Game is not active." };
     const cents = parseMoney(input);
     if (cents === null) return { correct: false, points: 0, message: "Enter a dollar amount, such as 1.50." };
+    return this.submitChange(cents);
+  }
+  submitChange(cents: number): { correct: boolean; points: number; message: string } {
+    if (!this.active || !this.question) return { correct: false, points: 0, message: "Game is not active." };
+    if (!Number.isSafeInteger(cents) || cents < 0) return { correct: false, points: 0, message: "Select the change to give." };
     if (cents !== this.question.changeCents) {
       this.streak = 0;
       return { correct: false, points: 0, message: "Not quite! Try again." };
