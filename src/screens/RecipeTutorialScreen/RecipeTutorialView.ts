@@ -4,7 +4,7 @@ import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import type { MathOperation } from "../../mathTutorials.ts";
 import type { RecipeSkillStatus } from "../../tutorialManager.ts";
-import { TopBar } from "../../components/TopBar.ts";
+import { TopBarNoHelp } from "../../components/TopBarNoHelp.ts";
 import { makeCircleButton, setArrowEnabled } from "../../components/CircleButton.ts";
 
 const BGCOLOR = "#D9D9D9";
@@ -37,7 +37,6 @@ export class RecipeTutorialView implements View {
     private onRecipeChangeHandler?: (next: boolean) => void;
     private onBackToRecipeStepsHandler?: () => void;
     private onHome?: () => void;
-    private onHelp?: () => void;
     private onArrowHandler?: (rightShift: boolean) => void;
 
     constructor() {
@@ -53,10 +52,9 @@ export class RecipeTutorialView implements View {
             fill: BGCOLOR,
         });
 
-        const topBar = new TopBar({
+        const topBar = new TopBarNoHelp({
             title: "Recipe Tutorials",
             onHome: () => this.onHome?.(),
-            onHelp: () => this.onHelp?.(),
         });
 
         this.titleDisplay = new Konva.Text({
@@ -222,10 +220,6 @@ export class RecipeTutorialView implements View {
 
     onHomePress(handler: () => void): void {
         this.onHome = handler;
-    }
-
-    onHelpPress(handler: () => void): void {
-        this.onHelp = handler;
     }
 
     onSkillSelect(handler: (operation: MathOperation) => void): void {

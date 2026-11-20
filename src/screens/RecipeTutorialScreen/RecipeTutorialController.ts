@@ -25,7 +25,6 @@ export class RecipeTutorialController extends ScreenController {
 
         this.view.onArrowPress((rightShift) => this.handleArrowButtonPress(rightShift));
         this.view.onHomePress(() => this.handleHome());
-        this.view.onHelpPress(() => this.handleHelp());
         this.view.onSkillSelect((operation) => this.handleSkillSelect(operation));
         this.view.onRecipeChange((next) => this.handleRecipeChange(next));
         this.view.onBackToRecipeSteps(() => {
@@ -38,10 +37,6 @@ export class RecipeTutorialController extends ScreenController {
 
     private handleHome(): void {
 		this.screenSwitcher.switchToScreen({ type: "home" });
-	}
-
-	private handleHelp(): void {
-		// TODO: show how the recipe tutorial works (skipped for now)
 	}
 
     private getCurrentRecipeId(): RecipeId {

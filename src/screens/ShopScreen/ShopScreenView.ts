@@ -3,12 +3,11 @@ import type { View } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import type { ShopItem } from "../../ShopItems.ts";
-import { TopBar } from "../../components/TopBar.ts";
+import { TopBarNoHelp } from "../../components/TopBarNoHelp.ts";
 import { makeCircleButton, addPointerCursor, setCursor, setArrowEnabled } from "../../components/CircleButton.ts";
 
 export interface ShopScreenHandlers {
 	onHome: () => void;
-	onHelp: () => void;
 	onItemClick: (item: ShopItem) => void;
 	onPurchase: () => void;
 	onEmptyCart: () => void;
@@ -90,7 +89,7 @@ export class ShopScreenView implements View {
 		this.group.add(new Konva.Rect({ width: STAGE_WIDTH, height: STAGE_HEIGHT, fill: FILL }));
 
 		// Top Bar
-		this.group.add(new TopBar({ title: "Shop", onHome: handlers.onHome, onHelp: handlers.onHelp }).getGroup());
+		this.group.add(new TopBarNoHelp({ title: "Shop", onHome: handlers.onHome }).getGroup());
 
 		this.buildInfoRow();
 		this.buildCart();
