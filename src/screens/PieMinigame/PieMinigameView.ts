@@ -3,7 +3,6 @@ import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "../../constants.ts";
 
 // Color constants
 const HEADERCOLOR = "#989898";
-const BGCOLOR = "#D9D9D9";
 const GREEN = "#2e9e4f";
 const RED = "#d03b3b";
 
@@ -31,15 +30,6 @@ export class PieMinigameView {
   
   constructor() {
     this.group = new Konva.Group({ visible: false });
-    
-    // background
-    const bg = new Konva.Rect({
-        x: 0,
-        y: 0,
-        width: STAGE_WIDTH,
-        height: STAGE_HEIGHT,
-        fill: BGCOLOR,
-    });
 
     const topBar = new Konva.Rect({
         width: STAGE_WIDTH,
@@ -205,7 +195,6 @@ export class PieMinigameView {
 
     //Background
     this.group.add(
-        bg,
         topBar,
         headerText,
         this.timerText,

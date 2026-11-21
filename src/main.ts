@@ -11,6 +11,7 @@ import { MainGameScreenController } from "./screens/MainGameScreen/MainGameScree
 import { SaveManager } from "./saveManager.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
 import { CashierGameController } from "./CashierMiniGame/CashierGameController.ts";
+import { DEFAULT_BACKGROUND, getBackgroundColor } from "./ShopItems.ts";
 
 
 /**
@@ -37,8 +38,11 @@ class App implements ScreenSwitcher {
 	private gameTutorialController: GameTutorialController;
 	private recipeTutorialController: RecipeTutorialController;
 	private pieMinigameController: PieMinigameController;
-  private mainGameScreenController: MainGameScreenController;
+    private mainGameScreenController: MainGameScreenController;
 	private cashierGameController: CashierGameController;
+
+	private backgroundLayer = new Konva.Layer();
+	private background = new Konva.Rect({ width: STAGE_WIDTH, height: STAGE_HEIGHT, fill: DEFAULT_BACKGROUND });
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -47,10 +51,6 @@ class App implements ScreenSwitcher {
 			width: STAGE_WIDTH,
 			height: STAGE_HEIGHT,
 		});
-
-		// Create a layer (screens will be added to this layer)
-		this.layer = new Konva.Layer();
-		this.stage.add(this.layer);
 
 		// Initialize all screen controllers
 		// Each controller manages a Model, View, and handles user interactions
@@ -63,6 +63,12 @@ class App implements ScreenSwitcher {
 		this.pieMinigameController = new PieMinigameController(this);
     	this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
 		this.cashierGameController = new CashierGameController(this);
+
+		// Bakgrounds before screen's layers
+		this.backgroundLayer.add(this.background);
+		this.stage.add(this.backgroundLayer);
+		this.layer = new Konva.Layer();
+		this.stage.add(this.layer);
 
 		// Add all screen groups to the layer
 		// All screens exist simultaneously but only one is visible at a time
@@ -81,6 +87,8 @@ class App implements ScreenSwitcher {
 
 		// Start with title screen visible
 		this.titleController.show();
+
+		this.updateBackground();
 
 		// Save progress if the player closes the tab without pressing Save & Exit
 		window.addEventListener("beforeunload", () => this.saveManager.save());
@@ -131,7 +139,6 @@ class App implements ScreenSwitcher {
 				this.shopController.show();
 				break;
 
-		// 	more cases to add in the future: games, tutorials, etc.
 			case "recipeTutorial":
 				this.recipeTutorialController.show();
 				break;
@@ -147,7 +154,18 @@ class App implements ScreenSwitcher {
 				this.pieMinigameController.show();
 				break;
 		// 	more cases to add in the future: games, tutorials, etc.
+
+		}
+
+		this.updateBackground();
+		
 	}
+
+	// Colors the shared background with the player's chosen kitchen
+	private updateBackground(): void {
+		const kitchenId = this.saveManager.getCurrent()?.activeKitchenId ?? null;
+		this.background.fill(getBackgroundColor(kitchenId));
+		this.backgroundLayer.batchDraw();
 	}
 }
 

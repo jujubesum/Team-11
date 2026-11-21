@@ -3,7 +3,6 @@ import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "./../../constants"
 import { TopBarNoHelp } from "../../components/TopBarNoHelp.ts";
 import { makeCircleButton, setArrowEnabled } from "../../components/CircleButton.ts";
 
-const BGCOLOR = "#D9D9D9";
 const WHITE = "#FFFFFF"
 const HOVERFILL = "#eeeeee"
 const MARGIN = 50;
@@ -39,14 +38,6 @@ export class GameTutorialView {
     this.group = new Konva.Group({visible: false});
     const leftPanel = new Konva.Group({x: LEFT_BOX_X, y: BOX_Y});
     const rightPanel = new Konva.Group({x:RIGHT_BOX_X, y: BOX_Y});
-
-    const bg = new Konva.Rect({
-      x:0,
-      y:0,
-      width: STAGE_WIDTH,
-      height: STAGE_HEIGHT,
-      fill: BGCOLOR,
-    });
 
     const topBar = new TopBarNoHelp({
         title: "How to Play",
@@ -96,7 +87,6 @@ export class GameTutorialView {
     rightPanel.add(this.makeBox(), placeholder);
 
     this.group.add(
-      bg, 
       topBar.getGroup(),
       leftPanel,
       rightPanel,

@@ -91,15 +91,6 @@ export class MainGameScreenView implements View {
   constructor(handlers: MainGameScreenHandlers){
     this.group = new Konva.Group({ visible: false });
 
-    // background
-    this.group.add( 
-          new Konva.Rect({
-            width: STAGE_WIDTH,
-            height: STAGE_HEIGHT,
-            fill: "#d9d9d9",
-          }),
-        );
-
     // topbar
     this.group.add(new TopBar({ title: "Baking", onHome: handlers.onHome, onHelp: handlers.onHelp }).getGroup());
   

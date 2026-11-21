@@ -19,7 +19,7 @@ export class HomeScreenController extends ScreenController {
 			onShop: () => this.handleShop(),
 			onRecipeTutorials: () => this.handleRecipeTutorials(),
 			onPieFractions: () => this.handlePieFractions(),
-      onMainGame: () => this.handleMainGame(),
+      		onMainGame: () => this.handleMainGame(),
 			onCashierGame: () => this.handleCashierGame(),
 		});
 	}

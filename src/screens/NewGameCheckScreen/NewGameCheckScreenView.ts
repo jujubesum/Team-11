@@ -29,11 +29,6 @@ export class NewGameCheckScreenView implements View {
  
 	constructor(handlers: NewGameCheckScreenHandlers) {
 		this.group.add(
-			new Konva.Rect({ 
-				width: STAGE_WIDTH, 
-				height: STAGE_HEIGHT, 
-				fill: FILL 
-			}),
 		
 			// White Card
 			new Konva.Rect({ 
