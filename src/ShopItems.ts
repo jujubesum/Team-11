@@ -5,12 +5,16 @@ export interface ShopItem {
 	price: number;
 	// Placeholder color before we do images
 	color: string;
-	// Path to the kitchen image, will add later
-	image?: string | undefined;
+}
+
+export const DEFAULT_BACKGROUND = "#d9d9d9";
+
+// Background color for a kitchen id (or default)
+export function getBackgroundColor(kitchenId: string | null): string {
+	return SHOP_ITEMS.find((item) => item.id === kitchenId)?.color ?? DEFAULT_BACKGROUND;
 }
 
 export const SHOP_ITEMS: ShopItem[] = [
-	// Color Placeholders, will change with actual image backgrounds later
 	{ id: "kitchen_yellow", name: "Yellow Kitchen", price: 10, color: "#ffe08a" },
 	{ id: "kitchen_mint", name: "Mint Kitchen", price: 10, color: "#a8e6cf" },
 	{ id: "kitchen_pink", name: "Pink Kitchen", price: 15, color: "#f4a6c1" },

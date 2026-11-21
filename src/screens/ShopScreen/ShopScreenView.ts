@@ -63,7 +63,6 @@ const PREV_ARROW_X = STAGE_WIDTH * 0.55;
 const NEXT_ARROW_X = STAGE_WIDTH * 0.935;
 
 // Colors
-const FILL = "#d9d9d9";
 const TILE_FILL = "#8c8c8c";
 const ACTION_FILL = "#bfbfbf";
 const ACTION_HOVER_FILL = "#a9a9a9";
@@ -85,8 +84,6 @@ export class ShopScreenView implements View {
 
 	constructor(handlers: ShopScreenHandlers) {
 		this.handlers = handlers;
-
-		this.group.add(new Konva.Rect({ width: STAGE_WIDTH, height: STAGE_HEIGHT, fill: FILL }));
 
 		// Top Bar
 		this.group.add(new TopBarNoHelp({ title: "Shop", onHome: handlers.onHome }).getGroup());

@@ -30,14 +30,6 @@ export class HomeScreenView implements View {
 	constructor(handlers: HomeScreenHandlers) {
 		this.group = new Konva.Group({ visible: false });
 
-		this.group.add(
-			new Konva.Rect({
-				width: STAGE_WIDTH,
-				height: STAGE_HEIGHT,
-				fill: "#d9d9d9",
-			}),
-		);
-
 		const leftX = PAD_X;
 		const rightX = PAD_X + COL_WIDTH + COL_GAP;
 

@@ -30,7 +30,6 @@ export class TitleScreenView implements View {
 	private continueButton: Button;
  
 	constructor(handlers: TitleScreenHandlers) {
-		this.group.add(new Konva.Rect({ width: STAGE_WIDTH, height: STAGE_HEIGHT, fill: FILL }));
  
 		// Card 1: no save
 		this.newGameCard = makeCard(0.315);
