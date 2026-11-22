@@ -245,6 +245,7 @@ export class MainGameScreenController extends ScreenController {
     const recipe = this.model.getCurrentRecipe();
     this.view.updateTitle(recipe.name);
     this.view.fillLeftPanel(recipe.steps);
+    this.view.setRecipeImage(`/images/recipes/${recipe.name.toLowerCase()}.svg`)
     this.view.clearAnswer();
   }
 

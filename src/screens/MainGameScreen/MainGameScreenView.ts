@@ -86,6 +86,7 @@ export class MainGameScreenView implements View {
   private guidePopup: HintPopup;
   private warningPopup: HintPopup;
   private activePopup: Popup | undefined;
+  private recipeImage: Konva.Image | null = null;
 
 
   constructor(handlers: MainGameScreenHandlers){
@@ -518,6 +519,32 @@ export class MainGameScreenView implements View {
       `Your statistics: ${correctAnswers}/${questions} correct!`,
       `$${earnings} made!`
     ]);
+  }
+
+  setRecipeImage(url: string): void {
+    const img = new Image();
+    const IMAGE_TOP = MARGIN + PADDING * 2
+    img.onload = () => {
+      const maxW = PANEL_WIDTH - 2 * PADDING;
+      const maxH = PANEL_HEIGHT - IMAGE_TOP - PADDING;
+      const scale = Math.min(maxW / img.width, maxH / img.height);   // fit inside the box
+      const w = img.width * scale;
+      const h = img.height * scale;
+
+      this.recipeImage?.destroy();
+      this.recipeImage = new Konva.Image({
+        image: img,
+        width: w,
+        height: h,
+        x: (PANEL_WIDTH - w) / 2,                    // centered horizontally
+        y: IMAGE_TOP + (maxH - h) / 2,               // centered in the space under the title
+        listening: false,
+      });
+      this.recipePanel.add(this.recipeImage);
+      this.group.getLayer()?.batchDraw();
+    };
+    img.onerror = () => console.warn("Could not load recipe image:", url);
+    img.src = url;
   }
 
   getGroup(): Konva.Group {
