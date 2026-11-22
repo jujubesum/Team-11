@@ -38,16 +38,15 @@ export class HomeScreenView implements View {
 		this.addButton("Start Baking!", leftX, rowY(0), FULL_WIDTH, handlers.onMainGame);
 
 		this.addButton("Minigame: Change Counting", leftX, rowY(1), COL_WIDTH, handlers.onCashierGame,);
-		this.addButton("Math Tutorials", rightX, rowY(1), COL_WIDTH, handlers.onMathTutorials);
+		this.addButton("Minigame: Pie Fractions", rightX, rowY(1), COL_WIDTH, handlers.onPieFractions);
 
-		this.addButton("Minigame: Pie Fractions", leftX, rowY(2), COL_WIDTH, handlers.onPieFractions);
-		
+		this.addButton("Math Tutorials", leftX, rowY(2), COL_WIDTH, handlers.onMathTutorials);
 		this.addButton("Recipe Tutorials", rightX, rowY(2), COL_WIDTH, handlers.onRecipeTutorials);
 
 		this.addButton("Shop", leftX, rowY(3), COL_WIDTH, handlers.onShop);
 		this.addButton("Customize", rightX, rowY(3), COL_WIDTH, handlers.onCustomize);
-
-		this.addButton("Save & Exit", leftX, rowY(4), FULL_WIDTH, handlers.onSaveExit);
+		
+		this.addButton("Save & Exit", leftX, rowY(4), FULL_WIDTH, handlers.onSaveExit, "red", "red");
 	}
 
 	private addButton(
@@ -56,8 +55,10 @@ export class HomeScreenView implements View {
 		y: number,
 		width: number,
 		onClick?: () => void,
+		strokeColor?: string,
+		textColor?: string,
 	): void {
-		const button = new Button({ x, y, width, height: ROW_HEIGHT, label, onClick });
+		const button = new Button({ x, y, width, height: ROW_HEIGHT, label, onClick, strokeColor, textColor});
 		this.group.add(button.getGroup());
 	}
 

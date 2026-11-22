@@ -16,10 +16,10 @@ export interface ButtonConfig {
 	disabled?: boolean | undefined;
 	// Fill used while disabled
 	disabledFill?: string | undefined;
+	strokeColor?: string | undefined;
+	textColor?: string | undefined;
 }
 
-const TEXT_COLOR = "black";
-const STROKE_COLOR = "black";
 const DISABLED_TEXT_COLOR = "#aaaaaa";
 const DISABLED_STROKE_COLOR = "#bbbbbb";
  
@@ -33,6 +33,8 @@ export class Button {
 	private fill: string;
 	private hoverFill: string;
 	private disabledFill: string;
+	private strokeColor: string;
+	private textColor: string;
 	private enabled = true;
 	private hovered = false;
  
@@ -49,11 +51,15 @@ export class Button {
 		hoverFill = "#eeeeee",
 		disabled = false,
 		disabledFill = "white",
+		strokeColor = "black",
+		textColor = "black",
 	}: ButtonConfig) {
 		this.height = height;
 		this.fill = fill;
 		this.hoverFill = hoverFill;
 		this.disabledFill = disabledFill;
+		this.strokeColor = strokeColor;
+		this.textColor = textColor;
  
 		this.group = new Konva.Group({ x, y });
  
@@ -61,7 +67,7 @@ export class Button {
 			width,
 			height,
 			fill,
-			stroke: "black",
+			stroke: strokeColor,
 			strokeWidth: 3,
 			cornerRadius: 12,
 		});
@@ -121,9 +127,9 @@ export class Button {
 	setEnabled(enabled: boolean): void {
 		this.enabled = enabled;
 
-		this.rect.stroke(enabled ? STROKE_COLOR : DISABLED_STROKE_COLOR);
-		this.labelText.fill(enabled ? TEXT_COLOR : DISABLED_TEXT_COLOR);
-		this.subtitleText.fill(enabled ? TEXT_COLOR : DISABLED_TEXT_COLOR);
+		this.rect.stroke(enabled ? this.strokeColor : DISABLED_STROKE_COLOR);
+		this.labelText.fill(enabled ? this.textColor : DISABLED_TEXT_COLOR);
+		this.subtitleText.fill(enabled ? this.textColor : DISABLED_TEXT_COLOR);
 		this.updateLook();
 
 		// If the mouse is already over it, fix the cursor right away
