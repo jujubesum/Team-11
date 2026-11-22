@@ -11,10 +11,10 @@ export interface TitleScreenHandlers {
 }
  
 
-const CARD_X = STAGE_WIDTH * 0.081;
-const CARD_Y = STAGE_HEIGHT * 0.146;
 const CARD_WIDTH = STAGE_WIDTH * 0.398;
 const CARD_HEIGHT = STAGE_HEIGHT * 0.688;
+const CARD_X = (STAGE_WIDTH - CARD_WIDTH) / 2;
+const CARD_Y = (STAGE_HEIGHT - CARD_HEIGHT) / 2;
 const BUTTON_WIDTH = CARD_WIDTH * 0.756;
 const BUTTON_X = CARD_X + (CARD_WIDTH - BUTTON_WIDTH) / 2;
 const BUTTON_HEIGHT = STAGE_HEIGHT * 0.105;

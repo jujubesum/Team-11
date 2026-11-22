@@ -64,7 +64,7 @@ export class HomeScreenView implements View {
 
 		this.addButton("Shop", leftX, rowY(3), COL_WIDTH, handlers.onShop);
 		this.addButton("Recipe Book", rightX, rowY(3), COL_WIDTH);
-		this.addButton("Save & Exit", leftX, rowY(4), FULL_WIDTH, handlers.onSaveExit);
+		this.addButton("Save & Exit", leftX, rowY(4), FULL_WIDTH, handlers.onSaveExit, "red", "red");
 	}
 
 	private addButton(
@@ -73,8 +73,10 @@ export class HomeScreenView implements View {
 		y: number,
 		width: number,
 		onClick?: () => void,
+		strokeColor?: string,
+		textColor?: string,
 	): void {
-		const button = new Button({ x, y, width, height: ROW_HEIGHT, label, onClick });
+		const button = new Button({ x, y, width, height: ROW_HEIGHT, label, onClick, strokeColor, textColor});
 		this.group.add(button.getGroup());
 	}
 
