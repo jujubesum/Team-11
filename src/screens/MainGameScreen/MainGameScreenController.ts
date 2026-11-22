@@ -269,7 +269,7 @@ export class MainGameScreenController extends ScreenController {
     const x = problem.x;
     const y = problem.y;
     const operation = problem.operation;
-    this.view.fillRightPanel(x, y, operation);
+    this.view.fillQuestionPanel(x, y, operation);
   }
 
   /**
