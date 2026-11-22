@@ -9,9 +9,10 @@ const HOME_BUTTON_LABELS = [
 	"Start Baking!",
 	"Minigame: Change Counting",
 	"Math Tutorials",
+	"Recipe Tutorials",
 	"Minigame: Pie Fractions",
-	"Recipe Book",
 	"Shop",
+	"Customize",
 	"Save & Exit",
 ];
  
@@ -19,9 +20,11 @@ const NOT_YET_WIRED_LABELS = HOME_BUTTON_LABELS.filter((label) =>
   label !== "Save & Exit" && 
   label !== "Minigame: Change Counting" && 
   label !== "Shop" && 
+  label !== "Customize" && 
   label !== "Start Baking!" &&
   label !== "Minigame: Pie Fractions" &&
-  label !== "Math Tutorials"                                             
+  label !== "Math Tutorials" &&
+  label !== "Recipe Tutorials"                                              
  );
 
 
@@ -89,18 +92,32 @@ describe("HomeScreenController", () => {
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "shop" });
 	});
 
+	it("goes to the customize page when Customize is clicked", () => {
+		clickButton(controller.getView().getGroup(), "Customize");
+
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "customize" });
+	});
+
 	it("goes to math tutorials when Math Tutorials is clicked", () => {
 		clickButton(controller.getView().getGroup(), "Math Tutorials");
 
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "mathTutorial" });
 	});
- 
-	it.each(NOT_YET_WIRED_LABELS)("does not navigate when '%s' is clicked (not built yet)", (label) => {
-		clickButton(controller.getView().getGroup(), label);
- 
-		expect(screenSwitcher.switchToScreen).not.toHaveBeenCalled();
+
+	it("goes to recipe tutorials when Recipe Tutorials is clicked", () => {
+		clickButton(controller.getView().getGroup(), "Recipe Tutorials");
+
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
+		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "recipeTutorial" });
 	});
+ 
+	// it.each(NOT_YET_WIRED_LABELS)("does not navigate when '%s' is clicked (not built yet)", (label) => {
+	// 	clickButton(controller.getView().getGroup(), label);
+ 
+	// 	expect(screenSwitcher.switchToScreen).not.toHaveBeenCalled();
+	// });
  
 	it("is hidden until shown and hidden again by hide()", () => {
 		const freshController = new HomeScreenController(screenSwitcher, saveManager);
