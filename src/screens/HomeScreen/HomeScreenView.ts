@@ -7,10 +7,11 @@ import { Button } from "../../components/Button.ts";
 export interface HomeScreenHandlers {
 	onSaveExit: () => void;
 	onShop: () => void;
+	onCustomize: () => void;
 	onRecipeTutorials?: () => void;
 	onMathTutorials?: () => void;
 	onPieFractions?: () => void;
-  onMainGame: () => void;
+  	onMainGame: () => void;
 	onCashierGame?: () => void;
 }
 
@@ -39,24 +40,13 @@ export class HomeScreenView implements View {
 		this.addButton("Minigame: Change Counting", leftX, rowY(1), COL_WIDTH, handlers.onCashierGame,);
 		this.addButton("Math Tutorials", rightX, rowY(1), COL_WIDTH, handlers.onMathTutorials);
 
-		this.addButton(
-			"Minigame: Pie Fractions", 
-			leftX, 
-			rowY(2), 
-			COL_WIDTH,
-			handlers.onPieFractions,
-		);
+		this.addButton("Minigame: Pie Fractions", leftX, rowY(2), COL_WIDTH, handlers.onPieFractions);
 		
-		this.addButton(
-			"Recipe Tutorials",
-			rightX,
-			rowY(2),
-			COL_WIDTH,
-			handlers.onRecipeTutorials,
-		);
+		this.addButton("Recipe Tutorials", rightX, rowY(2), COL_WIDTH, handlers.onRecipeTutorials);
 
 		this.addButton("Shop", leftX, rowY(3), COL_WIDTH, handlers.onShop);
-		this.addButton("Recipe Book", rightX, rowY(3), COL_WIDTH);
+		this.addButton("Customize", rightX, rowY(3), COL_WIDTH, handlers.onCustomize);
+
 		this.addButton("Save & Exit", leftX, rowY(4), FULL_WIDTH, handlers.onSaveExit);
 	}
 
