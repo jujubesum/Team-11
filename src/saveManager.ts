@@ -13,7 +13,7 @@ export interface SaveData {
 
 export const SAVE_KEY = "bakeryGameSave";
 export const SAVE_VERSION = 3;
-export const STARTING_MONEY = 270;
+export const STARTING_MONEY = 0;
 
 export function createDefaultSave(): SaveData {
 	const now = Date.now();
