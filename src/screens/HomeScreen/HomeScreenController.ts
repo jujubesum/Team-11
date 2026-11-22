@@ -17,9 +17,11 @@ export class HomeScreenController extends ScreenController {
 		this.view = new HomeScreenView({
             onSaveExit: () => this.handleSaveExit(),
 			onShop: () => this.handleShop(),
+			onCustomize: () => this.handleCustomize(),
 			onRecipeTutorials: () => this.handleRecipeTutorials(),
+			onMathTutorials: () => this.handleMathTutorials(),
 			onPieFractions: () => this.handlePieFractions(),
-      onMainGame: () => this.handleMainGame(),
+      		onMainGame: () => this.handleMainGame(),
 			onCashierGame: () => this.handleCashierGame(),
 		});
 	}
@@ -34,6 +36,11 @@ export class HomeScreenController extends ScreenController {
 	private handleRecipeTutorials(): void {
 		this.screenSwitcher.switchToScreen({ type: "recipeTutorial" });
 	}
+
+	// Handle Math Tutorials button click
+	private handleMathTutorials(): void {
+		this.screenSwitcher.switchToScreen({ type: "mathTutorial" });
+	}
 	private handleCashierGame(): void {
     	this.screenSwitcher.switchToScreen({ type: "cashierGame" });
 	}
@@ -43,9 +50,14 @@ export class HomeScreenController extends ScreenController {
 		this.screenSwitcher.switchToScreen({ type: "shop" });
 	}
 
-  private handleMainGame(): void {
-    this.screenSwitcher.switchToScreen({ type: "mainGame" });
-  }
+	// Go to the customization screen
+	private handleCustomize(): void {
+		this.screenSwitcher.switchToScreen({ type: "customize" });
+	}
+
+	private handleMainGame(): void {
+		this.screenSwitcher.switchToScreen({ type: "mainGame" });
+	}
 
 	// Handle Pie Fraction Minigame button click
 	private handlePieFractions(): void {

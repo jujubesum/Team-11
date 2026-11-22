@@ -3,12 +3,11 @@ import type { View } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import type { ShopItem } from "../../ShopItems.ts";
-import { TopBar } from "../../components/TopBar.ts";
+import { TopBarNoHelp } from "../../components/TopBarNoHelp.ts";
 import { makeCircleButton, addPointerCursor, setCursor, setArrowEnabled } from "../../components/CircleButton.ts";
 
 export interface ShopScreenHandlers {
 	onHome: () => void;
-	onHelp: () => void;
 	onItemClick: (item: ShopItem) => void;
 	onPurchase: () => void;
 	onEmptyCart: () => void;
@@ -56,6 +55,9 @@ const TILE_GAP_X = STAGE_WIDTH * 0.01;
 const TILE_GAP_Y = STAGE_HEIGHT * 0.02;
 const TILE_PAD = TILE_WIDTH * 0.06;
 const PREVIEW_HEIGHT = TILE_HEIGHT * 0.55;
+const TILE_FONT_SIZE = TILE_HEIGHT * 0.12;
+const NAME_Y = TILE_PAD + PREVIEW_HEIGHT + TILE_HEIGHT * 0.05;
+const PRICE_Y = NAME_Y + TILE_FONT_SIZE * 1.3;
 
 // Page arrows (under the grid)
 const ARROW_Y = STAGE_HEIGHT * 0.89;
@@ -64,7 +66,6 @@ const PREV_ARROW_X = STAGE_WIDTH * 0.55;
 const NEXT_ARROW_X = STAGE_WIDTH * 0.935;
 
 // Colors
-const FILL = "#d9d9d9";
 const TILE_FILL = "#8c8c8c";
 const ACTION_FILL = "#bfbfbf";
 const ACTION_HOVER_FILL = "#a9a9a9";
@@ -87,10 +88,8 @@ export class ShopScreenView implements View {
 	constructor(handlers: ShopScreenHandlers) {
 		this.handlers = handlers;
 
-		this.group.add(new Konva.Rect({ width: STAGE_WIDTH, height: STAGE_HEIGHT, fill: FILL }));
-
 		// Top Bar
-		this.group.add(new TopBar({ title: "Shop", onHome: handlers.onHome, onHelp: handlers.onHelp }).getGroup());
+		this.group.add(new TopBarNoHelp({ title: "Shop", onHome: handlers.onHome }).getGroup());
 
 		this.buildInfoRow();
 		this.buildCart();
@@ -291,20 +290,20 @@ export class ShopScreenView implements View {
 			}),
 			makeKitchenPreview(item, TILE_PAD, TILE_PAD, previewWidth, PREVIEW_HEIGHT),
 			new Konva.Text({
-				y: TILE_PAD + PREVIEW_HEIGHT + 10,
+				y: NAME_Y,
 				width: TILE_WIDTH,
 				text: item.name,
-				fontSize: 25,
+				fontSize: TILE_FONT_SIZE,
 				fontFamily: FONT,
 				fill: "white",
 				align: "center",
 				listening: false,
 			}),
 			new Konva.Text({
-				y: TILE_PAD + PREVIEW_HEIGHT + 40,
+				y: PRICE_Y,
 				width: TILE_WIDTH,
 				text: owned ? "Owned ✓" : `$${item.price}`,
-				fontSize: 25,
+				fontSize: TILE_FONT_SIZE,
 				fontStyle: "bold",
 				fontFamily: FONT,
 				fill: "white",

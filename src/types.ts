@@ -14,11 +14,14 @@ export type Screen =
 	| { type: "game" }
 	| { type: "newGameCheck" }
 	| { type: "shop" }
+	| { type: "customize" }
 	| { type: "gameTutorial" }
 	| { type: "recipeTutorial" }
+	| { type: "mathTutorial" }
 	| { type: "pieMinigame"}
-  | { type: "mainGame" }
-	| { type: "cashierGame" };
+    | { type: "mainGame" }
+	| { type: "cashierGame" }
+	| { type: "customize"};
 
 export abstract class ScreenController {
 	abstract getView(): View;

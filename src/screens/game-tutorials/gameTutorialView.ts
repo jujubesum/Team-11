@@ -1,9 +1,8 @@
 import Konva from "konva";
 import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "./../../constants"
-import { TopBar } from "../../components/TopBar.ts";
+import { TopBarNoHelp } from "../../components/TopBarNoHelp.ts";
 import { makeCircleButton, setArrowEnabled } from "../../components/CircleButton.ts";
 
-const BGCOLOR = "#D9D9D9";
 const WHITE = "#FFFFFF"
 const HOVERFILL = "#eeeeee"
 const MARGIN = 50;
@@ -31,7 +30,6 @@ export class GameTutorialView {
   private rightArrow: Konva.Group;
 
   private onHome?: () => void;
-  private onHelp?: () => void;
   private onArrowHandler?: (rightShift: boolean) => void;
 
 
@@ -41,18 +39,9 @@ export class GameTutorialView {
     const leftPanel = new Konva.Group({x: LEFT_BOX_X, y: BOX_Y});
     const rightPanel = new Konva.Group({x:RIGHT_BOX_X, y: BOX_Y});
 
-    const bg = new Konva.Rect({
-      x:0,
-      y:0,
-      width: STAGE_WIDTH,
-      height: STAGE_HEIGHT,
-      fill: BGCOLOR,
-    });
-
-    const topBar = new TopBar({
+    const topBar = new TopBarNoHelp({
         title: "How to Play",
         onHome: () => this.onHome?.(),
-        onHelp: () => this.onHelp?.(),
     });
 
     this.titleDisplay = new Konva.Text({
@@ -98,7 +87,6 @@ export class GameTutorialView {
     rightPanel.add(this.makeBox(), placeholder);
 
     this.group.add(
-      bg, 
       topBar.getGroup(),
       leftPanel,
       rightPanel,
@@ -142,10 +130,6 @@ export class GameTutorialView {
 
   onHomePress(handler: () => void): void {
       this.onHome = handler;
-  }
-
-  onHelpPress(handler: () => void): void {
-      this.onHelp = handler;
   }
 
   /**

@@ -4,10 +4,9 @@ import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import type { MathOperation } from "../../mathTutorials.ts";
 import type { RecipeSkillStatus } from "../../tutorialManager.ts";
-import { TopBar } from "../../components/TopBar.ts";
+import { TopBarNoHelp } from "../../components/TopBarNoHelp.ts";
 import { makeCircleButton, setArrowEnabled } from "../../components/CircleButton.ts";
 
-const BGCOLOR = "#D9D9D9";
 const WHITE = "#FFFFFF";
 const MARGIN = 50;
 const GAP = 60;
@@ -37,7 +36,6 @@ export class RecipeTutorialView implements View {
     private onRecipeChangeHandler?: (next: boolean) => void;
     private onBackToRecipeStepsHandler?: () => void;
     private onHome?: () => void;
-    private onHelp?: () => void;
     private onArrowHandler?: (rightShift: boolean) => void;
 
     constructor() {
@@ -45,18 +43,9 @@ export class RecipeTutorialView implements View {
         const leftPanel = new Konva.Group({ x: LEFT_BOX_X, y: BOX_Y });
         const rightPanel = new Konva.Group({ x: RIGHT_BOX_X, y: BOX_Y });
 
-        const bg = new Konva.Rect({
-            x: 0,
-            y: 0,
-            width: STAGE_WIDTH,
-            height: STAGE_HEIGHT,
-            fill: BGCOLOR,
-        });
-
-        const topBar = new TopBar({
+        const topBar = new TopBarNoHelp({
             title: "Recipe Tutorials",
             onHome: () => this.onHome?.(),
-            onHelp: () => this.onHelp?.(),
         });
 
         this.titleDisplay = new Konva.Text({
@@ -148,7 +137,6 @@ export class RecipeTutorialView implements View {
         );
 
         this.group.add(
-            bg,
             topBar.getGroup(),
             leftPanel,
             rightPanel,
@@ -222,10 +210,6 @@ export class RecipeTutorialView implements View {
 
     onHomePress(handler: () => void): void {
         this.onHome = handler;
-    }
-
-    onHelpPress(handler: () => void): void {
-        this.onHelp = handler;
     }
 
     onSkillSelect(handler: (operation: MathOperation) => void): void {

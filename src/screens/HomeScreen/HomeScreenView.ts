@@ -7,9 +7,11 @@ import { Button } from "../../components/Button.ts";
 export interface HomeScreenHandlers {
 	onSaveExit: () => void;
 	onShop: () => void;
+	onCustomize: () => void;
 	onRecipeTutorials?: () => void;
+	onMathTutorials?: () => void;
 	onPieFractions?: () => void;
-  onMainGame: () => void;
+  	onMainGame: () => void;
 	onCashierGame?: () => void;
 }
 
@@ -30,40 +32,20 @@ export class HomeScreenView implements View {
 	constructor(handlers: HomeScreenHandlers) {
 		this.group = new Konva.Group({ visible: false });
 
-		this.group.add(
-			new Konva.Rect({
-				width: STAGE_WIDTH,
-				height: STAGE_HEIGHT,
-				fill: "#d9d9d9",
-			}),
-		);
-
 		const leftX = PAD_X;
 		const rightX = PAD_X + COL_WIDTH + COL_GAP;
 
 		this.addButton("Start Baking!", leftX, rowY(0), FULL_WIDTH, handlers.onMainGame);
 
 		this.addButton("Minigame: Change Counting", leftX, rowY(1), COL_WIDTH, handlers.onCashierGame,);
-		this.addButton("Math Tutorials", rightX, rowY(1), COL_WIDTH);
+		this.addButton("Minigame: Pie Fractions", rightX, rowY(1), COL_WIDTH, handlers.onPieFractions);
 
-		this.addButton(
-			"Minigame: Pie Fractions", 
-			leftX, 
-			rowY(2), 
-			COL_WIDTH,
-			handlers.onPieFractions,
-		);
-		
-		this.addButton(
-			"Recipe Tutorials",
-			rightX,
-			rowY(2),
-			COL_WIDTH,
-			handlers.onRecipeTutorials,
-		);
+		this.addButton("Math Tutorials", leftX, rowY(2), COL_WIDTH, handlers.onMathTutorials);
+		this.addButton("Recipe Tutorials", rightX, rowY(2), COL_WIDTH, handlers.onRecipeTutorials);
 
 		this.addButton("Shop", leftX, rowY(3), COL_WIDTH, handlers.onShop);
-		this.addButton("Recipe Book", rightX, rowY(3), COL_WIDTH);
+		this.addButton("Customize", rightX, rowY(3), COL_WIDTH, handlers.onCustomize);
+		
 		this.addButton("Save & Exit", leftX, rowY(4), FULL_WIDTH, handlers.onSaveExit, "red", "red");
 	}
 
