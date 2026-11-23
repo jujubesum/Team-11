@@ -520,6 +520,12 @@ export class MainGameScreenView implements View {
     ]);
   }
 
+  setIncorrectStats(attemptsRemaining: number){
+    this.incorrectPopup.setDetails([
+      `Attempts remaining: ${attemptsRemaining}`
+    ])
+  }
+
   setRecipeImage(url: string): void {
     const img = new Image();
     const IMAGE_TOP = MARGIN + PADDING * 2

@@ -203,6 +203,7 @@ export class MainGameScreenController extends ScreenController {
       this.view.setActivePopup("fail");
     }
     else {
+      this.view.setIncorrectStats(this.model.getAttemptsRemaining());
       this.view.setActivePopup("incorrect"); 
     }
     this.view.showPopup();
