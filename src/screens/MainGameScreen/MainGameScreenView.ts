@@ -514,10 +514,9 @@ export class MainGameScreenView implements View {
     }
   }
 
-  setOrderStats(questions: number, correctAnswers: number, earnings: number){
+  setOrderStats(questions: number, correctAnswers: number){
     this.completePopup.setDetails([
-      `Your statistics: ${correctAnswers}/${questions} correct!`,
-      `$${earnings} made!`
+      `Your statistics: ${correctAnswers}/${questions} correct!`
     ]);
   }
 

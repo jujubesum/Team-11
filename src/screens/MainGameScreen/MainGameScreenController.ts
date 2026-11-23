@@ -221,7 +221,7 @@ export class MainGameScreenController extends ScreenController {
    */
   orderComplete(): void {
     const stats = this.model.getStats();
-    this.view.setOrderStats(stats.questionsAnswered, stats.questionsCorrect, stats.earnings);
+    this.view.setOrderStats(stats.questionsAnswered, stats.questionsCorrect);
     this.view.setActivePopup("complete");
     this.view.showPopup();
     this.model.resetOrder();
