@@ -87,7 +87,7 @@ export class CashierGameView implements View {
     this.onBack = handlers.onBack;
 
     this.group.add(
-      new Konva.Rect({ width: STAGE_WIDTH, height: STAGE_HEIGHT, fill: BG_FILL }),
+      
       new Konva.Rect({ width: STAGE_WIDTH, height: HEADER_HEIGHT * SCALE, fill: HEADER_FILL }),
       this.content,
     );

@@ -56,12 +56,6 @@ export class MathTutorialView implements View {
         const leftPanel = new Konva.Group({ x: LEFT_BOX_X, y: BOX_Y });
         const rightPanel = new Konva.Group({ x: RIGHT_BOX_X, y: BOX_Y });
 
-        const bg = new Konva.Rect({
-            width: STAGE_WIDTH,
-            height: STAGE_HEIGHT,
-            fill: BGCOLOR,
-        });
-
         const topBar = new Konva.Rect({
             width: STAGE_WIDTH,
             height: TOPBAR_HEIGHT,
@@ -158,7 +152,6 @@ export class MathTutorialView implements View {
         rightPanel.add(this.makeBox(), operationsHeader, this.operationButtonsGroup);
 
         this.group.add(
-            bg,
             topBar,
             headerText,
             backButton.getGroup(),

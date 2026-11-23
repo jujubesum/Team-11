@@ -15,11 +15,14 @@ describe("ShopScreenController", () => {
 	const mint = SHOP_ITEMS[1]!;
 	const firstOnPageTwo = SHOP_ITEMS[ITEMS_PER_PAGE]!;
 
+	const TEST_MONEY = 100;
+
 	beforeEach(() => {
 		localStorage.clear();
 		screenSwitcher = { switchToScreen: jest.fn() };
 		saveManager = new SaveManager();
 		saveManager.startNewGame();
+		saveManager.update({ money: TEST_MONEY });
 		controller = new ShopScreenController(screenSwitcher, saveManager);
 		controller.show();
 	});
@@ -38,7 +41,7 @@ describe("ShopScreenController", () => {
 
 	describe("opening the shop", () => {
 		it("shows the player's balance and an empty cart", () => {
-			expect(showsBalance(STARTING_MONEY)).toBe(true);
+			expect(showsBalance(TEST_MONEY)).toBe(true);
 			expect(showsCartTotal(0)).toBe(true);
 		});
 
@@ -94,7 +97,7 @@ describe("ShopScreenController", () => {
 
 			clickButton(root(), "Purchase");
 
-			expect(showsBalance(STARTING_MONEY - yellow.price)).toBe(true);
+			expect(showsBalance(TEST_MONEY - yellow.price)).toBe(true);
 			expect(showsCartTotal(0)).toBe(true);
 			expect(hasVisibleText(root(), "Owned ✓")).toBe(true);
 		});
@@ -105,7 +108,7 @@ describe("ShopScreenController", () => {
 
 			const reopened = new SaveManager().load();
 			expect(reopened!.customizations).toContain(yellow.id);
-			expect(reopened!.money).toBe(STARTING_MONEY - yellow.price);
+			expect(reopened!.money).toBe(TEST_MONEY - yellow.price);
 		});
 
 		it("does nothing when the player cannot afford the cart", () => {
@@ -123,7 +126,7 @@ describe("ShopScreenController", () => {
 		it("does nothing when the cart is empty", () => {
 			clickButton(root(), "Purchase");
 
-			expect(showsBalance(STARTING_MONEY)).toBe(true);
+			expect(showsBalance(TEST_MONEY)).toBe(true);
 			expect(saveManager.getCurrent()!.customizations).toEqual([]);
 		});
 	});
