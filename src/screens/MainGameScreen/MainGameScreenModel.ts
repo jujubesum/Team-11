@@ -41,6 +41,7 @@ export interface MainGameScreenModelApi {
   getProblem(): { x: number, y: number, operation: Operation };
   getHint(): number;
   getStats(): { questionsAnswered: number, questionsCorrect: number , earnings: number };
+  getAttemptsRemaining(): number;
 }
 
 export class MainGameScreenModel implements MainGameScreenModelApi {
@@ -224,6 +225,14 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    */
   isOrderFailed(): boolean {
     return this.lastResult?.attemptsRemaining === 0;
+  }
+
+  /**
+   * 
+   * @returns number of attempts user has left
+   */
+  getAttemptsRemaining(): number {
+    return this.lastResult?.attemptsRemaining ?? 2;
   }
 
   /**

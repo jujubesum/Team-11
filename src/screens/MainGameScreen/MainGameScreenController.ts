@@ -203,6 +203,7 @@ export class MainGameScreenController extends ScreenController {
       this.view.setActivePopup("fail");
     }
     else {
+      this.view.setIncorrectStats(this.model.getAttemptsRemaining());
       this.view.setActivePopup("incorrect"); 
     }
     this.view.showPopup();
@@ -221,7 +222,7 @@ export class MainGameScreenController extends ScreenController {
    */
   orderComplete(): void {
     const stats = this.model.getStats();
-    this.view.setOrderStats(stats.questionsAnswered, stats.questionsCorrect, stats.earnings);
+    this.view.setOrderStats(stats.questionsAnswered, stats.questionsCorrect);
     this.view.setActivePopup("complete");
     this.view.showPopup();
     this.model.resetOrder();
@@ -245,6 +246,7 @@ export class MainGameScreenController extends ScreenController {
     const recipe = this.model.getCurrentRecipe();
     this.view.updateTitle(recipe.name);
     this.view.fillLeftPanel(recipe.steps);
+    this.view.setRecipeImage(`/images/recipes/${recipe.name.toLowerCase()}.svg`)
     this.view.clearAnswer();
   }
 
@@ -269,7 +271,7 @@ export class MainGameScreenController extends ScreenController {
     const x = problem.x;
     const y = problem.y;
     const operation = problem.operation;
-    this.view.fillRightPanel(x, y, operation);
+    this.view.fillQuestionPanel(x, y, operation);
   }
 
   /**

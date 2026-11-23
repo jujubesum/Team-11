@@ -25,6 +25,10 @@ export const TUTORIAL_DATA = [
   },
   {
     title: "Shop",
-    body: "Upon ending the day, you can choose to go visit a nearby store to see what goodies they have in stock! You may purchase various items like little trinkets and rewards to display!",
+    body: "Upon ending the day, you can choose to go visit a nearby store to see what goodies they have in stock! You may purchase different background colors eith the money you earned from minigames!",
+  },
+  {
+    title: "Customize",
+    body: "You can apply any of your owned background colors to the entire game layout! Have fun customizing your game to your own style and liking!",
   }
 ];
