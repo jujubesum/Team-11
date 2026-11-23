@@ -34,6 +34,7 @@ function makeFakeModel(overrides: Partial<MainGameScreenModelApi> = {}): MainGam
     getProblem: jest.fn(() => ({ x: 4, y: 4, operation: "+"})),
     getHint: jest.fn(() => 0),
     getStats: jest.fn(() => ({ questionsAnswered: 4, questionsCorrect: 4, earnings: 40 })),
+    getAttemptsRemaining: jest.fn(() => 0),
     ...overrides,
   }
 }
@@ -53,11 +54,11 @@ const saveManager = {} as unknown as SaveManager;
 describe("MainGameScreenController", () => {
   beforeEach(() => {
     view = {
-      fillLeftPanel: jest.fn(), fillRightPanel: jest.fn(), setProgress: jest.fn(),
+      fillLeftPanel: jest.fn(), fillQuestionPanel: jest.fn(), setProgress: jest.fn(),
       setStepChecked: jest.fn(), clearAnswer: jest.fn(), showPopup: jest.fn(),
       hidePopup: jest.fn(), setActivePopup: jest.fn(), showHint: jest.fn(),
       updateTitle: jest.fn(), showWarning: jest.fn(), setOrderStats: jest.fn(),
-      showGuide: jest.fn(),
+      showGuide: jest.fn(), setRecipeImage: jest.fn(), setIncorrectStats: jest.fn(),
     } as unknown as MainGameScreenView;
     screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
     model = makeFakeModel();
@@ -75,7 +76,7 @@ describe("MainGameScreenController", () => {
     expect(model.advanceOrder).toHaveBeenCalledTimes(1);
     expect(view.updateTitle).toHaveBeenCalledTimes(1);
     expect(view.fillLeftPanel).toHaveBeenCalledTimes(1);
-    expect(view.fillRightPanel).toHaveBeenCalledTimes(1);
+    expect(view.fillQuestionPanel).toHaveBeenCalledTimes(1);
     expect(view.setProgress).toHaveBeenCalledTimes(1);
   });
 
@@ -158,7 +159,7 @@ describe("MainGameScreenController", () => {
     expect(model.advanceProblem).toHaveBeenCalledTimes(1);
     expect(view.setProgress).toHaveBeenCalledTimes(2);
     expect(view.setStepChecked).toHaveBeenCalled();
-    expect(view.fillRightPanel).toHaveBeenCalledTimes(2);
+    expect(view.fillQuestionPanel).toHaveBeenCalledTimes(2);
   });
 
   it("replays question and doesn't advance question when user presses retry", () => {
@@ -186,6 +187,6 @@ describe("MainGameScreenController", () => {
     controller.handleReroll();
 
     expect(model.advanceProblem).not.toHaveBeenCalled();
-    expect(view.fillRightPanel).toHaveBeenCalledTimes(2);
+    expect(view.fillQuestionPanel).toHaveBeenCalledTimes(2);
   });
 });
