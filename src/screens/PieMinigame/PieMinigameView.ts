@@ -1,5 +1,6 @@
 import Konva from "konva";
 import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "../../constants.ts";
+import { TopBarNoHelp } from "../../components/TopBarNoHelp.ts";
 
 // Color constants
 const HEADERCOLOR = "#989898";
@@ -22,52 +23,40 @@ export class PieMinigameView {
   private summaryGroup: Konva.Group;
   private summaryScore: Konva.Text;
   private doneButtonText: Konva.Text;
+  private leaderboardText: Konva.Text;
 
   //Pie images and callbacks
   private images = new Map<string, HTMLImageElement>();
   private onPick: ((index: number) => void) | null = null;
   private onDone: (() => void) | null = null;
+  private onPlayAgain: (() => void) | null = null;
   
-  constructor() {
+  constructor(handlers: { onHome: () => void}) {
     this.group = new Konva.Group({ visible: false });
 
-    const topBar = new Konva.Rect({
-        width: STAGE_WIDTH,
-        height: TOPBAR_HEIGHT,
-        fill: HEADERCOLOR,
-    });
-
-    const headerText = new Konva.Text({
-        width: STAGE_WIDTH,
-        height: TOPBAR_HEIGHT,
-        text: "Pie Fractions!",
-        fontSize: 56,
-        fill: "black",
-        align: "center",
-        verticalAlign: "middle",
-    });
+    const topBar = new TopBarNoHelp({ title: "Pie Fractions!", onHome: handlers.onHome });
 
     //Countdown timer text which is updated by setTimer
     this.timerText = new Konva.Text({
         x: 30,
+        y: TOPBAR_HEIGHT + 30,
         width: 300,
-        height: TOPBAR_HEIGHT,
         text: "Time: 30",
         fontSize: 36,
         fill: "black",
-        verticalAlign: "middle",
+        listening: false,
     });
 
     //Score which is updated by setScore
     this.scoreText = new Konva.Text({
         x: STAGE_WIDTH - 330,
+        y: TOPBAR_HEIGHT + 30,
         width: 300,
-        height: TOPBAR_HEIGHT,
         text: "Score: 0",
         fontSize: 36,
         fill: "black",
         align: "right",
-        verticalAlign: "middle",
+        listening: false,
     });
 
     //Question group
@@ -75,12 +64,13 @@ export class PieMinigameView {
 
     const instructions = new Konva.Text({
         width: STAGE_WIDTH,
-        height: TOPBAR_HEIGHT + 170,
+        height: TOPBAR_HEIGHT + 190,
         text: "Choose the pie that corresponds with the fraction",
         fontSize: 35,
         fill: "black",
         align: "center",
         verticalAlign: "middle",
+        listening: false,
     });
 
     const gameText = new Konva.Text({
@@ -91,6 +81,7 @@ export class PieMinigameView {
         fill: "black",
         align: "center",
         verticalAlign: "middle",
+        listening: false,
     });
 
    
@@ -150,7 +141,7 @@ export class PieMinigameView {
 
     this.summaryScore = new Konva.Text({
         x: 0,
-        y: TOPBAR_HEIGHT + 220,
+        y: TOPBAR_HEIGHT + 200,
         width: STAGE_WIDTH,
         text: "",
         fontSize: 48,
@@ -158,45 +149,68 @@ export class PieMinigameView {
         align: "center",
     });
 
-    const BUTTON_W = 320;
-    const BUTTON_H = 70;
-
-    const doneButton = new Konva.Group({
-        x: (STAGE_WIDTH - BUTTON_W) / 2,
-        y: STAGE_HEIGHT - BUTTON_H - 60,
-    });
-
-    const buttonRect = new Konva.Rect({
-        width: BUTTON_W,
-        height: BUTTON_H,
-        fill: HEADERCOLOR,
-        stroke: "black",
-        strokeWidth: 3,
-        cornerRadius: 12,
-    });
-
-    this.doneButtonText = new Konva.Text({
-        width: BUTTON_W,
-        height: BUTTON_H,
-        text: "Back to home",
-        fontSize: 30,
+    this.leaderboardText = new Konva.Text({
+        x: 0,
+        y: TOPBAR_HEIGHT + 260,
+        width: STAGE_WIDTH,
+        text: "",
+        fontSize: 36,
         fill: "black",
         align: "center",
-        verticalAlign: "middle",
+        lineHeight: 1.4,
+        listening: false,
     });
 
-    doneButton.add(buttonRect, this.doneButtonText);
-    doneButton.on("click tap", () => this.onDone?.());
-    //Turns the cursor into a pointer
-    doneButton.on("mouseenter", () => (document.body.style.cursor = "pointer"));
-    doneButton.on("mouseleave", () => (document.body.style.cursor = "default"));
+    const BUTTON_W = 320;
+    const BUTTON_H = 70;
+    const BUTTON_GAP = 40;
+    const BUTTON_Y = STAGE_HEIGHT - BUTTON_H - 60;
+    const buttonsLeft = (STAGE_WIDTH - (2 * BUTTON_W + BUTTON_GAP)) / 2;
 
-    this.summaryGroup.add(summaryTitle, this.summaryScore, doneButton);
+    const makeButton = (label: string, x: number, onClick: () => void) => {
+        const button = new Konva.Group({ x, y: BUTTON_Y });
+        const text = new Konva.Text({
+            width: BUTTON_W,
+            height: BUTTON_H,
+            text: label,
+            fontSize: 30,
+            fill: "black",
+            align: "center",
+            verticalAlign: "middle",
+            listening: false,
+        });
+        button.add(
+            new Konva.Rect({
+                width: BUTTON_W,
+                height: BUTTON_H,
+                fill: HEADERCOLOR,
+                stroke: "black",
+                strokeWidth: 3,
+                cornerRadius: 12,
+            }),
+            text
+        );
+        button.on("click tap", onClick);
+        button.on("mouseenter", () => (document.body.style.cursor = "pointer"));
+        button.on("mouseleave", () => (document.body.style.cursor = "default"));
+        return { button, text };
+    };
+
+    const playAgain = makeButton("Play again", buttonsLeft, () => this.onPlayAgain?.());
+    const done = makeButton("Back to home", buttonsLeft + BUTTON_W + BUTTON_GAP, () => this.onDone?.());
+    this.doneButtonText = done.text;
+
+    this.summaryGroup.add(
+        summaryTitle, 
+        this.summaryScore, 
+        this.leaderboardText,
+        playAgain.button,
+        done.button
+    );
 
     //Background
     this.group.add(
-        topBar,
-        headerText,
+        topBar.getGroup(),
         this.timerText,
         this.scoreText,
         this.questionGroup,
@@ -251,10 +265,19 @@ export class PieMinigameView {
   }
 
   //Summary
-  showSummary(score: number, buttonLabel: string, onDone: () => void): void {
+    showSummary(
+        score: number, 
+        earned: number, 
+        topScores: number[], 
+        buttonLabel: string, 
+        onDone: () => void,
+        onPlayAgain: () => void
+    ): void {
     this.onDone = onDone;
+    this.onPlayAgain = onPlayAgain;
     this.doneButtonText.text(buttonLabel);
-    this.summaryScore.text(`You got ${score} right!`);
+    this.summaryScore.text(`You got ${score} right! You earned $${earned}`);
+    this.leaderboardText.text("Top 5 Scores\n" + topScores.map((s, i) => `${i + 1}. ${s}`).join("\n"));
 
     this.questionGroup.visible(false);
     this.summaryGroup.visible(true);
