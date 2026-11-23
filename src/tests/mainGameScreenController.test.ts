@@ -34,6 +34,7 @@ function makeFakeModel(overrides: Partial<MainGameScreenModelApi> = {}): MainGam
     getProblem: jest.fn(() => ({ x: 4, y: 4, operation: "+"})),
     getHint: jest.fn(() => 0),
     getStats: jest.fn(() => ({ questionsAnswered: 4, questionsCorrect: 4, earnings: 40 })),
+    getAttemptsRemaining: jest.fn(() => 0),
     ...overrides,
   }
 }
@@ -57,7 +58,7 @@ describe("MainGameScreenController", () => {
       setStepChecked: jest.fn(), clearAnswer: jest.fn(), showPopup: jest.fn(),
       hidePopup: jest.fn(), setActivePopup: jest.fn(), showHint: jest.fn(),
       updateTitle: jest.fn(), showWarning: jest.fn(), setOrderStats: jest.fn(),
-      showGuide: jest.fn(), setRecipeImage: jest.fn(),
+      showGuide: jest.fn(), setRecipeImage: jest.fn(), setIncorrectStats: jest.fn(),
     } as unknown as MainGameScreenView;
     screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
     model = makeFakeModel();
