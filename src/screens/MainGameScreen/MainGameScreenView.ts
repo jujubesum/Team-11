@@ -530,7 +530,7 @@ export class MainGameScreenView implements View {
     const img = new Image();
     const IMAGE_TOP = MARGIN + PADDING * 2
     img.onload = () => {
-      const maxW = PANEL_WIDTH - 2 * PADDING;
+      const maxW = PANEL_WIDTH - 3 * PADDING;
       const maxH = PANEL_HEIGHT - IMAGE_TOP - PADDING;
       const scale = Math.min(maxW / img.width, maxH / img.height);   // fit inside the box
       const w = img.width * scale;
