@@ -1,5 +1,6 @@
 import { PieMinigameController } from "../screens/PieMinigame/PieMinigameController";
 import type { ScreenSwitcher } from "../types";
+import type { SaveManager } from "../saveManager";
 
 jest.mock("../screens/PieMinigame/PieMinigameView", () => ({
     PieMinigameView: class {
@@ -21,7 +22,12 @@ describe("PieMinigameController", () => {
     beforeEach(() => {
         jest.useFakeTimers();
         const screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
-        controller = new PieMinigameController(screenSwitcher);
+        const saveManager = {
+            load: jest.fn(() => ({ pieHighScores: [], money: 0 })),
+            update: jest.fn(),
+            save: jest.fn(),
+    } as unknown as SaveManager;
+        controller = new PieMinigameController(screenSwitcher, saveManager);
         view = controller.getView();
         controller.show();
     });
