@@ -64,8 +64,8 @@ export interface MainGameScreenHandlers {
 export class MainGameScreenView implements View {
   private group: Konva.Group;
   private leftPanel: Konva.Group;
-  private middlePanel: Konva.Group;
-  private rightPanel: Konva.Group;
+  private recipePanel: Konva.Group;
+  private questionPanel: Konva.Group;
   private recipeTitle: Konva.Text;
   private stepsGroup: Konva.Group;
   private stepsCheck: Konva.Shape[] = [];
@@ -86,6 +86,7 @@ export class MainGameScreenView implements View {
   private guidePopup: HintPopup;
   private warningPopup: HintPopup;
   private activePopup: Popup | undefined;
+  private recipeImage: Konva.Image | null = null;
 
 
   constructor(handlers: MainGameScreenHandlers){
@@ -96,9 +97,10 @@ export class MainGameScreenView implements View {
   
     // game panels
     this.leftPanel = this.makePanel(PANEL_WIDTH, PANEL_HEIGHT, MARGIN, PANELS_Y);
-    this.middlePanel = this.makePanel(PANEL_WIDTH, PANEL_HEIGHT, MARGIN + GAP + PANEL_WIDTH, PANELS_Y);
-    this.rightPanel = this.makePanel(PANEL_WIDTH, PANEL_HEIGHT, MARGIN + GAP * 2 + PANEL_WIDTH * 2, PANELS_Y)
+    this.recipePanel = this.makePanel(PANEL_WIDTH, PANEL_HEIGHT, MARGIN + GAP * 2 + PANEL_WIDTH * 2, PANELS_Y); // this is now the right/recipe panel
+    this.questionPanel = this.makePanel(PANEL_WIDTH, PANEL_HEIGHT, MARGIN + GAP + PANEL_WIDTH, PANELS_Y); // this is now the middle/question panel
 
+    
     // Static headers on game panels
     this.leftPanel.add(new Konva.Text({
       text: "Steps",
@@ -109,7 +111,7 @@ export class MainGameScreenView implements View {
       y: MARGIN
     }));
 
-    this.rightPanel.add(new Konva.Text({
+    this.questionPanel.add(new Konva.Text({
       text: "Solve Problem",
       fontSize: 64,
       fill: "black",
@@ -127,11 +129,11 @@ export class MainGameScreenView implements View {
       width: PANEL_WIDTH,
       y: MARGIN,
     });
-    this.middlePanel.add(this.recipeTitle);
+    this.recipePanel.add(this.recipeTitle);
 
     this.group.add(this.leftPanel,
-                   this.middlePanel,
-                   this.rightPanel,
+                   this.recipePanel,
+                   this.questionPanel,
     );
 
     // non static steps boxes and text
@@ -176,14 +178,14 @@ export class MainGameScreenView implements View {
     this.group.add(this.progress);
 
     // Answer box
-    this.rightPanel.add(new Konva.Text({
+    this.questionPanel.add(new Konva.Text({
       x: PADDING, y: ANSWER_Y, width: LABEL_WIDTH, height: ANSWER_ROW_HEIGHT,
       text: "? =", fontSize: 24, fill: "black", verticalAlign: "middle",
     }));
     this.inputSlot = new Konva.Rect({
       x: INPUT_X, y: ANSWER_Y, width: INPUT_WIDTH, height: ANSWER_ROW_HEIGHT,
     });
-    this.rightPanel.add(this.inputSlot);
+    this.questionPanel.add(this.inputSlot);
 
     this.input = document.createElement("input");
     this.input.type = "text";
@@ -202,7 +204,7 @@ export class MainGameScreenView implements View {
     this.input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") submit();
     })
-    this.rightPanel.add(this.submitButton);
+    this.questionPanel.add(this.submitButton);
 
     // Problem text
 
@@ -218,7 +220,7 @@ export class MainGameScreenView implements View {
       verticalAlign: "middle",
       listening: false,
     });
-    this.rightPanel.add(this.problemText)
+    this.questionPanel.add(this.problemText)
 
     // The following will all be popup declarations (hidden by default)
 
@@ -387,7 +389,7 @@ export class MainGameScreenView implements View {
     this.group.getLayer()?.batchDraw();
   }
 
-  fillRightPanel(x: number, y: number, operation: string){
+  fillQuestionPanel(x: number, y: number, operation: string){
     this.problemText.text(`x = ${x}\ny = ${y}\nx ${operation} y = ?`);
     this.clearAnswer();
     this.group.getLayer()?.batchDraw();
@@ -512,11 +514,42 @@ export class MainGameScreenView implements View {
     }
   }
 
-  setOrderStats(questions: number, correctAnswers: number, earnings: number){
+  setOrderStats(questions: number, correctAnswers: number){
     this.completePopup.setDetails([
-      `Your statistics: ${correctAnswers}/${questions} correct!`,
-      `$${earnings} made!`
+      `Your statistics: ${correctAnswers}/${questions} correct!`
     ]);
+  }
+
+  setIncorrectStats(attemptsRemaining: number){
+    this.incorrectPopup.setDetails([
+      `Attempts remaining: ${attemptsRemaining}`
+    ])
+  }
+
+  setRecipeImage(url: string): void {
+    const img = new Image();
+    const IMAGE_TOP = MARGIN + PADDING * 2
+    img.onload = () => {
+      const maxW = PANEL_WIDTH - 3 * PADDING;
+      const maxH = PANEL_HEIGHT - IMAGE_TOP - PADDING;
+      const scale = Math.min(maxW / img.width, maxH / img.height);   // fit inside the box
+      const w = img.width * scale;
+      const h = img.height * scale;
+
+      this.recipeImage?.destroy();
+      this.recipeImage = new Konva.Image({
+        image: img,
+        width: w,
+        height: h,
+        x: (PANEL_WIDTH - w) / 2,                    // centered horizontally
+        y: IMAGE_TOP + (maxH - h) / 2,               // centered in the space under the title
+        listening: false,
+      });
+      this.recipePanel.add(this.recipeImage);
+      this.group.getLayer()?.batchDraw();
+    };
+    img.onerror = () => console.warn("Could not load recipe image:", url);
+    img.src = url;
   }
 
   getGroup(): Konva.Group {
