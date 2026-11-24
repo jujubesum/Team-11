@@ -156,7 +156,6 @@ export class MainGameScreenController extends ScreenController {
    * If not, prompt user to take an order
    */
   onStart() {
-    console.log("onStart", { taken: this.model.isOrderTaken() });
     const localSave = this.model.isOrderTaken(); // checks local question
     if (localSave){
       return;
@@ -168,7 +167,6 @@ export class MainGameScreenController extends ScreenController {
       return;
     }
     else {
-      console.log("No save detected?");
       this.view.setActivePopup("start");
       this.view.showPopup();
     }

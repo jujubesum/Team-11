@@ -65,7 +65,7 @@ export class QuestionSession {
 
   toSaved(): SavedSession {
     return {
-      question: this.question,
+      question: {...this.question},
       attemptsRemaining: this.attemptsRemaining,
       finished: this.finished,
     }
