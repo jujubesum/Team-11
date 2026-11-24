@@ -19,7 +19,7 @@ describe("GameTutorialModel.loadTutorals", () => {
   it("doesn't modify title or body from the data file", () =>{
     const tutorials = model.loadTutorials();
     expect(tutorials.map(tutorial => ({
-      title: tutorial.getTitle(), body: tutorial.getBody()
+      title: tutorial.getTitle(), body: tutorial.getBody(), image: tutorial.getImage(),
     }))).toEqual(TUTORIAL_DATA);
   });
 });
