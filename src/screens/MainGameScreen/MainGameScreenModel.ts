@@ -208,7 +208,7 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    * Checks if an order is currently taken, if not user would be prompted to start a new one
    */
   isOrderTaken(): boolean {
-    if (this.currentStep != -1) return true;
+    if (this.currentStep != -1 && !this.orderManager.wasGameReset()) return true;
     return false;
   }
 

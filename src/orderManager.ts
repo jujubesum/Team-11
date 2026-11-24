@@ -43,6 +43,12 @@ export class OrderManager {
       return ordersComplete % ORDERS_PER_UNLOCK == 0 && ordersComplete < 9; 
     }
 
+    public wasGameReset(): boolean {
+      const saveData = this.saveManager.getCurrent();
+      if(!saveData?.currentOrderId) return true;
+      return false;
+    }
+
     public isRecipeUnlocked(recipeId: string): boolean {
         const state = this.getGameState();
         return state.unlockedRecipes.some((recipe) => recipe.id === recipeId);
