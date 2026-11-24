@@ -61,7 +61,7 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
     this.saveManager = saveManager;
     this.orderManager = new OrderManager(saveManager);
     this.currentRecipe = undefined;
-    this.currentStep = 0;
+    this.currentStep = -1;
     this.gameStats = { questionsAnswered: 0, questionsCorrect: 0 , earnings: 0 }
     this.lastResult = undefined;
     this.lastGuess = 0;
@@ -207,6 +207,7 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    * Checks if an order is currently taken, if not user would be prompted to start a new one
    */
   isOrderTaken(): boolean {
+    if (this.currentStep != -1) return true;
     return false;
   }
 
