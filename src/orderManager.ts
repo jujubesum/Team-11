@@ -26,6 +26,7 @@ export class OrderManager {
     private saveGameState(state: GameState): void {
         this.saveManager.update({
             unlockedRecipeIds: state.unlockedRecipes.map((recipe) => recipe.id),
+            level: state.unlockedRecipes.length,
             currentOrderId: state.currentOrder?.id ?? null,
             completedOrders: state.completedOrders
         });
