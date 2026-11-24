@@ -30,6 +30,7 @@ function makeFakeModel(overrides: Partial<MainGameScreenModelApi> = {}): MainGam
     isOrderFailed: jest.fn(() => false),
     isOrderUnlocked: jest.fn(() => false),
     save: jest.fn(),
+    load: jest.fn(),
     getCurrentRecipe: jest.fn(() => (PLACEHOLDER_RECIPE)), 
     getProgress: jest.fn(() => ({ done: 0, total: 4 })),
     getProblem: jest.fn(() => ({ x: 4, y: 4, operation: "+"})),
@@ -63,11 +64,6 @@ describe("MainGameScreenController", () => {
     } as unknown as MainGameScreenView;
     screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
     model = makeFakeModel();
-  });
-
-  it("checks if a recipe is loaded upon creation", () => {
-    makeController();
-    expect(model.isOrderTaken).toHaveBeenCalledTimes(1);
   });
 
   it("loads new order and fills panels when user chooses to start a new order", () => {

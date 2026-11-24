@@ -31,7 +31,6 @@ export class MainGameScreenController extends ScreenController {
       onReroll: () => this.handleReroll(),
       onFailQuit: () => this.handleFailQuit(),
     });
-    this.onStart();
   }
 
   getView(): MainGameScreenView {
@@ -157,8 +156,19 @@ export class MainGameScreenController extends ScreenController {
    * If not, prompt user to take an order
    */
   onStart() {
-    const save = this.model.isOrderTaken();
-    if (!save){
+    console.log("onStart", { taken: this.model.isOrderTaken() });
+    const localSave = this.model.isOrderTaken(); // checks local question
+    if (localSave){
+      return;
+    }
+    else if (this.model.load()){
+      this.updateProblem();
+      this.updateProgress();
+      this.updateRecipe();
+      return;
+    }
+    else {
+      console.log("No save detected?");
       this.view.setActivePopup("start");
       this.view.showPopup();
     }
@@ -275,6 +285,7 @@ export class MainGameScreenController extends ScreenController {
     const y = problem.y;
     const operation = problem.operation;
     this.view.fillQuestionPanel(x, y, operation);
+    this.model.save();
   }
 
   /**

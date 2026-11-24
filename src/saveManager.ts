@@ -1,3 +1,5 @@
+import type { MainGameQuestionData } from "./screens/MainGameScreen/MainGameScreenModel";
+
 export interface SaveData {
 	version: number;
 	level: number;
@@ -9,6 +11,7 @@ export interface SaveData {
 	completedOrders: number;
 	createdAt: number;
 	lastSavedAt: number;
+  lastQuestion: MainGameQuestionData | null;
 }
 
 export const SAVE_KEY = "bakeryGameSave";
@@ -29,6 +32,7 @@ export function createDefaultSave(): SaveData {
 		completedOrders: 0,
 		createdAt: now,
 		lastSavedAt: now,
+    lastQuestion: null,
 	};
 }
 

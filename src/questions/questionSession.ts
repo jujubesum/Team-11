@@ -4,6 +4,12 @@ import { getHint } from "./hintProvider.ts";
 
 const MAX_ATTEMPTS = 3;
 
+export interface SavedSession{
+  question: Question;
+	attemptsRemaining: number;
+	finished: boolean;
+}
+
 //holds one question and player's progress on it, make one per question
 export class QuestionSession {
 	private question: Question;
@@ -56,4 +62,18 @@ export class QuestionSession {
 	isFinished(): boolean {
 		return this.finished;
 	}
+
+  toSaved(): SavedSession {
+    return {
+      question: this.question,
+      attemptsRemaining: this.attemptsRemaining,
+      finished: this.finished,
+    }
+  }
+
+  static fromSaved(data: SavedSession): QuestionSession {
+    const session = new QuestionSession(data.question);
+      Object.assign(session, data);
+      return session;
+  }
 }
