@@ -81,8 +81,8 @@ describe("MathTutorialController", () => {
 		expect(hasVisibleText(root, division.steps[0]!)).toBe(true);
 	});
 
-	it("returns to the home screen when Back is clicked", () => {
-		clickButton(root, "Back");
+	it("returns to the home screen when the home button is clicked", () => {
+		clickButton(root, "⌂");
 
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledTimes(1);
 		expect(screenSwitcher.switchToScreen).toHaveBeenCalledWith({ type: "home" });

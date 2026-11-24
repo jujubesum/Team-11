@@ -1,27 +1,24 @@
 import Konva from "konva";
 import type { View } from "../../types.ts";
-import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "../../constants.ts";
+import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
+import { TopBarNoHelp, TOP_BAR_HEIGHT } from "../../components/TopBarNoHelp.ts";
 import { getMathTutorial, type MathOperation } from "../../mathTutorials.ts";
 
-const HEADERCOLOR = "#989898";
-const BGCOLOR = "#D9D9D9";
 const WHITE = "#FFFFFF";
 const SELECTED_FILL = "#BDBDBD";
 const MARGIN = 50;
 const GAP = 60;
 const PADDING = 20;
 const BOX_WIDTH = (STAGE_WIDTH - 2 * MARGIN - GAP) / 2;
-const BOX_HEIGHT = ((STAGE_HEIGHT - TOPBAR_HEIGHT) * 3) / 4;
-const BOX_Y = TOPBAR_HEIGHT + MARGIN;
+const BOX_HEIGHT = ((STAGE_HEIGHT - TOP_BAR_HEIGHT) * 3) / 4;
+const BOX_Y = TOP_BAR_HEIGHT + MARGIN;
 const LEFT_BOX_X = MARGIN;
 const RIGHT_BOX_X = MARGIN + BOX_WIDTH + GAP;
 const NAV_BUTTON_WIDTH = 180;
 const NAV_BUTTON_HEIGHT = 55;
 const NAV_BUTTON_Y =
     BOX_Y + BOX_HEIGHT + Math.max(10, (STAGE_HEIGHT - BOX_Y - BOX_HEIGHT - NAV_BUTTON_HEIGHT) / 2);
-const BACK_BUTTON_WIDTH = 120;
-const BACK_BUTTON_HEIGHT = 50;
 const OPERATIONS_HEADER_HEIGHT = 60;
 const OPERATION_BUTTON_GAP = 12;
 
@@ -56,30 +53,9 @@ export class MathTutorialView implements View {
         const leftPanel = new Konva.Group({ x: LEFT_BOX_X, y: BOX_Y });
         const rightPanel = new Konva.Group({ x: RIGHT_BOX_X, y: BOX_Y });
 
-        const topBar = new Konva.Rect({
-            width: STAGE_WIDTH,
-            height: TOPBAR_HEIGHT,
-            fill: HEADERCOLOR,
-        });
-
-        const headerText = new Konva.Text({
-            width: STAGE_WIDTH,
-            height: TOPBAR_HEIGHT,
-            text: "Math Tutorials",
-            fontSize: 56,
-            fill: "black",
-            align: "center",
-            verticalAlign: "middle",
-            listening: false,
-        });
-
-        const backButton = new Button({
-            x: MARGIN / 2,
-            y: (TOPBAR_HEIGHT - BACK_BUTTON_HEIGHT) / 2,
-            width: BACK_BUTTON_WIDTH,
-            height: BACK_BUTTON_HEIGHT,
-            label: "Back",
-            onClick: () => this.onBackPressHandler?.(),
+        const topBar = new TopBarNoHelp({
+            title: "Math Tutorials",
+            onHome: () => this.onBackPressHandler?.(),
         });
 
         this.titleDisplay = new Konva.Text({
@@ -152,9 +128,7 @@ export class MathTutorialView implements View {
         rightPanel.add(this.makeBox(), operationsHeader, this.operationButtonsGroup);
 
         this.group.add(
-            topBar,
-            headerText,
-            backButton.getGroup(),
+            topBar.getGroup(),
             leftPanel,
             rightPanel,
             this.previousButton.getGroup(),
