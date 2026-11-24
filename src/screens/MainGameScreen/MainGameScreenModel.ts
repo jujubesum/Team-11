@@ -35,6 +35,7 @@ export interface MainGameScreenModelApi {
   isOrderComplete(): boolean;
   isOrderTaken(): boolean;
   isOrderFailed(): boolean;
+  isOrderUnlocked(): boolean;
   save(): void;
   getCurrentRecipe(): Recipe; 
   getProgress(): { done: number; total: number };
@@ -216,6 +217,7 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    * @returns true if user was on last step
    */
   isOrderComplete(): boolean {
+    if (!this.currentRecipe) return true;
     const lastStep = this.getCurrentRecipe().steps.length - 1;
     return this.currentStep === lastStep && this.isCurrentStepSolved();
   }
@@ -226,6 +228,10 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    */
   isOrderFailed(): boolean {
     return this.lastResult?.attemptsRemaining === 0;
+  }
+
+  isOrderUnlocked(): boolean {
+    return this.orderManager.wasRecipeUnlocked();
   }
 
   /**

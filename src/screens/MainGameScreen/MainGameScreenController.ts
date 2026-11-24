@@ -116,7 +116,7 @@ export class MainGameScreenController extends ScreenController {
    */
   handleFailQuit(): void {
     this.handleReroll(); //gets a new problem ready and hides the popup
-    this.handleSaveQuit();
+    this.screenSwitcher.switchToScreen({ type: "home" });
   }
 
   /**
@@ -141,6 +141,9 @@ export class MainGameScreenController extends ScreenController {
    * Called when the user presses the "Save & Quit" button on order completion
    */
   handleSaveQuit(): void {
+    if (this.model.isOrderComplete()) {
+      this.nextOrder();
+    }
     this.model.save(); 
     this.view.hidePopup();
     this.screenSwitcher.switchToScreen({ type: "home" });
@@ -222,7 +225,7 @@ export class MainGameScreenController extends ScreenController {
    */
   orderComplete(): void {
     const stats = this.model.getStats();
-    this.view.setOrderStats(stats.questionsAnswered, stats.questionsCorrect);
+    this.view.setOrderStats(stats.questionsAnswered, stats.questionsCorrect, this.model.isOrderUnlocked());
     this.view.setActivePopup("complete");
     this.view.showPopup();
     this.model.resetOrder();

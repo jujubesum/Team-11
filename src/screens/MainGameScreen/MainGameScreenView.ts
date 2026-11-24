@@ -514,7 +514,12 @@ export class MainGameScreenView implements View {
     }
   }
 
-  setOrderStats(questions: number, correctAnswers: number){
+  setOrderStats(questions: number, correctAnswers: number, orderUnlocked: boolean){
+    if (orderUnlocked)
+      this.completePopup.setDetails([
+      `Your statistics: ${correctAnswers}/${questions} correct!`,
+      `Recipe unlocked! Check your recipe guides/math tutorials for instructions!`,
+    ])
     this.completePopup.setDetails([
       `Your statistics: ${correctAnswers}/${questions} correct!`
     ]);

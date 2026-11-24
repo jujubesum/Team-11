@@ -28,6 +28,7 @@ function makeFakeModel(overrides: Partial<MainGameScreenModelApi> = {}): MainGam
     isOrderComplete: jest.fn(() => false),
     isOrderTaken: jest.fn(() => false),
     isOrderFailed: jest.fn(() => false),
+    isOrderUnlocked: jest.fn(() => false),
     save: jest.fn(),
     getCurrentRecipe: jest.fn(() => (PLACEHOLDER_RECIPE)), 
     getProgress: jest.fn(() => ({ done: 0, total: 4 })),

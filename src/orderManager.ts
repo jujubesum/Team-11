@@ -37,6 +37,12 @@ export class OrderManager {
         return this.getGameState().unlockedRecipes;
     }
 
+    public wasRecipeUnlocked(): boolean {
+      const state = this.getGameState();
+      const ordersComplete = state.completedOrders + 1; //doesn't update until after user presses next order
+      return ordersComplete % ORDERS_PER_UNLOCK == 0 && ordersComplete < 9; 
+    }
+
     public isRecipeUnlocked(recipeId: string): boolean {
         const state = this.getGameState();
         return state.unlockedRecipes.some((recipe) => recipe.id === recipeId);
