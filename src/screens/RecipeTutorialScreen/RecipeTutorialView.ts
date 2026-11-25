@@ -1,51 +1,69 @@
 import Konva from "konva";
 import type { View } from "../../types.ts";
-import { STAGE_WIDTH, STAGE_HEIGHT, TOPBAR_HEIGHT } from "../../constants.ts";
+import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
-import type { MathOperation } from "../../mathTutorials.ts";
-import type { RecipeSkillStatus } from "../../tutorialManager.ts";
-import { TopBarNoHelp } from "../../components/TopBarNoHelp.ts";
-import { makeCircleButton, setArrowEnabled } from "../../components/CircleButton.ts";
+import { TopBarNoHelp, TOP_BAR_HEIGHT } from "../../components/TopBarNoHelp.ts";
+import { getRecipeTutorial, RECIPE_IDS, type RecipeId } from "../../recipeTutorials.ts";
 
 const WHITE = "#FFFFFF";
+const SELECTED_FILL = "#BDBDBD";
+const LOCKED_FILL = "#D6D6D6";
 const MARGIN = 50;
 const GAP = 60;
+const PADDING = 20;
 const BOX_WIDTH = (STAGE_WIDTH - 2 * MARGIN - GAP) / 2;
-const BOX_HEIGHT = ((STAGE_HEIGHT - TOPBAR_HEIGHT) * 3) / 4;
-const BOX_Y = TOPBAR_HEIGHT + MARGIN;
+const BOX_HEIGHT = ((STAGE_HEIGHT - TOP_BAR_HEIGHT) * 3) / 4;
+const BOX_Y = TOP_BAR_HEIGHT + MARGIN;
 const LEFT_BOX_X = MARGIN;
 const RIGHT_BOX_X = MARGIN + BOX_WIDTH + GAP;
-const PADDING = 20;
-const LEFT_ARROW_X = MARGIN + PADDING;
-const LEFT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 10;
-const RIGHT_ARROW_X = STAGE_WIDTH - MARGIN - PADDING - 10 + PADDING;
-const RIGHT_ARROW_Y = STAGE_HEIGHT - MARGIN - PADDING + 10;
-const BUTTON_RADIUS = BOX_HEIGHT / 16;
+const NAV_BUTTON_WIDTH = 180;
+const NAV_BUTTON_HEIGHT = 55;
+const NAV_BUTTON_Y =
+    BOX_Y + BOX_HEIGHT + Math.max(10, (STAGE_HEIGHT - BOX_Y - BOX_HEIGHT - NAV_BUTTON_HEIGHT) / 2);
+const RECIPES_HEADER_HEIGHT = 60;
+const RECIPE_BUTTON_GAP = 12;
+const POPUP_WIDTH = 560;
+const POPUP_HEIGHT = 76;
+
+export interface RecipeTutorialContent {
+    recipeId: RecipeId;
+    title: string;
+    step: string;
+    stepNumber: number;
+    totalSteps: number;
+    canGoBack: boolean;
+    canGoForward: boolean;
+}
 
 export class RecipeTutorialView implements View {
     private group: Konva.Group;
+    private allRecipes: RecipeId[];
+    private unlockedRecipes: Set<RecipeId>;
     private titleDisplay: Konva.Text;
-    private bodyDisplay: Konva.Text;
-    private skillsHeaderDisplay: Konva.Text;
-    private practiceDisplay: Konva.Text;
-    private skillButtonsGroup: Konva.Group;
-    private leftArrow: Konva.Group;
-    private rightArrow: Konva.Group;
+    private stepCounterDisplay: Konva.Text;
+    private stepDisplay: Konva.Text;
+    private recipeButtonsGroup: Konva.Group;
+    private previousButton: Button;
+    private nextButton: Button;
+    private lockedPopupGroup: Konva.Group;
+    private lockedPopupText: Konva.Text;
+    private popupTimeoutId: number | null = null;
 
-    private onSkillSelectHandler?: (operation: MathOperation) => void;
-    private onRecipeChangeHandler?: (next: boolean) => void;
-    private onBackToRecipeStepsHandler?: () => void;
-    private onHome?: () => void;
-    private onArrowHandler?: (rightShift: boolean) => void;
+    private onArrowPressHandler?: (rightShift: boolean) => void;
+    private onRecipeSelectHandler?: (recipeId: RecipeId) => void;
+    private onBackPressHandler?: () => void;
+    private onShowHandler?: () => void;
 
-    constructor() {
+    constructor(unlockedRecipes: RecipeId[] = [], allRecipes: RecipeId[] = [...RECIPE_IDS]) {
+        this.allRecipes = allRecipes;
+        this.unlockedRecipes = new Set(unlockedRecipes);
         this.group = new Konva.Group({ visible: false });
         const leftPanel = new Konva.Group({ x: LEFT_BOX_X, y: BOX_Y });
         const rightPanel = new Konva.Group({ x: RIGHT_BOX_X, y: BOX_Y });
 
         const topBar = new TopBarNoHelp({
             title: "Recipe Tutorials",
-            onHome: () => this.onHome?.(),
+            onHome: () => this.onBackPressHandler?.(),
         });
 
         this.titleDisplay = new Konva.Text({
@@ -59,90 +77,106 @@ export class RecipeTutorialView implements View {
             align: "center",
         });
 
-        this.bodyDisplay = new Konva.Text({
+        this.stepCounterDisplay = new Konva.Text({
             x: PADDING,
             y: PADDING + 60,
             width: BOX_WIDTH - 2 * PADDING,
             text: "",
-            fontSize: 28,
+            fontSize: 26,
+            fill: "#333333",
+            align: "center",
+        });
+
+        this.stepDisplay = new Konva.Text({
+            x: PADDING,
+            y: PADDING + 120,
+            width: BOX_WIDTH - 2 * PADDING,
+            text: "",
+            fontSize: 32,
             lineHeight: 1.4,
             fill: "black",
             align: "center",
         });
 
-        this.practiceDisplay = new Konva.Text({
-            x: PADDING,
-            y: BOX_HEIGHT - 140,
-            width: BOX_WIDTH - 2 * PADDING,
-            text: "",
-            fontSize: 22,
-            lineHeight: 1.3,
-            fill: "#333333",
-            align: "center",
-        });
-
-        this.skillsHeaderDisplay = new Konva.Text({
+        const recipesHeader = new Konva.Text({
             x: PADDING,
             y: PADDING,
             width: BOX_WIDTH - 2 * PADDING,
-            text: "Tested Math Skills (Click to Learn):",
+            text: "Choose a Recipe:",
             fontSize: 26,
             fontStyle: "bold",
             fill: "black",
             align: "center",
         });
 
-        this.skillButtonsGroup = new Konva.Group({
+        this.recipeButtonsGroup = new Konva.Group({
             x: PADDING,
-            y: PADDING + 45,
+            y: PADDING + RECIPES_HEADER_HEIGHT,
         });
 
-        const prevRecipeBtn = new Button({
-            x: PADDING,
-            y: BOX_HEIGHT - 75,
-            width: (BOX_WIDTH - 3 * PADDING) / 2,
-            height: 55,
-            label: "Prev Recipe",
-            onClick: () => this.onRecipeChangeHandler?.(false),
+        this.previousButton = new Button({
+            x: LEFT_BOX_X,
+            y: NAV_BUTTON_Y,
+            width: NAV_BUTTON_WIDTH,
+            height: NAV_BUTTON_HEIGHT,
+            label: "Previous",
+            onClick: () => this.onArrowPressHandler?.(false),
         });
 
-        const nextRecipeBtn = new Button({
-            x: PADDING * 2 + (BOX_WIDTH - 3 * PADDING) / 2,
-            y: BOX_HEIGHT - 75,
-            width: (BOX_WIDTH - 3 * PADDING) / 2,
-            height: 55,
-            label: "Next Recipe",
-            onClick: () => this.onRecipeChangeHandler?.(true),
+        this.nextButton = new Button({
+            x: LEFT_BOX_X + BOX_WIDTH - NAV_BUTTON_WIDTH,
+            y: NAV_BUTTON_Y,
+            width: NAV_BUTTON_WIDTH,
+            height: NAV_BUTTON_HEIGHT,
+            label: "Next",
+            onClick: () => this.onArrowPressHandler?.(true),
         });
 
-        this.leftArrow = makeCircleButton("<", LEFT_ARROW_X, LEFT_ARROW_Y, BUTTON_RADIUS, "white", () =>
-            this.onArrowHandler?.(false),
-        );
-        this.rightArrow = makeCircleButton(">", RIGHT_ARROW_X, RIGHT_ARROW_Y, BUTTON_RADIUS, "white", () =>
-            this.onArrowHandler?.(true),
-        );
+        this.lockedPopupGroup = new Konva.Group({
+            x: (STAGE_WIDTH - POPUP_WIDTH) / 2,
+            y: STAGE_HEIGHT - POPUP_HEIGHT - 24,
+            visible: false,
+            listening: false,
+        });
 
-        leftPanel.add(
-            this.makeBox(),
-            this.titleDisplay,
-            this.bodyDisplay,
-            this.practiceDisplay,
-        );
-        rightPanel.add(
-            this.makeBox(),
-            this.skillsHeaderDisplay,
-            this.skillButtonsGroup,
-            prevRecipeBtn.getGroup(),
-            nextRecipeBtn.getGroup(),
-        );
+        const popupBackground = new Konva.Rect({
+            width: POPUP_WIDTH,
+            height: POPUP_HEIGHT,
+            fill: "#222222",
+            opacity: 0.92,
+            cornerRadius: 12,
+            stroke: "#FFFFFF",
+            strokeWidth: 2,
+        });
+
+        this.lockedPopupText = new Konva.Text({
+            x: 16,
+            y: 0,
+            width: POPUP_WIDTH - 32,
+            height: POPUP_HEIGHT,
+            text: "",
+            fontSize: 22,
+            fontStyle: "bold",
+            fill: WHITE,
+            align: "center",
+            verticalAlign: "middle",
+        });
+
+        this.lockedPopupGroup.add(popupBackground, this.lockedPopupText);
+
+        leftPanel.add(this.makeBox(), this.titleDisplay, this.stepCounterDisplay, this.stepDisplay);
+        rightPanel.add(this.makeBox(), recipesHeader, this.recipeButtonsGroup);
 
         this.group.add(
             topBar.getGroup(),
             leftPanel,
             rightPanel,
-            this.leftArrow,
-            this.rightArrow,
+            this.previousButton.getGroup(),
+            this.nextButton.getGroup(),
+            this.lockedPopupGroup,
         );
+
+        this.renderRecipeButtons(unlockedRecipes[0]);
     }
 
     getGroup(): Konva.Group {
@@ -150,78 +184,107 @@ export class RecipeTutorialView implements View {
     }
 
     show(): void {
+        this.onShowHandler?.();
         this.group.visible(true);
         this.group.getLayer()?.batchDraw();
     }
 
     hide(): void {
+        this.clearLockedPopup();
         this.group.visible(false);
         this.group.getLayer()?.batchDraw();
     }
 
-    setTutorialContent(params: {
-        title: string;
-        body: string;
-        practiceText: string;
-        skills: RecipeSkillStatus[];
-        isSkillMode: boolean;
-    }): void {
-        this.titleDisplay.text(params.title);
-        this.bodyDisplay.text(params.body);
-        this.practiceDisplay.text(params.practiceText);
+    setUnlockedRecipes(unlockedRecipes: RecipeId[], selectedRecipeId?: RecipeId): void {
+        this.unlockedRecipes = new Set(unlockedRecipes);
+        this.renderRecipeButtons(selectedRecipeId ?? unlockedRecipes[0]);
+        this.group.getLayer()?.batchDraw();
+    }
 
-        this.skillButtonsGroup.destroyChildren();
-        const btnWidth = BOX_WIDTH - 2 * PADDING;
-        const btnHeight = 52;
-        const btnGap = 12;
-
-        params.skills.forEach((skill, idx) => {
-            const statusMark = skill.learned ? "[✓] Learned" : "[ ] Not Learned";
-            const label = `${skill.operation.toUpperCase()}  ${statusMark}`;
-            const btn = new Button({
-                x: 0,
-                y: idx * (btnHeight + btnGap),
-                width: btnWidth,
-                height: btnHeight,
-                label,
-                onClick: () => this.onSkillSelectHandler?.(skill.operation),
-            });
-            this.skillButtonsGroup.add(btn.getGroup());
-        });
-
-        if (params.isSkillMode) {
-            const returnBtn = new Button({
-                x: 0,
-                y: params.skills.length * (btnHeight + btnGap) + 10,
-                width: btnWidth,
-                height: 50,
-                label: "Back to Recipe Steps",
-                onClick: () => this.onBackToRecipeStepsHandler?.(),
-            });
-            this.skillButtonsGroup.add(returnBtn.getGroup());
-        }
+    setTutorialContent(content: RecipeTutorialContent): void {
+        this.titleDisplay.text(`Recipe: ${content.title}`);
+        this.stepCounterDisplay.text(`Step ${content.stepNumber} of ${content.totalSteps}`);
+        this.stepDisplay.text(content.step);
+        this.previousButton.setEnabled(content.canGoBack);
+        this.nextButton.setEnabled(content.canGoForward);
+        this.renderRecipeButtons(content.recipeId);
 
         this.group.getLayer()?.batchDraw();
     }
 
+    showLockedPopup(recipeTitle: string, durationMs = 5000): void {
+        if (this.popupTimeoutId !== null) {
+            window.clearTimeout(this.popupTimeoutId);
+        }
+
+        this.lockedPopupText.text(`Unlock "${recipeTitle}" to see its steps!` + '\n' + ' New recipes are unlocked every 2 orders completed!');
+        this.lockedPopupGroup.visible(true);
+        this.lockedPopupGroup.moveToTop();
+        this.group.getLayer()?.batchDraw();
+
+        this.popupTimeoutId = window.setTimeout(() => {
+            this.clearLockedPopup();
+            this.group.getLayer()?.batchDraw();
+        }, durationMs);
+    }
+
     onArrowPress(handler: (rightShift: boolean) => void): void {
-        this.onArrowHandler = handler;
+        this.onArrowPressHandler = handler;
     }
 
-    onHomePress(handler: () => void): void {
-        this.onHome = handler;
+    onRecipeSelect(handler: (recipeId: RecipeId) => void): void {
+        this.onRecipeSelectHandler = handler;
     }
 
-    onSkillSelect(handler: (operation: MathOperation) => void): void {
-        this.onSkillSelectHandler = handler;
+    onBackPress(handler: () => void): void {
+        this.onBackPressHandler = handler;
     }
 
-    onRecipeChange(handler: (next: boolean) => void): void {
-        this.onRecipeChangeHandler = handler;
+    onShow(handler: () => void): void {
+        this.onShowHandler = handler;
     }
 
-    onBackToRecipeSteps(handler: () => void): void {
-        this.onBackToRecipeStepsHandler = handler;
+    private clearLockedPopup(): void {
+        if (this.popupTimeoutId !== null) {
+            window.clearTimeout(this.popupTimeoutId);
+            this.popupTimeoutId = null;
+        }
+        this.lockedPopupGroup.visible(false);
+    }
+
+    private renderRecipeButtons(selected?: RecipeId): void {
+        this.recipeButtonsGroup.destroyChildren();
+
+        const count = this.allRecipes.length;
+        const available =
+            BOX_HEIGHT - 2 * PADDING - RECIPES_HEADER_HEIGHT - (count - 1) * RECIPE_BUTTON_GAP;
+        const btnHeight = Math.min(60, Math.max(30, available / Math.max(count, 1)));
+        const btnWidth = BOX_WIDTH - 2 * PADDING;
+
+        this.allRecipes.forEach((recipeId, idx) => {
+            const isUnlocked = this.unlockedRecipes.has(recipeId);
+            const isSelected = isUnlocked && recipeId === selected;
+            const title = getRecipeTutorial(recipeId).title;
+            const label = isUnlocked ? title : `${title} (Locked)`;
+
+            const btn = new Button({
+                x: 0,
+                y: idx * (btnHeight + RECIPE_BUTTON_GAP),
+                width: btnWidth,
+                height: btnHeight,
+                label,
+                fontSize: Math.min(26, Math.round(btnHeight * 0.48)),
+                fill: !isUnlocked ? LOCKED_FILL : isSelected ? SELECTED_FILL : WHITE,
+                hoverFill: !isUnlocked ? LOCKED_FILL : isSelected ? SELECTED_FILL : "#eeeeee",
+                onClick: () => this.onRecipeSelectHandler?.(recipeId),
+            });
+
+            if (!isUnlocked) {
+                btn.getGroup().opacity(0.6);
+            }
+
+            this.recipeButtonsGroup.add(btn.getGroup());
+        });
     }
 
     private makeBox(): Konva.Rect {
@@ -233,12 +296,4 @@ export class RecipeTutorialView implements View {
             cornerRadius: 10,
         });
     }
-
-    // Dim the arrows when there's no step to go to
-    setArrows(canGoBack: boolean, canGoForward: boolean): void {
-        setArrowEnabled(this.leftArrow, canGoBack);
-        setArrowEnabled(this.rightArrow, canGoForward);
-        this.group.getLayer()?.batchDraw();
-    }
-
 }

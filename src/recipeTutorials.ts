@@ -53,13 +53,13 @@ export function buildPracticeProblem(operation: MathOperation): PracticeProblem 
 
 function buildRecipeTutorial(recipe: Recipe): RecipeTutorial {
     const id = recipe.id as RecipeId;
-    const mathOperations = recipe.mathOperations.filter(isMathOperation);
+    const mathOperations = (recipe.mathOperations ?? []).filter(isMathOperation);
 
     return {
         id,
         title: recipe.name,
         mathOperations,
-        steps: [...recipe.steps],
+        steps: [...(recipe.steps ?? [])],
         practiceProblems: mathOperations.map(buildPracticeProblem)
     };
 }
