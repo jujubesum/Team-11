@@ -167,6 +167,7 @@ export class MainGameScreenController extends ScreenController {
       return;
     }
     else {
+      this.view.reset()
       this.view.setActivePopup("start");
       this.view.showPopup();
     }
