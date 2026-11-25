@@ -31,7 +31,6 @@ export class MainGameScreenController extends ScreenController {
       onReroll: () => this.handleReroll(),
       onFailQuit: () => this.handleFailQuit(),
     });
-    this.onStart();
   }
 
   getView(): MainGameScreenView {
@@ -116,7 +115,7 @@ export class MainGameScreenController extends ScreenController {
    */
   handleFailQuit(): void {
     this.handleReroll(); //gets a new problem ready and hides the popup
-    this.handleSaveQuit();
+    this.screenSwitcher.switchToScreen({ type: "home" });
   }
 
   /**
@@ -141,6 +140,9 @@ export class MainGameScreenController extends ScreenController {
    * Called when the user presses the "Save & Quit" button on order completion
    */
   handleSaveQuit(): void {
+    if (this.model.isOrderComplete()) {
+      this.nextOrder();
+    }
     this.model.save(); 
     this.view.hidePopup();
     this.screenSwitcher.switchToScreen({ type: "home" });
@@ -154,8 +156,18 @@ export class MainGameScreenController extends ScreenController {
    * If not, prompt user to take an order
    */
   onStart() {
-    const save = this.model.isOrderTaken();
-    if (!save){
+    const localSave = this.model.isOrderTaken(); // checks local question
+    if (localSave){
+      return;
+    }
+    else if (this.model.load()){
+      this.updateProblem();
+      this.updateProgress();
+      this.updateRecipe();
+      return;
+    }
+    else {
+      this.view.reset()
       this.view.setActivePopup("start");
       this.view.showPopup();
     }
@@ -222,7 +234,7 @@ export class MainGameScreenController extends ScreenController {
    */
   orderComplete(): void {
     const stats = this.model.getStats();
-    this.view.setOrderStats(stats.questionsAnswered, stats.questionsCorrect);
+    this.view.setOrderStats(stats.questionsAnswered, stats.questionsCorrect, this.model.isOrderUnlocked());
     this.view.setActivePopup("complete");
     this.view.showPopup();
     this.model.resetOrder();
@@ -272,6 +284,7 @@ export class MainGameScreenController extends ScreenController {
     const y = problem.y;
     const operation = problem.operation;
     this.view.fillQuestionPanel(x, y, operation);
+    this.model.save();
   }
 
   /**

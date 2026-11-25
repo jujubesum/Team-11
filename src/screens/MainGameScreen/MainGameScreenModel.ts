@@ -4,6 +4,7 @@ import { generateQuestion } from "../../questions/questionGenerator.ts";
 import { QuestionSession } from "../../questions/questionSession.ts";
 import type { AnswerResult, Operation, Question, QuestionConfig } from "../../questions/questionTypes.ts";
 import {OrderManager} from "../../orderManager";
+import type { SavedSession } from "../../questions/questionSession";
 
 //recipes says operations in words, but question uses symbols
 const TO_SYMBOL: Record<string, Operation> = {
@@ -24,6 +25,16 @@ export interface GameStats {
   earnings: number;
 }
 
+export interface MainGameQuestionData {
+  currentRecipe: Recipe | undefined;
+  currentStep: number;
+  gameStats: GameStats;
+  question: Question;
+  session: SavedSession;
+  lastResult: AnswerResult | undefined;
+  lastGuess: number;
+}
+
 // These methods are called by the controller! Any not methods not within this API can be removed as long as things still function without them
 export interface MainGameScreenModelApi {
   checkAnswer(answer: number): boolean;
@@ -35,6 +46,7 @@ export interface MainGameScreenModelApi {
   isOrderComplete(): boolean;
   isOrderTaken(): boolean;
   isOrderFailed(): boolean;
+  isOrderUnlocked(): boolean;
   save(): void;
   getCurrentRecipe(): Recipe; 
   getProgress(): { done: number; total: number };
@@ -42,15 +54,14 @@ export interface MainGameScreenModelApi {
   getHint(): number;
   getStats(): { questionsAnswered: number, questionsCorrect: number , earnings: number };
   getAttemptsRemaining(): number;
+  load(): boolean;
 }
 
 export class MainGameScreenModel implements MainGameScreenModelApi {
-  // Add/remove instance vars as necessary!
   private saveManager: SaveManager;
   private currentRecipe: Recipe | undefined;
   private currentStep: number;
   private gameStats: GameStats;
-  //current question and the player's attempts on it
   private question!: Question;
   private session!: QuestionSession;
   private lastResult: AnswerResult | undefined;
@@ -61,7 +72,7 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
     this.saveManager = saveManager;
     this.orderManager = new OrderManager(saveManager);
     this.currentRecipe = undefined;
-    this.currentStep = 0;
+    this.currentStep = -1;
     this.gameStats = { questionsAnswered: 0, questionsCorrect: 0 , earnings: 0 }
     this.lastResult = undefined;
     this.lastGuess = 0;
@@ -200,13 +211,38 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    * Current recipe, current step, current problem, current attempt count, 
    */
   save(): void {
+    this.saveManager.update({
+      lastQuestion: {
+        currentRecipe: this.currentRecipe,
+        currentStep: this.currentStep,
+        gameStats: this.gameStats,
+        question: this.question,
+        session: this.session.toSaved(),
+        lastResult: this.lastResult,
+        lastGuess: this.lastGuess,
+      }
+    });
+    this.saveManager.save();
+  }
 
+  load(): boolean {
+    const lastQuestion = this.saveManager.getCurrent()?.lastQuestion;
+    if (!lastQuestion) return false;
+    this.currentRecipe = lastQuestion.currentRecipe;
+    this.currentStep = lastQuestion.currentStep;
+    this.gameStats = lastQuestion.gameStats;
+    this.question = lastQuestion.question;
+    this.session = QuestionSession.fromSaved(lastQuestion.session);
+    this.lastResult = lastQuestion.lastResult;
+    this.lastGuess = lastQuestion.lastGuess; 
+    return true;
   }
 
   /**
    * Checks if an order is currently taken, if not user would be prompted to start a new one
    */
   isOrderTaken(): boolean {
+    if (this.currentStep != -1 && !this.orderManager.wasGameReset()) return true;
     return false;
   }
 
@@ -215,6 +251,7 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    * @returns true if user was on last step
    */
   isOrderComplete(): boolean {
+    if (!this.currentRecipe) return true;
     const lastStep = this.getCurrentRecipe().steps.length - 1;
     return this.currentStep === lastStep && this.isCurrentStepSolved();
   }
@@ -225,6 +262,10 @@ export class MainGameScreenModel implements MainGameScreenModelApi {
    */
   isOrderFailed(): boolean {
     return this.lastResult?.attemptsRemaining === 0;
+  }
+
+  isOrderUnlocked(): boolean {
+    return this.orderManager.wasRecipeUnlocked();
   }
 
   /**
