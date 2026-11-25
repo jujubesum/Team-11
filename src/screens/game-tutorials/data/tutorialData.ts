@@ -31,7 +31,7 @@ export const TUTORIAL_DATA = [
   },
   {
     title: "Shop",
-    body: "Upon ending the day, you can choose to go visit a nearby store to see what goodies they have in stock! You may purchase different background colors eith the money you earned from minigames!",
+    body: "Upon ending the day, you can choose to go visit a nearby store to see what goodies they have in stock! You may purchase different background colors with the money you earned from minigames!",
     image: "/images/tutorials/6.webp",
   },
   {
