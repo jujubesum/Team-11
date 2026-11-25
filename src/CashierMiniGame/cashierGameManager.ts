@@ -17,6 +17,9 @@ export interface CashierSnapshot {
   question: CustomerQuestion | null;
 }
 const ITEMS = ["Cupcake", "Cookie", "Croissant", "Muffin", "Slice of cake", "Donut"];
+// In-game money (whole dollars, not cents) earned per finished round
+export const POINTS_PER_DOLLAR = 1000;
+export const calculateReward = (finalScore: number): number => Math.floor(Math.max(0, finalScore) / POINTS_PER_DOLLAR);
 export const formatMoney = (cents: number): string => `$${(cents / 100).toFixed(2)}`;
 export function parseMoney(value: string): number | null {
   const cleaned = value.trim().replace(/^\$/, "");
@@ -52,6 +55,7 @@ export class CashierGameManager {
   private active = false;
   private question: CustomerQuestion | null = null;
   private questionStartedAt = 0;
+  private pausedAt: number | null = null;
   constructor(private readonly now: () => number = Date.now, private readonly random: () => number = Math.random) {}
   start(): void {
     this.score = 0;
@@ -59,7 +63,27 @@ export class CashierGameManager {
     this.correctAnswers = 0;
     this.timeLeftSeconds = 120;
     this.active = true;
+    this.pausedAt = null;
     this.nextQuestion();
+  }
+  // Back to the state before the first round, ready for Start
+  reset(): void {
+    this.score = 0;
+    this.streak = 0;
+    this.correctAnswers = 0;
+    this.timeLeftSeconds = 120;
+    this.active = false;
+    this.question = null;
+    this.pausedAt = null;
+  }
+  // Time spent paused doesn't count against the speed bonus
+  pause(): void {
+    if (this.active && this.pausedAt === null) this.pausedAt = this.now();
+  }
+  resume(): void {
+    if (this.pausedAt === null) return;
+    this.questionStartedAt += this.now() - this.pausedAt;
+    this.pausedAt = null;
   }
   private getDifficulty(): Difficulty {
     if (this.correctAnswers >= 12) return 4;
