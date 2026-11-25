@@ -514,7 +514,13 @@ export class MainGameScreenView implements View {
     }
   }
 
-  setOrderStats(questions: number, correctAnswers: number){
+  setOrderStats(questions: number, correctAnswers: number, orderUnlocked: boolean){
+    if (orderUnlocked)
+      this.completePopup.setDetails([
+      `Your statistics: ${correctAnswers}/${questions} correct!`,
+      `New recipe unlocked! Check your recipe guides/math tutorials for instructions!`,
+    ])
+    else
     this.completePopup.setDetails([
       `Your statistics: ${correctAnswers}/${questions} correct!`
     ]);
@@ -555,4 +561,18 @@ export class MainGameScreenView implements View {
   getGroup(): Konva.Group {
     return this.group;
   }
+
+  reset(): void {
+    this.stepsGroup.destroyChildren();
+    this.stepsCheck = [];
+    this.problemText.text("");
+    this.clearAnswer();
+    this.progressLabel.text("No recipe loaded!");
+    this.progressFill.visible(false);
+    this.progressFill.width(0);
+    this.recipeTitle.text("Placeholder");
+    this.recipeImage?.destroy();
+    this.recipeImage = null;
+    this.group.getLayer()?.batchDraw();
+  } 
 }
