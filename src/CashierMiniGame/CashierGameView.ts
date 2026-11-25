@@ -1,6 +1,8 @@
 import Konva from "konva";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../constants.ts";
 import { Button } from "../components/Button.ts";
+import { TopBar, TOP_BAR_HEIGHT } from "../components/TopBar.ts";
+import { makeHintPopup, type HintPopup } from "../components/hint.ts";
 import type { View } from "../types.ts";
 import { type CashierSnapshot, formatMoney } from "./cashierGameManager.ts";
 
@@ -24,20 +26,31 @@ export const DENOMINATIONS: readonly Denomination[] = [
 ];
 
 export interface Feedback { correct: boolean; message: string; }
+// Dollars earned for a finished round; saved is false when there was no save to add it to
+export interface RoundReward { amount: number; saved: boolean; }
 
-// Everything is laid out on a fixed design canvas, then scaled to fit the stage.
+export const HELP_TEXT = [
+  "Subtract the customer total from the amount paid.",
+  "Click bills and coins to select the change.",
+  "Use Undo or Clear to correct your selection.",
+  "Press Submit to hand over the change.",
+  "Earn $1 for every 1,000 points!",
+].join("\n");
+
+// The shared top bar is drawn at stage size; everything below it is laid out
+// on a fixed design canvas, then scaled to fit the remaining space.
 const DESIGN_WIDTH = 1000;
-const DESIGN_HEIGHT = 700;
-const SCALE = Math.min(STAGE_WIDTH / DESIGN_WIDTH, STAGE_HEIGHT / DESIGN_HEIGHT);
-const HEADER_HEIGHT = 100;
+const DESIGN_HEIGHT = 690;
+const SCALE = Math.min(STAGE_WIDTH / DESIGN_WIDTH, (STAGE_HEIGHT - TOP_BAR_HEIGHT) / DESIGN_HEIGHT);
 
-const BILL_WIDTH = 210;
-const BILL_HEIGHT = 90;
+const BILL_WIDTH = 240;
+const BILL_HEIGHT = 104;
 // Roughly proportional to real coin diameters
-const COIN_SIZES: Record<number, number> = { 25: 92, 10: 72, 5: 84, 1: 76 };
+const COIN_SIZES: Record<number, number> = { 25: 104, 10: 82, 5: 94, 1: 86 };
+const BILL_ROW_Y = 335;
+const COIN_ROW_Y = 492;
+const ACTION_ROW_Y = 598;
 
-const BG_FILL = "#fff9ed";
-const HEADER_FILL = "#f6e3bf";
 const CARD_STROKE = "#d8c3a0";
 const TEXT_COLOR = "#222";
 const MUTED_COLOR = "#6b5a40";
@@ -47,19 +60,15 @@ const RED = "#c62828";
 export class CashierGameView implements View {
   private readonly group = new Konva.Group({ visible: false });
   private readonly content = new Konva.Group({
-    x: (STAGE_WIDTH - DESIGN_WIDTH * SCALE) / 2, scaleX: SCALE, scaleY: SCALE,
+    x: (STAGE_WIDTH - DESIGN_WIDTH * SCALE) / 2, y: TOP_BAR_HEIGHT, scaleX: SCALE, scaleY: SCALE,
   });
   private readonly playGroup = new Konva.Group();
   private readonly idleGroup = new Konva.Group();
+  private readonly helpPopup: HintPopup;
 
   private readonly timeText: Konva.Text;
   private readonly scoreText: Konva.Text;
   private readonly streakText: Konva.Text;
-  private readonly correctText: Konva.Text;
-  private readonly orderText: Konva.Text;
-  private readonly subtotalText: Konva.Text;
-  private readonly discountText: Konva.Text;
-  private readonly difficultyText: Konva.Text;
   private readonly totalText: Konva.Text;
   private readonly paidText: Konva.Text;
   private readonly feedbackText: Konva.Text;
@@ -79,61 +88,63 @@ export class CashierGameView implements View {
   private questionId = "";
   private readonly onStart: () => void;
   private readonly onSubmit: (changeCents: number) => void;
-  private readonly onBack: () => void;
 
-  constructor(handlers: { onStart: () => void; onSubmit: (changeCents: number) => void; onBack: () => void }) {
+  constructor(handlers: {
+    onStart: () => void;
+    onSubmit: (changeCents: number) => void;
+    onHome: () => void;
+    onHelp: () => void;
+    onHelpClosed: () => void;
+  }) {
     this.onStart = handlers.onStart;
     this.onSubmit = handlers.onSubmit;
-    this.onBack = handlers.onBack;
 
+    this.helpPopup = makeHintPopup({
+      title: "How to play",
+      hint: HELP_TEXT,
+      width: STAGE_WIDTH * 0.8,
+      onDone: handlers.onHelpClosed,
+    });
     this.group.add(
-      
-      new Konva.Rect({ width: STAGE_WIDTH, height: HEADER_HEIGHT * SCALE, fill: HEADER_FILL }),
+      new TopBar({ title: "Cashier Rush", onHome: handlers.onHome, onHelp: handlers.onHelp }).getGroup(),
       this.content,
+      this.helpPopup.getGroup(),
     );
 
-    // Header
-    this.text(this.content, { x: 30, y: 18, text: "Cashier Rush", fontSize: 34, fontStyle: "bold" });
-    this.content.add(new Button({ x: 875, y: 18, width: 95, height: 46, label: "Back", fontSize: 20, onClick: this.onBack }).getGroup());
-    this.timeText = this.text(this.content, { x: 30, y: 66, fontSize: 22, fontStyle: "bold" });
-    this.scoreText = this.text(this.content, { x: 230, y: 66, fontSize: 22 });
-    this.streakText = this.text(this.content, { x: 430, y: 66, fontSize: 22 });
-    this.correctText = this.text(this.content, { x: 630, y: 66, fontSize: 22 });
+    // Stats row
+    this.timeText = this.text(this.content, { x: 30, y: 14, width: 300, fontSize: 28, fontStyle: "bold" });
+    this.scoreText = this.text(this.content, { x: 350, y: 14, width: 300, align: "center", fontSize: 28 });
+    this.streakText = this.text(this.content, { x: 670, y: 14, width: 300, align: "right", fontSize: 28 });
 
     // Start / game-over card
-    this.idleGroup.add(this.card(30, 130, 940, 260));
-    this.idleTitle = this.text(this.idleGroup, { x: 30, y: 165, width: 940, align: "center", fontSize: 30, fontStyle: "bold" });
-    this.idleDetails = this.text(this.idleGroup, { x: 80, y: 215, width: 840, align: "center", fontSize: 20, fill: MUTED_COLOR, lineHeight: 1.3 });
-    this.startButton = new Button({ x: 410, y: 300, width: 180, height: 54, label: "Start", fontSize: 24, onClick: () => this.start() });
-    this.playAgainButton = new Button({ x: 410, y: 300, width: 180, height: 54, label: "Play Again", fontSize: 24, onClick: () => this.start() });
+    this.idleGroup.add(this.card(30, 62, 940, 330));
+    this.idleTitle = this.text(this.idleGroup, { x: 30, y: 92, width: 940, align: "center", fontSize: 36, fontStyle: "bold" });
+    this.idleDetails = this.text(this.idleGroup, { x: 80, y: 150, width: 840, align: "center", fontSize: 24, fill: MUTED_COLOR, lineHeight: 1.4 });
+    this.startButton = new Button({ x: 400, y: 300, width: 200, height: 60, label: "Start", fontSize: 26, onClick: () => this.start() });
+    this.playAgainButton = new Button({ x: 400, y: 300, width: 200, height: 60, label: "Play Again", fontSize: 26, onClick: () => this.start() });
     this.idleGroup.add(this.startButton.getGroup(), this.playAgainButton.getGroup());
 
-    // Order card
-    this.playGroup.add(this.card(30, 120, 940, 165));
-    this.orderText = this.text(this.playGroup, { x: 55, y: 138, fontSize: 24, fontStyle: "bold" });
-    this.subtotalText = this.text(this.playGroup, { x: 55, y: 178, fontSize: 20 });
-    this.discountText = this.text(this.playGroup, { x: 55, y: 208, fontSize: 20 });
-    this.difficultyText = this.text(this.playGroup, { x: 55, y: 245, fontSize: 16, fill: MUTED_COLOR });
-    this.totalText = this.text(this.playGroup, { x: 520, y: 140, fontSize: 30, fontStyle: "bold" });
-    this.paidText = this.text(this.playGroup, { x: 520, y: 185, fontSize: 30, fontStyle: "bold" });
-    this.text(this.playGroup, {
-      x: 520, y: 245, width: 430, fontSize: 17, fontStyle: "italic", fill: MUTED_COLOR,
-      text: "Click the money below to give the correct change.",
-    });
-    this.feedbackText = this.text(this.playGroup, { x: 30, y: 297, width: 940, align: "center", fontSize: 22, fontStyle: "bold" });
+    // Transaction card: just the two amounts the player needs
+    this.playGroup.add(this.card(30, 62, 940, 150));
+    this.playGroup.add(new Konva.Line({ points: [500, 82, 500, 192], stroke: CARD_STROKE, strokeWidth: 2, listening: false }));
+    this.text(this.playGroup, { x: 30, y: 80, width: 470, align: "center", fontSize: 26, fill: MUTED_COLOR, text: "Customer total" });
+    this.text(this.playGroup, { x: 500, y: 80, width: 470, align: "center", fontSize: 26, fill: MUTED_COLOR, text: "Customer pays" });
+    this.totalText = this.text(this.playGroup, { x: 30, y: 118, width: 470, align: "center", fontSize: 60, fontStyle: "bold", name: "customer-total" });
+    this.paidText = this.text(this.playGroup, { x: 500, y: 118, width: 470, align: "center", fontSize: 60, fontStyle: "bold", name: "customer-pays" });
+    this.feedbackText = this.text(this.playGroup, { x: 30, y: 224, width: 940, align: "center", fontSize: 26, fontStyle: "bold" });
 
     // Money tray
-    this.playGroup.add(this.card(30, 335, 940, 345, "#fdf3df"));
+    this.playGroup.add(this.card(30, 262, 940, 410, "#fdf3df"));
     const bills = DENOMINATIONS.filter(d => d.kind === "bill");
     const coins = DENOMINATIONS.filter(d => d.kind === "coin");
-    bills.forEach((d, i) => this.buildMoney(d, 365 + i * 270, 395));
-    coins.forEach((d, i) => this.buildMoney(d, 275 + i * 150, 525));
+    bills.forEach((d, i) => this.buildMoney(d, 355 + i * 290, BILL_ROW_Y));
+    coins.forEach((d, i) => this.buildMoney(d, 245 + i * 170, COIN_ROW_Y));
 
-    this.selectedText = this.text(this.playGroup, { x: 55, y: 627, fontSize: 26, fontStyle: "bold" });
-    this.undoButton = new Button({ x: 560, y: 615, width: 120, height: 50, label: "Undo", fontSize: 22, onClick: () => this.undo() });
-    this.clearButton = new Button({ x: 695, y: 615, width: 120, height: 50, label: "Clear", fontSize: 22, onClick: () => this.clear() });
+    this.selectedText = this.text(this.playGroup, { x: 55, y: ACTION_ROW_Y + 14, fontSize: 30, fontStyle: "bold" });
+    this.undoButton = new Button({ x: 540, y: ACTION_ROW_Y, width: 130, height: 56, label: "Undo", fontSize: 24, onClick: () => this.undo() });
+    this.clearButton = new Button({ x: 685, y: ACTION_ROW_Y, width: 130, height: 56, label: "Clear", fontSize: 24, onClick: () => this.clear() });
     this.submitButton = new Button({
-      x: 830, y: 615, width: 120, height: 50, label: "Submit", fontSize: 22,
+      x: 830, y: ACTION_ROW_Y, width: 130, height: 56, label: "Submit", fontSize: 24,
       fill: "#c8efc8", hoverFill: "#a6e3a6", onClick: () => this.submit(),
     });
     this.playGroup.add(this.undoButton.getGroup(), this.clearButton.getGroup(), this.submitButton.getGroup());
@@ -188,7 +199,7 @@ export class CashierGameView implements View {
     this.loadImage(d, image, fallback, w, h);
 
     const rowHeight = isBill ? BILL_HEIGHT : Math.max(...Object.values(COIN_SIZES));
-    this.text(item, { x: -85, y: rowHeight / 2 + 8, width: 170, align: "center", text: d.label, fontSize: 18 });
+    this.text(item, { x: -85, y: rowHeight / 2 + 8, width: 170, align: "center", text: d.label, fontSize: 20 });
 
     const badge = new Konva.Group({ x: w / 2 - 4, y: -h / 2 + 4, visible: false, listening: false });
     badge.add(new Konva.Circle({ radius: 15, fill: RED, stroke: "white", strokeWidth: 2 }));
@@ -296,7 +307,7 @@ export class CashierGameView implements View {
     this.group.getLayer()?.batchDraw();
   }
 
-  render(snapshot: CashierSnapshot, feedback?: Feedback): void {
+  render(snapshot: CashierSnapshot, feedback?: Feedback, reward: RoundReward | null = null): void {
     const q = snapshot.question;
     const id = q ? `${q.item}:${q.subtotalCents}:${q.discountPercent}:${q.paidCents}:${snapshot.correctAnswers}` : "";
     if (id !== this.questionId) {
@@ -314,7 +325,6 @@ export class CashierGameView implements View {
     this.timeText.fill(snapshot.active && seconds <= 10 ? RED : TEXT_COLOR);
     this.scoreText.text(`Score: ${snapshot.score}`);
     this.streakText.text(`Streak: ${snapshot.streak}`);
-    this.correctText.text(`Correct: ${snapshot.correctAnswers}`);
 
     this.playing = snapshot.active && q !== null;
     this.playGroup.visible(this.playing);
@@ -322,9 +332,9 @@ export class CashierGameView implements View {
 
     if (!q || !this.playing) {
       const over = seconds === 0;
-      this.idleTitle.text(over ? `Time's up! Final score: ${snapshot.score}` : "Serve customers for two minutes!");
+      this.idleTitle.text(over ? "Time's up!" : "Serve customers for two minutes!");
       this.idleDetails.text(over
-        ? `You served ${snapshot.correctAnswers} customer${snapshot.correctAnswers === 1 ? "" : "s"}.`
+        ? this.resultLines(snapshot, reward).join("\n")
         : "Work out each customer's change, then click the bills and coins to hand it back.");
       this.startButton.getGroup().visible(!over);
       this.playAgainButton.getGroup().visible(over);
@@ -334,16 +344,35 @@ export class CashierGameView implements View {
       return;
     }
 
-    this.orderText.text(`Customer orders: ${q.item}`);
-    this.subtotalText.text(`Subtotal: ${formatMoney(q.subtotalCents)}`);
-    this.discountText.text(q.discountPercent ? `Discount: ${q.discountPercent}%` : "Discount: none");
-    this.difficultyText.text(`Difficulty: ${q.difficulty}/4`);
-    this.totalText.text(`Total: ${formatMoney(q.totalCents)}`);
-    this.paidText.text(`Customer pays: ${formatMoney(q.paidCents)}`);
+    this.totalText.text(formatMoney(q.totalCents));
+    this.paidText.text(formatMoney(q.paidCents));
     this.updateSelection();
+  }
+
+  private resultLines(snapshot: CashierSnapshot, reward: RoundReward | null): string[] {
+    const lines = [
+      `Final score: ${snapshot.score.toLocaleString("en-US")}`,
+      `Customers served: ${snapshot.correctAnswers}`,
+    ];
+    if (reward) {
+      lines.push(reward.saved
+        ? `Money earned: $${reward.amount}`
+        : `Money earned: $${reward.amount} (not saved, no game loaded)`);
+    }
+    return lines;
+  }
+
+  showHelp(): void {
+    this.setCursor("default");
+    this.helpPopup.show();
   }
 
   getGroup(): Konva.Group { return this.group; }
   show(): void { this.group.show(); this.group.getLayer()?.batchDraw(); }
-  hide(): void { this.setCursor("default"); this.group.hide(); this.group.getLayer()?.batchDraw(); }
+  hide(): void {
+    this.setCursor("default");
+    this.helpPopup.hide();
+    this.group.hide();
+    this.group.getLayer()?.batchDraw();
+  }
 }

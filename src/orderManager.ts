@@ -26,6 +26,7 @@ export class OrderManager {
     private saveGameState(state: GameState): void {
         this.saveManager.update({
             unlockedRecipeIds: state.unlockedRecipes.map((recipe) => recipe.id),
+            level: state.unlockedRecipes.length,
             currentOrderId: state.currentOrder?.id ?? null,
             completedOrders: state.completedOrders
         });
@@ -34,6 +35,18 @@ export class OrderManager {
 
     public getUnlockedRecipes(): Recipe[] {
         return this.getGameState().unlockedRecipes;
+    }
+
+    public wasRecipeUnlocked(): boolean {
+      const state = this.getGameState();
+      const ordersComplete = state.completedOrders + 1; //doesn't update until after user presses next order
+      return ordersComplete % ORDERS_PER_UNLOCK == 0 && ordersComplete < 9; 
+    }
+
+    public wasGameReset(): boolean {
+      const saveData = this.saveManager.getCurrent();
+      if(!saveData?.currentOrderId) return true;
+      return false;
     }
 
     public isRecipeUnlocked(recipeId: string): boolean {

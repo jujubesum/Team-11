@@ -66,10 +66,9 @@ class App implements ScreenSwitcher {
 		this.gameTutorialController = new GameTutorialController(this);
 		this.recipeTutorialController = new RecipeTutorialController(this, this.saveManager);
 		this.mathTutorialController = new MathTutorialController(this);
-		this.pieMinigameController = new PieMinigameController(this);
+		this.pieMinigameController = new PieMinigameController(this, this.saveManager);
 		this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
-		this.cashierGameController = new CashierGameController(this);
-
+		this.cashierGameController = new CashierGameController(this, this.saveManager);
 
 		// Bakgrounds before screen's layers
 		this.backgroundLayer.add(this.background);
@@ -166,7 +165,7 @@ class App implements ScreenSwitcher {
 				this.mainGameScreenController.show();
 				break;
 			case "cashierGame":
-				this.cashierGameController.getView().show();
+				this.cashierGameController.show();
 				break;
 
 			case "pieMinigame":

@@ -1,3 +1,5 @@
+import type { MainGameQuestionData } from "./screens/MainGameScreen/MainGameScreenModel";
+
 export interface SaveData {
 	version: number;
 	level: number;
@@ -9,6 +11,8 @@ export interface SaveData {
 	completedOrders: number;
 	createdAt: number;
 	lastSavedAt: number;
+	pieHighScores: number[];
+  lastQuestion: MainGameQuestionData | null;
 }
 
 export const SAVE_KEY = "bakeryGameSave";
@@ -27,8 +31,10 @@ export function createDefaultSave(): SaveData {
 		activeKitchenId: null,
 		currentOrderId: null,
 		completedOrders: 0,
+		pieHighScores: [],
 		createdAt: now,
 		lastSavedAt: now,
+    lastQuestion: null,
 	};
 }
 
@@ -103,6 +109,7 @@ function isValidSave(data: unknown): data is SaveData {
 		typeof d["money"] === "number" &&
 		Array.isArray(d["unlockedRecipeIds"]) &&
 		Array.isArray(d["customizations"]) &&
+		Array.isArray(d["pieHighScores"]) &&
 		(d["activeKitchenId"] === null || typeof d["activeKitchenId"] === "string") &&
 		(d["currentOrderId"] === null || typeof d["currentOrderId"] === "string") &&
 		typeof d["completedOrders"] === "number" &&
