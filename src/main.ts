@@ -42,7 +42,7 @@ class App implements ScreenSwitcher {
 	private recipeTutorialController: RecipeTutorialController;
 	private mathTutorialController: MathTutorialController;
 	private pieMinigameController: PieMinigameController;
-    private mainGameScreenController: MainGameScreenController;
+	private mainGameScreenController: MainGameScreenController;
 	private cashierGameController: CashierGameController;
 
 	private backgroundLayer = new Konva.Layer();
@@ -64,10 +64,10 @@ class App implements ScreenSwitcher {
 		this.shopController = new ShopScreenController(this, this.saveManager);
 		this.customizeController = new CustomizeScreenController(this, this.saveManager, () => this.updateBackground());
 		this.gameTutorialController = new GameTutorialController(this);
-		this.recipeTutorialController = new RecipeTutorialController(this);
+		this.recipeTutorialController = new RecipeTutorialController(this, this.saveManager);
 		this.mathTutorialController = new MathTutorialController(this);
 		this.pieMinigameController = new PieMinigameController(this, this.saveManager);
-    	this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
+		this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
 		this.cashierGameController = new CashierGameController(this, this.saveManager);
 
 		// Bakgrounds before screen's layers
@@ -87,7 +87,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.recipeTutorialController.getView().getGroup());
 		this.layer.add(this.mathTutorialController.getView().getGroup());
 		this.layer.add(this.pieMinigameController.getView().getGroup());
-    	this.layer.add(this.mainGameScreenController.getView().getGroup());
+		this.layer.add(this.mainGameScreenController.getView().getGroup());
 		this.layer.add(this.cashierGameController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
@@ -122,9 +122,9 @@ class App implements ScreenSwitcher {
 		this.recipeTutorialController.hide();
 		this.mathTutorialController.hide();
 		this.pieMinigameController.hide();
-    	this.mainGameScreenController.hide();
+		this.mainGameScreenController.hide();
 		this.cashierGameController.hide();
-		
+
 		// this.resultsController.hide();
 
 		// Show the requested screen based on the screen type
@@ -148,7 +148,7 @@ class App implements ScreenSwitcher {
 			case "shop":
 				this.shopController.show();
 				break;
-			
+
 			case "customize":
 				this.customizeController.show();
 				break;
@@ -160,7 +160,7 @@ class App implements ScreenSwitcher {
 			case "mathTutorial":
 				this.mathTutorialController.show();
 				break;
-      
+
 			case "mainGame":
 				this.mainGameScreenController.show();
 				break;
@@ -171,12 +171,12 @@ class App implements ScreenSwitcher {
 			case "pieMinigame":
 				this.pieMinigameController.show();
 				break;
-		// 	more cases to add in the future: games, tutorials, etc.
+			// 	more cases to add in the future: games, tutorials, etc.
 
 		}
 
 		this.updateBackground();
-		
+
 	}
 
 	// Colors the shared background with the player's chosen kitchen
