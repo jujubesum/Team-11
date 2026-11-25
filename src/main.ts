@@ -66,7 +66,7 @@ class App implements ScreenSwitcher {
 		this.gameTutorialController = new GameTutorialController(this);
 		this.recipeTutorialController = new RecipeTutorialController(this);
 		this.mathTutorialController = new MathTutorialController(this);
-		this.pieMinigameController = new PieMinigameController(this);
+		this.pieMinigameController = new PieMinigameController(this, this.saveManager);
     	this.mainGameScreenController = new MainGameScreenController(this, this.saveManager);
 		this.cashierGameController = new CashierGameController(this, this.saveManager);
 

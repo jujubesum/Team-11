@@ -1,10 +1,12 @@
 import type { ScreenSwitcher } from "../../types.ts";
 import { PieMinigameView } from "./PieMinigameView.ts";
+import type { SaveManager } from "../../saveManager.ts";
 
 const ALL_FRACTIONS = ["1/2", "1/3", "2/3", "1/4", "3/4", "1/5", "2/5", "3/5", "4/5"];
 const GAME_SECONDS = 30;
 // how long the green/red flash shows before the next question
 const FEEDBACK_MS = 250;
+const MAX_SCORES = 5;
 
 // it shuffles all of the elements of the array
 function shuffle<T>(arr: T[]): T[] {
@@ -20,8 +22,14 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+//adds the score
+export function addScore(scores: number[], newScore: number): number[] {
+    //sort the highest scores and keeps the top 5
+    return [...scores, newScore].sort((a, b) => b - a).slice(0, MAX_SCORES);
+}
+
 export class PieMinigameController {
-    private view = new PieMinigameView();
+    private view: PieMinigameView;
     
     // Game variables
     private score = 0;
@@ -36,8 +44,47 @@ export class PieMinigameController {
     private feedbackId: number | null = null;
 
     //navigates to the other screens
-    constructor(private switcher: ScreenSwitcher) {
+    constructor(private switcher: ScreenSwitcher, private saveManager: SaveManager) {
+        this.view = new PieMinigameView({
+            onHome: () => {
+                //stop the countdown before leaving
+                this.clearTimers();
+                this.switcher.switchToScreen({ type: "home" });
+            },
+        });
         this.view.preloadImages(ALL_FRACTIONS);
+    }
+
+    private endGame(): void {
+        this.clearTimers();
+        this.locked = true;
+
+        const earned = this.score;
+        
+        // load() refreshes `current` from storage; it is null if there is no save
+        const save = this.saveManager.load();
+        const previous = save?.pieHighScores ?? [];
+        const topScores = addScore(previous, this.score);
+
+        if (save) {
+            this.saveManager.update({ 
+                pieHighScores: topScores,
+                money: save.money + earned,
+            });
+            this.saveManager.save();
+        }
+
+        this.view.showSummary(
+            this.score, 
+            earned, 
+            topScores, 
+            "Back to home", 
+            () => this.switcher.switchToScreen({ type: "home" }),
+            () => {
+                document.body.style.cursor = "default";
+                this.startGame();
+            }
+        );
     }
     
     getView() { return this.view; }
@@ -109,15 +156,6 @@ export class PieMinigameController {
             this.locked = false;
             this.nextQuestion();
         }, FEEDBACK_MS);
-    }
-    
-    //Finishes the round and shows the results screen
-    private endGame(): void {
-        this.clearTimers();
-        this.locked = true;
-        this.view.showSummary(this.score, "Back to home", () =>
-            this.switcher.switchToScreen({ type: "home" })
-        );
     }
 
     // cancels any running timer and resets their handles
