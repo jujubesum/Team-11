@@ -61,6 +61,7 @@ export class GameTutorialController extends ScreenController{
     const currentTutorial = this.model.getCurrentTutorial();
     this.view.setTutorial(currentTutorial.getTitle(), currentTutorial.getBody());
     this.view.setArrows(this.model.canGoBack(), this.model.canGoForward());
+    this.view.setTutorialImage(this.model.getCurrentImage());
   }
   
   /**

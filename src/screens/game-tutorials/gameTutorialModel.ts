@@ -8,10 +8,12 @@ import { TUTORIAL_DATA } from "./data/tutorialData";
 export class GameTutorial {
   private title: string;
   private body: string;
+  private image?: string | undefined;
 
-  constructor(title: string, body: string){
+  constructor(title: string, body: string, image?: string){
     this.title = title;
     this.body = body;
+    this.image = image;
   }
 
   /** Ahead will be a number of getters for testing purposes */
@@ -22,6 +24,10 @@ export class GameTutorial {
 
   getBody(){
     return this.body;
+  }
+
+  getImage(){
+    return this.image;
   }
 }
 
@@ -41,7 +47,7 @@ export class GameTutorialModel {
    * Load the tutorials contained in the data folder
    */
   loadTutorials(): GameTutorial[]{
-    return TUTORIAL_DATA.map((tutorial) => new GameTutorial(tutorial.title, tutorial.body));
+    return TUTORIAL_DATA.map((tutorial) => new GameTutorial(tutorial.title, tutorial.body, tutorial.image));
   }
 
   /**
@@ -98,5 +104,9 @@ export class GameTutorialModel {
       throw new Error("No tutorial at the current index!");
     }
     return tutorial;
+  }
+
+  getCurrentImage(): string | undefined {
+    return this.tutorials[this.currentTutorialIdx]?.getImage();
   }
 }

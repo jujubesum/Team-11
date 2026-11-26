@@ -18,6 +18,7 @@ describe("gameTutorialController.handleArrowButtonPress", () => {
     screenSwitcher = { switchToScreen: jest.fn() } as unknown as ScreenSwitcher;
     view = {
        setTutorial: jest.fn(), 
+       setTutorialImage: jest.fn(),
        setArrows: jest.fn(),
        onArrowPress: jest.fn(),
        onHomePress: jest.fn(),
@@ -82,6 +83,7 @@ describe("GameTutorialController.constructor", () => {
     model = new GameTutorialModel();
     view = {
        setTutorial: jest.fn(), 
+       setTutorialImage: jest.fn(),
        setArrows: jest.fn(),
        onArrowPress: jest.fn(),
        onHomePress: jest.fn(),

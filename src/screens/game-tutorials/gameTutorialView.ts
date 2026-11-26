@@ -5,7 +5,7 @@ import { makeCircleButton, setArrowEnabled } from "../../components/CircleButton
 
 const WHITE = "#FFFFFF"
 const HOVERFILL = "#eeeeee"
-const MARGIN = 50;
+const MARGIN = 60;
 const GAP = 100;
 const BOX_WIDTH = (STAGE_WIDTH - 2 * MARGIN - GAP) / 2;
 const BOX_HEIGHT = (STAGE_HEIGHT - TOPBAR_HEIGHT) * 3 / 4;
@@ -28,6 +28,10 @@ export class GameTutorialView {
   private bodyDisplay: Konva.Text;
   private leftArrow: Konva.Group;
   private rightArrow: Konva.Group;
+  private leftPanel: Konva.Group;
+  private rightPanel: Konva.Group;
+  private tutorialImage: Konva.Image | undefined;
+  private imageRequest = 0;
 
   private onHome?: () => void;
   private onArrowHandler?: (rightShift: boolean) => void;
@@ -36,8 +40,8 @@ export class GameTutorialView {
 
   constructor(){
     this.group = new Konva.Group({visible: false});
-    const leftPanel = new Konva.Group({x: LEFT_BOX_X, y: BOX_Y});
-    const rightPanel = new Konva.Group({x:RIGHT_BOX_X, y: BOX_Y});
+    this.leftPanel = new Konva.Group({x: LEFT_BOX_X, y: BOX_Y});
+    this.rightPanel = new Konva.Group({x:RIGHT_BOX_X, y: BOX_Y});
 
     const topBar = new TopBarNoHelp({
         title: "How to Play",
@@ -66,15 +70,15 @@ export class GameTutorialView {
       align: "center",
     });
 
-    const placeholder = new Konva.Text({
-      text: "IMAGE PLACEHOLDER",
-      fontSize: 64,
-      width: BOX_WIDTH - 2 * PADDING,
-      height: BOX_HEIGHT - 2 * PADDING,
-      fill: "black",
-      align: "center",
-      verticalAlign: "middle"
-    });
+    // const placeholder = new Konva.Text({
+    //   text: "IMAGE PLACEHOLDER",
+    //   fontSize: 64,
+    //   width: BOX_WIDTH - 2 * PADDING,
+    //   height: BOX_HEIGHT - 2 * PADDING,
+    //   fill: "black",
+    //   align: "center",
+    //   verticalAlign: "middle"
+    // });
 
     this.leftArrow = makeCircleButton("<", LEFT_ARROW_X, LEFT_ARROW_Y, BUTTON_RADIUS, "white", () =>
       this.onArrowHandler?.(false),
@@ -83,13 +87,13 @@ export class GameTutorialView {
       this.onArrowHandler?.(true),
     );
 
-    leftPanel.add(this.makeBox(), this.titleDisplay, this.bodyDisplay);
-    rightPanel.add(this.makeBox(), placeholder);
+    this.leftPanel.add(this.makeBox(), this.titleDisplay, this.bodyDisplay);
+    this.rightPanel.add(this.makeBox());
 
     this.group.add(
       topBar.getGroup(),
-      leftPanel,
-      rightPanel,
+      this.leftPanel,
+      this.rightPanel,
       this.leftArrow,
       this.rightArrow,
     );
@@ -178,9 +182,39 @@ export class GameTutorialView {
   }
 
   // Dim the arrows when there's no step to go to
-    setArrows(canGoBack: boolean, canGoForward: boolean): void {
-        setArrowEnabled(this.leftArrow, canGoBack);
-        setArrowEnabled(this.rightArrow, canGoForward);
-        this.group.getLayer()?.batchDraw();
-    }
+  setArrows(canGoBack: boolean, canGoForward: boolean): void {
+      setArrowEnabled(this.leftArrow, canGoBack);
+      setArrowEnabled(this.rightArrow, canGoForward);
+      this.group.getLayer()?.batchDraw();
+  }
+
+  setTutorialImage(url: string | undefined): void {
+    let imageRequest = 0;
+    this.tutorialImage?.destroy();
+    this.tutorialImage = undefined;
+    this.group.getLayer()?.batchDraw();
+    if (!url) return;
+
+    const request = ++this.imageRequest;
+    const img = new Image();
+    const IMAGE_TOP = 2 * PADDING;
+    img.onload = () => {
+      if (request !== this.imageRequest) return;
+      const maxW = BOX_WIDTH - 2 * PADDING;
+      const maxH = BOX_HEIGHT - IMAGE_TOP - PADDING;
+      const scale = Math.min(maxW / img.width, maxH / img.height);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      this.tutorialImage = new Konva.Image({
+        image: img, width: w, height: h,
+        x: (BOX_WIDTH - w) / 2,
+        y: IMAGE_TOP + (maxH - h) / 2,
+        listening: false,
+      });
+      this.rightPanel.add(this.tutorialImage);
+      this.group.getLayer()?.batchDraw();
+    };
+    img.onerror = () => console.warn("Could not load tutorial image:", url);
+    img.src = url;
+  }
 }
